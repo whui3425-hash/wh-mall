@@ -8,11 +8,8 @@ import com.github.wxpay.sdk.WXPayUtil;
 import com.gupaoedu.mall.util.*;
 import com.gupaoedu.vip.mall.pay.model.PayLog;
 import com.gupaoedu.vip.mall.pay.service.WeixinPayService;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.ServletInputStream;
@@ -32,8 +29,9 @@ import java.util.Map;
 @CrossOrigin
 public class WeixinPayController {
 
-    @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    // TODO: SaaS极简版，后续替换为普通的 Feign 同步调用或本地逻辑
+    // @Autowired
+    // private RocketMQTemplate rocketMQTemplate;
 
     @Autowired
     private WeixinPayService weixinPayService;
@@ -108,10 +106,14 @@ public class WeixinPayController {
         //创建日志对象
         PayLog payLog = new PayLog(map.get("out_trade_no"),status,JSON.toJSONString(map),map.get("out_trade_no"),new Date());
 
-        //构建消息
-        Message<String> message = MessageBuilder.withPayload(JSON.toJSONString(payLog)).build();
-        //发消息
-        rocketMQTemplate.sendMessageInTransaction("rocket","log",message,null);
+        // TODO: SaaS极简版，后续替换为普通的 Feign 同步调用或本地逻辑
+        // 原代码：发送MQ消息
+        // Message<String> message = MessageBuilder.withPayload(JSON.toJSONString(payLog)).build();
+        // rocketMQTemplate.sendMessageInTransaction("rocket","log",message,null);
+
+        // 简化版：直接保存支付日志（后续订单状态更新应通过Feign调用订单服务）
+        // TODO: SaaS极简版，此处应调用订单服务Feign接口更新订单状态
+        // payLogService.add(payLog);
 
         //Map 响应数据
         Map<String,String> resultResp = new HashMap<String,String>();

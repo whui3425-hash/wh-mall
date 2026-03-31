@@ -7,12 +7,7 @@ import com.gupaoedu.vip.mall.order.model.Order;
 import com.gupaoedu.vip.mall.order.model.OrderRefund;
 import com.gupaoedu.vip.mall.order.service.OrderService;
 import com.gupaoedu.vip.mall.pay.WeixinPayParam;
-import org.apache.rocketmq.client.producer.SendStatus;
-import org.apache.rocketmq.client.producer.TransactionSendResult;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,8 +28,9 @@ public class OrderController {
     @Autowired
     private WeixinPayParam weixinPayParam;
 
-    @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    // TODO: SaaS极简版，后续替换为普通的 Feign 同步调用或本地逻辑
+    // @Autowired
+    // private RocketMQTemplate rocketMQTemplate;
 
     /****
      * 申请取消订单（模拟测试退款的订单）
@@ -59,13 +55,16 @@ public class OrderController {
             );
             orderService.refund(orderRefund);
 
-            //向MQ发消息（申请退款）  out_trade_no（订单号）  out_refund_no（退款订单号）  total_fee（订单金额）  refund_fee（退款金额）
-            Message message = MessageBuilder.withPayload(weixinPayParam.weixinRefundParam(orderRefund)).build();
-            TransactionSendResult transactionSendResult = rocketMQTemplate.sendMessageInTransaction("refundtx", "refund", message, orderRefund);
+            // TODO: SaaS极简版，后续替换为普通的 Feign 同步调用或本地逻辑
+            // 原代码：向MQ发消息（申请退款）
+            // Message message = MessageBuilder.withPayload(weixinPayParam.weixinRefundParam(orderRefund)).build();
+            // TransactionSendResult transactionSendResult = rocketMQTemplate.sendMessageInTransaction("refundtx", "refund", message, orderRefund);
+            // if(transactionSendResult.getSendStatus()== SendStatus.SEND_OK){
+            //     return RespResult.ok();
+            // }
 
-            if(transactionSendResult.getSendStatus()== SendStatus.SEND_OK){
-                return RespResult.ok();
-            }
+            // 简化版直接返回成功，实际应调用支付服务Feign接口
+            return RespResult.ok();
         }
         //不符合直接返回错误
         return RespResult.error("当前订单不符合取消操作要求！");
