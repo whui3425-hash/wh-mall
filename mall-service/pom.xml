@@ -11,15 +11,10 @@
     <packaging>pom</packaging>
     <modules>
         <module>mall-goods-service</module>
-        <module>mall-file-service</module>
-        <module>mall-canal-service</module>
-        <module>mall-search-service</module>
         <module>mall-cart-service</module>
         <module>mall-user-service</module>
         <module>mall-order-service</module>
         <module>mall-pay-service</module>
-        <module>mall-seckill-service</module>
-        <module>mall-dw-service</module>
         <module>mall-permission-service</module>
     </modules>
     <artifactId>mall-service</artifactId>

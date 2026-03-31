@@ -2,12 +2,9 @@ package com.gupaoedu.vip.mall.permission.init;
 
 import com.gupaoedu.vip.mall.permission.model.Permission;
 import com.gupaoedu.vip.mall.permission.service.PermissionService;
-import org.redisson.api.RBloomFilter;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -18,11 +15,13 @@ public class InitPermission  implements ApplicationRunner {
     @Autowired
     private PermissionService permissionService;
 
-    @Autowired
-    private RedisTemplate redisTemplate;
+    // TODO: SaaS MVP 极简版暂不使用Redis
+    // @Autowired
+    // private RedisTemplate redisTemplate;
 
-    @Autowired
-    private RedissonClient redissonClient;
+    // TODO: SaaS MVP 极简版暂不使用Redisson
+    // @Autowired
+    // private RedissonClient redissonClient;
 
     /***
      * 权限初始化加载
@@ -39,18 +38,21 @@ public class InitPermission  implements ApplicationRunner {
         List<Map<Integer, Integer>> rolePermissions = permissionService.allRolePermissions();
         //匹配每个角色拥有的权限列表
         Map<String, Set<Permission>> roleMap = rolePermissionFilter(rolePermissions, permissionMatch0, permissionMatch1);
-        //数据存入到Redis缓存
-        redisTemplate.boundHashOps("RolePermissionAll").put("PermissionMatch0",permissionMatch0);
-        redisTemplate.boundHashOps("RolePermissionAll").put("PermissionMatch1",permissionMatch1);
-        //角色权限
-        redisTemplate.boundHashOps("RolePermissionMap").putAll(roleMap);
 
-        //存储权限判断部分uri到布隆过滤器中-完全匹配
-        RBloomFilter<String> filters = redissonClient.getBloomFilter("UriBloomFilterArray");
-        filters.tryInit(1000000L,0.0001);
-        for (Permission permission : permissionMatch0) {
-            filters.add(permission.getUrl());
-        }
+        // TODO: SaaS MVP 极简版暂不使用Redis缓存，直接内存存储
+        // 数据存入到Redis缓存
+        // redisTemplate.boundHashOps("RolePermissionAll").put("PermissionMatch0",permissionMatch0);
+        // redisTemplate.boundHashOps("RolePermissionAll").put("PermissionMatch1",permissionMatch1);
+        // 角色权限
+        // redisTemplate.boundHashOps("RolePermissionMap").putAll(roleMap);
+
+        // TODO: SaaS MVP 极简版暂不使用Redisson布隆过滤器
+        // 存储权限判断部分uri到布隆过滤器中-完全匹配
+        // RBloomFilter<String> filters = redissonClient.getBloomFilter("UriBloomFilterArray");
+        // filters.tryInit(1000000L,0.0001);
+        // for (Permission permission : permissionMatch0) {
+        //     filters.add(permission.getUrl());
+        // }
     }
 
     /****

@@ -15,10 +15,9 @@ import com.gupaoedu.vip.mall.order.model.Order;
 import com.gupaoedu.vip.mall.order.model.OrderRefund;
 import com.gupaoedu.vip.mall.order.model.OrderSku;
 import com.gupaoedu.vip.mall.order.service.OrderService;
-import io.seata.spring.annotation.GlobalTransactional;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -72,7 +71,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper,Order> implements 
     /***
      * 添加订单
      */
-    @GlobalTransactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean add(Order order) {
         //数据完善

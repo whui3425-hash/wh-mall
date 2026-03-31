@@ -16,14 +16,6 @@ spring:
       discovery:
         #Nacos的注册地址
         server-addr: 192.168.100.130:8848
-    alibaba:
-      seata:
-        tx-service-group: tx_shop
-
-  #Redis配置
-  redis:
-    host: 192.168.100.130
-    port: 6379
 # ====================MybatisPlus====================
 mybatis-plus:
   mapper-locations: mapper/*.xml

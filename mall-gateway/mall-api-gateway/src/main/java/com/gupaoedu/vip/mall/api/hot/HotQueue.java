@@ -1,28 +1,20 @@
 package com.gupaoedu.vip.mall.api.hot;
 
-import com.alibaba.fastjson.JSON;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 /***
- * 排队操作
+ * 排队操作 - 秒杀功能已移除
+ * TODO: SaaS MVP 极简版暂不使用Redis和RocketMQ
  */
 @Component
 public class HotQueue {
 
-    @Autowired
-    private RedisTemplate redisTemplate;
+    // TODO: SaaS MVP 极简版暂不使用Redis和RocketMQ
+    // @Autowired
+    // private RedisTemplate redisTemplate;
 
-    @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    // @Autowired
+    // private RocketMQTemplate rocketMQTemplate;
 
     //商品非热门
     public static final Integer NOT_HOT=0;
@@ -33,12 +25,16 @@ public class HotQueue {
 
 
     /***
-     * 抢单排队
+     * 抢单排队 - 秒杀功能已移除
      * username:用户名
      * id:商品ID
      * num:件数
      */
     public int hotToQueue(String username,String id,Integer num){
+        // TODO: SaaS MVP 极简版暂不使用秒杀功能，直接返回非热门商品
+        return NOT_HOT;
+
+        /* 原代码已注释：
         //获取该商品在Redis中的信息，如果Redis中存在对应信息，热门商品
         Boolean bo = redisTemplate.boundHashOps("HotSeckillGoods").hasKey(id);
         if(!bo){
@@ -62,5 +58,6 @@ public class HotQueue {
         Message<String> message = MessageBuilder.withPayload(JSON.toJSONString(dataMap)).build();
         rocketMQTemplate.convertAndSend("order-queue",message);
         return QUEUE_ING;
+        */
     }
 }

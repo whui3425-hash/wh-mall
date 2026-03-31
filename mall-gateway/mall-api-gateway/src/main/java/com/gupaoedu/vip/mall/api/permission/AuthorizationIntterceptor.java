@@ -4,11 +4,8 @@ import com.gupaoedu.mall.util.JwtToken;
 import com.gupaoedu.mall.util.MD5;
 import com.gupaoedu.vip.mall.api.util.IpUtil;
 import com.gupaoedu.vip.mall.permission.model.Permission;
-import org.redisson.api.RBloomFilter;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -22,11 +19,13 @@ import java.util.Set;
 @Component
 public class AuthorizationIntterceptor {
 
-    @Autowired
-    private RedisTemplate redisTemplate;
+    // TODO: SaaS MVP 极简版暂不使用Redis
+    // @Autowired
+    // private RedisTemplate redisTemplate;
 
-    @Autowired
-    private RedissonClient redissonClient;
+    // TODO: SaaS MVP 极简版暂不使用Redisson
+    // @Autowired
+    // private RedissonClient redissonClient;
 
     /****
      * 判断uri是否为有效路径
@@ -34,8 +33,10 @@ public class AuthorizationIntterceptor {
      * @return
      */
     public Boolean isInvalid(String uri){
-        RBloomFilter<String> uriBloomFilterArray = redissonClient.getBloomFilter("UriBloomFilterArray");
-        return uriBloomFilterArray.contains(uri);
+        // TODO: SaaS MVP 极简版暂不使用Redisson布隆过滤器，默认所有URI有效
+        // RBloomFilter<String> uriBloomFilterArray = redissonClient.getBloomFilter("UriBloomFilterArray");
+        // return uriBloomFilterArray.contains(uri);
+        return true;
     }
 
     /***
@@ -57,8 +58,9 @@ public class AuthorizationIntterceptor {
         Permission permission = null;
         //循环判断每个角色是否有权限
         for (String role : roles) {
-            //获取完全匹配权限集合
-            Set<Permission> permissions = (Set<Permission>) redisTemplate.boundHashOps("RolePermissionMap").get("Role_0_" + role);
+            // TODO: SaaS MVP 极简版暂不使用Redis，直接从内存或数据库获取权限
+            // Set<Permission> permissions = (Set<Permission>) redisTemplate.boundHashOps("RolePermissionMap").get("Role_0_" + role);
+            Set<Permission> permissions = null; // 暂时返回null，需要后续实现从数据库查询
 
             if(permissions==null){
                 continue;
@@ -106,9 +108,11 @@ public class AuthorizationIntterceptor {
         URI routerUri = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR);
         String servicename = routerUri.getHost();
 
-        //从Redis缓存中进行匹配
+        // TODO: SaaS MVP 极简版暂不使用Redis缓存
+        // 从Redis缓存中进行匹配
         // 0:完全匹配
-        List<Permission> permissionsMatch0 = (List<Permission>) redisTemplate.boundHashOps("RolePermissionAll").get("PermissionMatch0");
+        // List<Permission> permissionsMatch0 = (List<Permission>) redisTemplate.boundHashOps("RolePermissionAll").get("PermissionMatch0");
+        List<Permission> permissionsMatch0 = null; // 暂时返回null，需要后续实现从数据库查询
         if(permissionsMatch0!=null){
 
         }

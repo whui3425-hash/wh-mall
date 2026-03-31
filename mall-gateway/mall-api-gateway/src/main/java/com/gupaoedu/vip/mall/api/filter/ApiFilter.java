@@ -1,7 +1,6 @@
 package com.gupaoedu.vip.mall.api.filter;
 
 import com.alibaba.fastjson.JSON;
-import com.gupaoedu.vip.mall.api.hot.HotQueue;
 import com.gupaoedu.vip.mall.api.permission.AuthorizationIntterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -19,8 +18,9 @@ import java.util.Map;
 @Configuration
 public class ApiFilter implements GlobalFilter, Ordered {
 
-    @Autowired
-    private HotQueue hotQueue;
+    // TODO: SaaS MVP 极简版暂不使用秒杀排队功能
+    // @Autowired
+    // private HotQueue hotQueue;
 
     @Autowired
     private AuthorizationIntterceptor authorizationIntterceptor;
@@ -57,37 +57,39 @@ public class ApiFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        //秒杀过滤
-        if(uri.equals("/seckill/order")){
-            seckillFilter(exchange, request, resultMap.get("username").toString());
-            return chain.filter(exchange);
-        }
+        // TODO: SaaS MVP 极简版已移除秒杀功能
+        // //秒杀过滤
+        // if(uri.equals("/seckill/order")){
+        //     seckillFilter(exchange, request, resultMap.get("username").toString());
+        //     return chain.filter(exchange);
+        // }
 
-        //NOT_HOT 直接由后端服务处理
+        //直接由后端服务处理
         return chain.filter(exchange);
     }
 
-    /***
-     * 秒杀过滤
-     * @param exchange
-     * @param request
-     * @param username
-     * @return
-     */
-    private void seckillFilter(ServerWebExchange exchange, ServerHttpRequest request, String username) {
-        //商品ID
-        String id = request.getQueryParams().getFirst("id");
-        //数量
-        Integer num =Integer.valueOf( request.getQueryParams().getFirst("num") );
-
-        //排队结果
-        int result = hotQueue.hotToQueue(username, id, num);
-
-        //QUEUE_ING、HAS_QUEUE
-        if(result==HotQueue.QUEUE_ING || result==HotQueue.HAS_QUEUE){
-            endProcess(exchange,result,"hot");
-        }
-    }
+    // TODO: SaaS MVP 极简版已移除秒杀功能
+    ///***
+    // * 秒杀过滤
+    // * @param exchange
+    // * @param request
+    // * @param username
+    // * @return
+    // */
+    // private void seckillFilter(ServerWebExchange exchange, ServerHttpRequest request, String username) {
+    //     //商品ID
+    //     String id = request.getQueryParams().getFirst("id");
+    //     //数量
+    //     Integer num =Integer.valueOf( request.getQueryParams().getFirst("num") );
+    //
+    //     //排队结果
+    //     int result = hotQueue.hotToQueue(username, id, num);
+    //
+    //     //QUEUE_ING、HAS_QUEUE
+    //     if(result==HotQueue.QUEUE_ING || result==HotQueue.HAS_QUEUE){
+    //         endProcess(exchange,result,"hot");
+    //     }
+    // }
 
 
     /****
