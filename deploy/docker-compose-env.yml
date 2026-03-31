@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # 1. 核心数据库
+  mysql:
+    image: mysql:8.0
+    container_name: mall-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456 # 你的密码
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+
+  # 2. 注册中心
+  nacos:
+    image: nacos/nacos-server:v2.2.3
+    container_name: mall-nacos
+    restart: always
+    environment:
+      - PREFER_HOST_MODE=hostname
+      - MODE=standalone # 单机模式启动
+      - JVM_XMS=256m    # 限制内存
+      - JVM_XMX=256m
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    depends_on:
+      - mysql # Nacos 会在 MySQL 启动后再启动

@@ -5,17 +5,21 @@ spring:
     name: mall-permission
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.100.130:3306/shop_permission?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+    url: jdbc:mysql://192.168.31.101:3306/shop_permission?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
-    password: 123456
+    password: your_strong_password
   cloud:
     nacos:
       config:
         file-extension: yaml
-        server-addr: 192.168.100.130:8848
+        server-addr: 192.168.31.101:8848
+        username: nacos
+        password: nacos
       discovery:
         #Nacos的注册地址
-        server-addr: 192.168.100.130:8848
+        server-addr: 192.168.31.101:8848
+        username: nacos
+        password: nacos
 
 # ====================MybatisPlus====================
 mybatis-plus:
