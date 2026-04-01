@@ -14,8 +14,8 @@
         <version>2.2.10.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.gupaoedu</groupId>
-    <artifactId>gupaoedu-vip-mall</artifactId>
+    <groupId>com.wanghui</groupId>
+    <artifactId>wanghui-vip-mall</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>gupaoedu-vip-mall</name>
     <packaging>pom</packaging>
