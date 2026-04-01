@@ -1,6 +1,6 @@
 package com.gupaoedu.vip.mall.pay.config;
 
-import com.github.wxpay.sdk.IWXPayDomain;
+
 import com.github.wxpay.sdk.WXPayConfig;
 import com.github.wxpay.sdk.WXPayConstants;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +12,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 
 @Component
-public class WeixinPayConfig extends WXPayConfig {
+public class WeixinPayConfig implements WXPayConfig {
 
     @Value("${payconfig.weixin.appId}")
     private String appId;
@@ -69,21 +69,13 @@ public class WeixinPayConfig extends WXPayConfig {
         return certBis;
     }
 
-    /***
-     * Get WXPayDomain for multi-domain disaster recovery
-     * @return
-     */
     @Override
-    public IWXPayDomain getWXPayDomain() {
-        IWXPayDomain iwxPayDomain = new IWXPayDomain() {
-            @Override
-            public void report(String domain, long elapsedTimeMillis, Exception ex) {
-            }
-            @Override
-            public DomainInfo getDomain(WXPayConfig config) {
-                return new DomainInfo(WXPayConstants.DOMAIN_API, true);
-            }
-        };
-        return iwxPayDomain;
+    public int getHttpConnectTimeoutMs() {
+        return 0;
+    }
+
+    @Override
+    public int getHttpReadTimeoutMs() {
+        return 0;
     }
 }

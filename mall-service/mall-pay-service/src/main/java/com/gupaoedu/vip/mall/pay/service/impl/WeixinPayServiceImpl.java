@@ -23,7 +23,7 @@ public class WeixinPayServiceImpl implements WeixinPayService {
     private PayLogMapper payLogMapper;
 
     /****
-     * 申请退款
+     * Apply for refund
      * @param dataMap
      * @return
      */
@@ -33,7 +33,7 @@ public class WeixinPayServiceImpl implements WeixinPayService {
     }
 
     /****
-     * 预支付下单操作（获取支付二维码扫码地址）
+     * Pre-payment order operation (get payment QR code address)
      * @param dataMap
      * @return
      * @throws Exception
@@ -45,27 +45,27 @@ public class WeixinPayServiceImpl implements WeixinPayService {
 
 
     /****
-     * 支付结果查询
+     * Query payment result
      * @param outno
      * @return
      * @throws Exception
      */
     @Override
     public PayLog result(String outno) throws Exception {
-        //查询数据库中支付日志
+        // Query payment log from database
         PayLog payLog = payLogMapper.selectById(outno);
 
         if(payLog==null){
-            //数据库中没有数据查询微信支付服务
+            // Query WeChat payment service if no data in database
             Map<String, String> data = new HashMap<String, String>();
             data.put("out_trade_no",outno);
             Map<String, String> resp = wxPay.orderQuery(data);
-            //把支付结果存入数据库中（不可逆转支付结果）
-            //return_code result_code  trade_state
+            // Save payment result to database (irreversible payment result)
+            // return_code result_code trade_state
             String tradeState = resp.get("trade_state");
             int status = tradeState(tradeState);
 
-            //不可逆转的支付状态，记录日志
+            // Record log for irreversible payment status
             if(status==2 || status==3 || status==4 || status==5 || status==7){
                 payLog = new PayLog(outno,status, JSON.toJSONString(resp),outno,new Date());
                 payLogMapper.insert(payLog);
@@ -75,33 +75,33 @@ public class WeixinPayServiceImpl implements WeixinPayService {
     }
 
     /***
-     * 支付状态
+     * Payment status
      * @param tradeState
      * @return
      */
     public int tradeState(String tradeState){
         int state = 1;
         switch (tradeState){
-            case "NOTPAY":  //未支付
+            case "NOTPAY":  // Not paid
                 state = 1;
                 break;
             case "SUCCESS":
-                state = 2;  //已支付
+                state = 2;  // Paid
                 break;
             case "REFUND":
-                state = 3;  //转入退款
+                state = 3;  // Refunded
                 break;
             case "CLOSED":
-                state = 4;  //已关闭
+                state = 4;  // Closed
                 break;
             case "REVOKED":
-                state = 5;  //已撤销
+                state = 5;  // Revoked
                 break;
             case "USERPAYING":
-                state = 6;  //用户支付中
+                state = 6;  // User paying
                 break;
             case "PAYERROR":
-                state = 7;  //支付失败
+                state = 7;  // Payment failed
                 break;
             default:
                 state=1;
