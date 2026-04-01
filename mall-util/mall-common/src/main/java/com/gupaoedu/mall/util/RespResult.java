@@ -2,24 +2,20 @@ package com.gupaoedu.mall.util;
 
 import java.io.Serializable;
 
-/*****
- * @Author: 波波
- * @Description: 咕泡云商城
- ****/
 public class RespResult<T> implements Serializable {
 
-    //响应数据结果集
+    // Response data result set
     private T data;
 
     /**
-     * 状态码
-     * 20000 操作成功
-     * 50000 操作失败
+     * Status code
+     * 20000 Operation successful
+     * 50000 Operation failed
      */
     private Integer code;
 
     /***S
-     * 响应信息
+     * Response message
      */
     private String message;
 
@@ -52,7 +48,7 @@ public class RespResult<T> implements Serializable {
         return secByError(RespCode.ERROR.getCode(),message);
     }
 
-    //自定义异常
+    // Custom exception
     public static RespResult secByError(Integer code,String message) {
         RespResult err = new RespResult();
         err.setCode(code);

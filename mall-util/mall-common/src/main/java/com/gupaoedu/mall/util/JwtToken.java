@@ -14,84 +14,84 @@ import java.util.concurrent.TimeUnit;
 
 public class JwtToken {
 
-    //默认秘钥
+    // Default secret key
     private static final String DEFAULT_SECRET="springcloudalibaba";
 
     /***
-     * 创建Jwt令牌
-     * 秘钥：secret
-     * 载荷:dataMap(Map)
+     * Create JWT token
+     * Secret key: secret
+     * Payload: dataMap(Map)
      */
     public static String createToken(Map<String,Object> dataMap){
         return createToken(dataMap,null);
     }
     /***
-     * 创建Jwt令牌
-     * 秘钥：secret
-     * 载荷:dataMap(Map)
+     * Create JWT token
+     * Secret key: secret
+     * Payload: dataMap(Map)
      */
     public static String createToken(Map<String,Object> dataMap, String secret){
-        //确认秘钥
+        // Confirm secret key
         if(StringUtils.isEmpty(secret)){
             secret = DEFAULT_SECRET;
         }
 
-        //确认签名算法
+        // Confirm signature algorithm
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
-        //jwt令牌创建
+        // JWT token creation
         return
         JWT.create()
-                .withClaim("body",dataMap)  //自定义载荷
-                .withIssuer("GP")   //签发者
-                .withSubject("JWT令牌")   //主题
-                .withAudience("member") //接收方
-                .withExpiresAt(new Date(System.currentTimeMillis()+3600000))    //过期时间
-                .withNotBefore(new Date(System.currentTimeMillis()+1000))       //1秒后才能使用
-                .withIssuedAt(new Date())   //签发时间
-                .withJWTId(UUID.randomUUID().toString().replace("-",""))    //唯一标识符
+                .withClaim("body",dataMap)  // Custom payload
+                .withIssuer("GP")   // Issuer
+                .withSubject("JWT Token")   // Subject
+                .withAudience("member") // Audience
+                .withExpiresAt(new Date(System.currentTimeMillis()+3600000))    // Expiration time
+                .withNotBefore(new Date(System.currentTimeMillis()+1000))       // Available after 1 second
+                .withIssuedAt(new Date())   // Issue time
+                .withJWTId(UUID.randomUUID().toString().replace("-",""))    // Unique identifier
                 .sign(algorithm);
     }
 
     /****
-     * 令牌解析
+     * Parse token
      */
     public static Map<String,Object> parseToken(String token){
         return parseToken(token,null);
     }
     /****
-     * 令牌解析
+     * Parse token
      */
     public static Map<String,Object> parseToken(String token,String secret){
-        //确认秘钥
+        // Confirm secret key
         if(StringUtils.isEmpty(secret)){
             secret = DEFAULT_SECRET;
         }
 
-        //确认签名算法
+        // Confirm signature algorithm
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
-        //创建令牌校验对象
+        // Create token verifier
         JWTVerifier verifier = JWT.require(algorithm).build();
-        //校验解析
+        // Verify and parse
         DecodedJWT jwt = verifier.verify(token);
         return jwt.getClaim("body").as(Map.class);
     }
 
     public static void main(String[] args) throws InterruptedException {
-        //创建令牌
+        // Create token
         Map<String,Object> dataMap = new HashMap<String,Object>();
         dataMap.put("name","zhangsan");
         dataMap.put("address","湖南");
 
-        //创建令牌
+        // Create token
         String token = createToken(dataMap);
         System.out.println(token);
 
-        //休眠一秒钟
+        // Sleep for one second
         TimeUnit.SECONDS.sleep(1);
 
-        //校验解析令牌
+        // Verify and parse token
         Map<String, Object> stringObjectMap = parseToken(token);
         System.out.println(stringObjectMap);
     }

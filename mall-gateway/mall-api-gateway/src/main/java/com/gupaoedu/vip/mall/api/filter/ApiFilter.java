@@ -18,16 +18,11 @@ import java.util.Map;
 @Configuration
 public class ApiFilter implements GlobalFilter, Ordered {
 
-    // TODO: SaaS MVP 极简版暂不使用秒杀排队功能
-    // @Autowired
-    // private HotQueue hotQueue;
-
     @Autowired
     private AuthorizationIntterceptor authorizationIntterceptor;
 
-    /***
-     * 执行拦截处理      http://localhost:9001/mall/seckill/order?id&num
-     *                 JWT
+    /**
+     * Execute interception handling
      * @param exchange
      * @param chain
      * @return
@@ -35,71 +30,40 @@ public class ApiFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
-        //uri
+        // URI
         String uri = request.getURI().getPath();
 
-        //过滤uri是否有效
+        // Filter if URI is valid
         if(!authorizationIntterceptor.isInvalid(uri)){
             endProcess(exchange,404,"url bad");
             return chain.filter(exchange);
         }
 
-        //是否需要拦截
+        // Whether interception is required
         if(!authorizationIntterceptor.isIntercept(exchange)){
             return chain.filter(exchange);
         }
 
-        //令牌校验
+        // Token validation
         Map<String, Object> resultMap = authorizationIntterceptor.tokenIntercept(exchange);
         if(resultMap==null || !authorizationIntterceptor.rolePermission(exchange,resultMap)){
-            //令牌校验失败 或者没有权限
+            // Token validation failed or no permission
             endProcess(exchange,401,"Access denied");
             return chain.filter(exchange);
         }
 
-        // TODO: SaaS MVP 极简版已移除秒杀功能
-        // //秒杀过滤
-        // if(uri.equals("/seckill/order")){
-        //     seckillFilter(exchange, request, resultMap.get("username").toString());
-        //     return chain.filter(exchange);
-        // }
-
-        //直接由后端服务处理
+        // Directly processed by backend service
         return chain.filter(exchange);
     }
 
-    // TODO: SaaS MVP 极简版已移除秒杀功能
-    ///***
-    // * 秒杀过滤
-    // * @param exchange
-    // * @param request
-    // * @param username
-    // * @return
-    // */
-    // private void seckillFilter(ServerWebExchange exchange, ServerHttpRequest request, String username) {
-    //     //商品ID
-    //     String id = request.getQueryParams().getFirst("id");
-    //     //数量
-    //     Integer num =Integer.valueOf( request.getQueryParams().getFirst("num") );
-    //
-    //     //排队结果
-    //     int result = hotQueue.hotToQueue(username, id, num);
-    //
-    //     //QUEUE_ING、HAS_QUEUE
-    //     if(result==HotQueue.QUEUE_ING || result==HotQueue.HAS_QUEUE){
-    //         endProcess(exchange,result,"hot");
-    //     }
-    // }
-
-
-    /****
-     * 结束程序
+    /**
+     * End process
      * @param exchange
      * @param code
      * @param message
      */
     public void endProcess(ServerWebExchange exchange,Integer code,String message){
-        //响应状态码200
+        // Response status code 200
         Map<String,Object> resultMap = new HashMap<String,Object>();
         resultMap.put("code",code);
         resultMap.put("message",message);

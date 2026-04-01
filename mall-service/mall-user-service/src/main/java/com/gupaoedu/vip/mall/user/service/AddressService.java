@@ -5,15 +5,11 @@ import com.gupaoedu.vip.mall.user.model.Address;
 
 import java.util.List;
 
-/*****
- * @Author:
- * @Description:
- ****/
 public interface AddressService extends IService<Address>{
 
 
     /****
-     * 查询用户收件地址列表
+     * Query user address list
      */
     List<Address> list(String userName);
 }

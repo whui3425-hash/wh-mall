@@ -10,10 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-/*****
- * @Author: 波波
- * @Description: 咕泡云商城
- ****/
 @RestController
 @RequestMapping(value = "/brand")
 @CrossOrigin
@@ -23,7 +19,7 @@ public class BrandController {
     private BrandService brandService;
 
     /****
-     * 增加方法
+     * Add method
      */
     @PostMapping
     public RespResult add(@RequestBody Brand brand){
@@ -32,7 +28,7 @@ public class BrandController {
     }
 
     /****
-     * 修改方法
+     * Update method
      */
     @PutMapping
     public RespResult update(@RequestBody Brand brand){
@@ -41,7 +37,7 @@ public class BrandController {
     }
 
     /****
-     * 删除方法
+     * Delete method
      */
     @DeleteMapping("/{id}")
     public RespResult delete(@PathVariable(value = "id")String id){
@@ -50,7 +46,7 @@ public class BrandController {
     }
 
     /****
-     * 条件查询
+     * Conditional query
      */
     @PostMapping(value = "/search")
     public RespResult<List<Brand>> queryList(@RequestBody Brand brand){
@@ -59,7 +55,7 @@ public class BrandController {
     }
 
     /****
-     * 条件查询
+     * Conditional query
      */
     @PostMapping(value = "/search/{page}/{size}")
     public RespResult<Page<Brand>> queryPageList(
@@ -71,16 +67,16 @@ public class BrandController {
     }
 
     /****
-     * 根据分类ID查询品牌集合
+     * Query brand collection by category ID
      * http://localhost:9001/brand/category/11159
      * http://192.168.100.130/msitems/1.html
      */
     @GetMapping(value = "/category/{pid}")
     public RespResult<List<Brand>>  categoryBrands(@PathVariable(value = "pid")Integer pid) throws InterruptedException {
-        System.out.println("执行查询开始，，，，");
+        System.out.println("Execute query start,,,,");
         List<Brand> brands = brandService.queryByCategoryId(pid);
         TimeUnit.SECONDS.sleep(10);
-        System.out.println("执行查询完成，，，，");
+        System.out.println("Execute query complete,,,,");
         return RespResult.ok(brands);
     }
 }

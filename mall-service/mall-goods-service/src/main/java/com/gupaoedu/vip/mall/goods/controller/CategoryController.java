@@ -8,10 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/*****
- * @Author: 波波
- * @Description: 云商城
- ****/
 @RestController
 @RequestMapping(value = "/category")
 @CrossOrigin
@@ -21,7 +17,7 @@ public class CategoryController {
     private CategoryService categoryService;
 
     /****
-     * 根据分类父ID查询子分类
+     * Query child categories by parent ID
      */
     @GetMapping(value = "/parent/{id}")
     public RespResult<List<Category>> findByParentId(@PathVariable("id")Integer id){
@@ -29,7 +25,7 @@ public class CategoryController {
     }
 
     /****
-     * 根据分类查询分类信息
+     * Query category info by ID
      */
     @GetMapping(value = "/{id}")
     public RespResult<Category> one(@PathVariable(value = "id")Integer id){

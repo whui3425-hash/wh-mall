@@ -1,13 +1,9 @@
 package com.gupaoedu.mall.util;
 
-/*****
- * @Author: 波波
- * @Description: 咕泡云商城
- ****/
 public enum RespCode {
-    SUCCESS(20000, "操作成功"),
-    ERROR(50000, "操作失败"),
-    SYSTEM_ERROR(50001, "系统错误");
+    SUCCESS(20000, "Operation successful"),
+    ERROR(50000, "Operation failed"),
+    SYSTEM_ERROR(50001, "System error");
 
     private Integer code;
     private String message;

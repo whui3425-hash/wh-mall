@@ -10,10 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/*****
- * @Author: 波波
- * @Description: 云商城
- ****/
 @Service
 public class CategoryServiceImpl extends ServiceImpl<CategoryMapper,Category> implements CategoryService {
 
@@ -21,11 +17,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper,Category> im
     private CategoryMapper categoryMapper;
 
     /***
-     * 根据分类父ID查询所有子类
+     * Query all child categories by parent ID
      */
     @Override
     public List<Category> findByParentId(Integer pid) {
-        //条件封装对象
         QueryWrapper<Category> queryWrapper = new QueryWrapper<Category>();
         queryWrapper.eq("parent_id",pid);
         return categoryMapper.selectList(queryWrapper);

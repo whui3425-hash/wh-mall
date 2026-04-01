@@ -13,7 +13,6 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-//MyBatisPlus表映射注解
 @TableName(value = "order_refund")
 public class OrderRefund implements Serializable {
 

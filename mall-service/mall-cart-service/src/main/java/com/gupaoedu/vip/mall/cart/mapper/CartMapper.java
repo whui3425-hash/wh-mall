@@ -1,11 +1,7 @@
 package com.gupaoedu.vip.mall.cart.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.gupaoedu.vip.mall.cart.model.Cart;
-import org.springframework.data.mongodb.repository.MongoRepository;
 
-/*****
- * @Author:
- * @Description:
- ****/
-public interface CartMapper extends MongoRepository<Cart,String> {
+public interface CartMapper extends BaseMapper<Cart> {
 }

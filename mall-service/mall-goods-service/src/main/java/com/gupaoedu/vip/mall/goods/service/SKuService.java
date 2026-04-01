@@ -6,10 +6,6 @@ import com.gupaoedu.vip.mall.goods.model.Sku;
 
 import java.util.List;
 
-/*****
- * @Author: 波波
- * @Description: 云商城
- ****/
 public interface SKuService extends IService<Sku> {
 
     void dcount(List<Cart> carts);

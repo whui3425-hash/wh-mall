@@ -7,16 +7,16 @@ import java.util.Map;
 public interface WeixinPayService {
 
     /***
-     * 退款申请操作
+     * Refund application
      */
     Map<String,String> refund(Map<String,String> dataMap) throws Exception;
 
-    // 预支付订单创建方法-获取支付地址
+    // Pre-order creation method - get payment URL
     Map<String,String> preOrder(Map<String,String> dataMap) throws Exception;
 
     /****
-     * 主动查询支付结果
-     * outno:订单编号
+     * Query payment result
+     * outno: order number
      */
     PayLog result(String outno) throws Exception;
 }

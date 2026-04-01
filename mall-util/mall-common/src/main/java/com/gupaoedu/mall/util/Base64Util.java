@@ -6,8 +6,8 @@ import java.util.Base64;
 public class Base64Util {
 
     /***
-     * 普通解密操作
-     * @param encodedText：密文
+     * Standard decode operation
+     * @param encodedText: ciphertext
      * @return
      */
     public static byte[] decode(String encodedText){
@@ -16,7 +16,7 @@ public class Base64Util {
     }
 
     /***
-     * 普通加密操作
+     * Standard encode operation
      * @param data
      * @return
      */
@@ -26,7 +26,7 @@ public class Base64Util {
     }
 
     /***
-     * 解密操作
+     * URL-safe decode operation
      * @param encodedText
      * @return
      */
@@ -36,7 +36,7 @@ public class Base64Util {
     }
 
     /***
-     * 加密操作
+     * URL-safe encode operation
      * @param data
      * @return
      */

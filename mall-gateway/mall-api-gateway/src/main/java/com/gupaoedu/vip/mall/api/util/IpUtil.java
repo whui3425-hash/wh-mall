@@ -5,8 +5,8 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 
 public class IpUtil {
 
-    /***
-     * 获取IP
+    /**
+     * Get IP
      * @param request
      * @return
      */
@@ -14,7 +14,7 @@ public class IpUtil {
         HttpHeaders headers = request.getHeaders();
         String ip = headers.getFirst("x-forwarded-for");
         if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
-            // 多次反向代理后会有多个ip值，第一个ip才是真实ip
+            // After multiple reverse proxies, there will be multiple IP values, the first one is the real IP
             if (ip.indexOf(",") != -1) {
                 ip = ip.split(",")[0];
             }

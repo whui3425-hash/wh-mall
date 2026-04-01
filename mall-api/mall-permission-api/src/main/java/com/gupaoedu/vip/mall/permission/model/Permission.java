@@ -12,7 +12,6 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-//MyBatisPlus表映射注解
 @TableName(value = "permission")
 public class Permission implements Serializable {
 

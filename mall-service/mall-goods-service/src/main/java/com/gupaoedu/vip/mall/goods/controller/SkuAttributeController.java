@@ -8,10 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/*****
- * @Author: 波波
- * @Description: 云商城
- ****/
 @RestController
 @RequestMapping(value = "/skuAttribute")
 @CrossOrigin
@@ -21,7 +17,7 @@ public class SkuAttributeController {
     private SkuAttributeService skuAttributeService;
 
     /*****
-     * 根据分类ID查询属性集合
+     * Query attribute list by category ID
      */
     @GetMapping(value = "/category/{id}")
     public RespResult<List<SkuAttributeController>> categorySkuAttributeList(@PathVariable(value = "id")Integer id){

@@ -9,14 +9,9 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/*****
- * @Author:
- * @Description:
- ****/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-//MyBatisPlus表映射注解
 @TableName(value = "address")
 public class Address implements Serializable {
     @TableId(type = IdType.AUTO)

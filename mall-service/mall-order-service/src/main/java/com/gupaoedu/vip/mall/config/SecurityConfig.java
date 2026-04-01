@@ -15,7 +15,7 @@ public class SecurityConfig {
     private String salt;
 
     /*****
-     * 加密解密工具类
+     * Encryption and decryption tool
      * @return
      */
     @Bean

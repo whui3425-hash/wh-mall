@@ -9,10 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/*****
- * @Author: 波波
- * @Description: 云商城
- ****/
 @Service
 public class SkuAttributeServiceImpl extends ServiceImpl<SkuAttributeMapper,SkuAttribute> implements SkuAttributeService {
 
@@ -20,7 +16,7 @@ public class SkuAttributeServiceImpl extends ServiceImpl<SkuAttributeMapper,SkuA
     private SkuAttributeMapper skuAttributeMapper;
 
     /*****
-     * 根据分类ID查询属性集合
+     * Query attribute list by category ID
      * @param id
      * @return
      */

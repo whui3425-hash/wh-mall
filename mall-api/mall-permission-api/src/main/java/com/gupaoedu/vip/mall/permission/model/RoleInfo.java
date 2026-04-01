@@ -14,7 +14,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-//MyBatisPlus表映射注解
 @TableName(value = "role_info")
 public class RoleInfo implements Serializable {
 
@@ -22,7 +21,7 @@ public class RoleInfo implements Serializable {
     private Integer id;
     private String roleName;
     private String description;
-    //权限列表
+
     @TableField(exist = false)
     private List<Permission> permissions;
 }

@@ -12,14 +12,9 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
 
-/*****
- * @Author: 波波
- * @Description: 云商城
- ****/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-//MyBatisPlus表映射注解
 @TableName(value = "sku")
 @Table
 public class Sku implements Serializable{

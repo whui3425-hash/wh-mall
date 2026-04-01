@@ -9,14 +9,9 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/*****
- * @Author: 波波
- * @Description: 云商城
- ****/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-//MyBatisPlus表映射注解
 @TableName(value = "ad_items")
 public class AdItems implements Serializable{
 

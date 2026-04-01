@@ -5,38 +5,34 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-/*****
- * @Author:
- * @Description:URL工具
- ****/
 public class UrlUtils {
 
     /**
-     * 去掉URL中指定的参数
+     * Remove specified parameters from URL
      */
     public static String replateUrlParameter(String url,String... names){
         for (String name : names) {
-            url = url.replaceAll("(&"+name+"=([0-9\\w]+))|("+name+"=([0-9\\w]+)&)|("+name+"=([0-9\\w]+))", "");
+            url = url.replaceAll("(&"+name+"=([0-9\\w]+))|(”+name+"=([0-9\\w]+)&)|(”+name+"=([0-9\\w]+))", "");
         }
         return url;
     }
 
     /***
-     * 当前请求地址组装
+     * Assemble current request URL
      */
     public static String map2url(String baseUrl,Map<String,Object> searchMap,String... names){
-        //参数获取
+        // Get parameters
         String parm = map2parm(searchMap);
         if(!StringUtils.isEmpty(parm)){
             baseUrl+="?"+parm;
         }
-        //去掉指定参数
+        // Remove specified parameters
         baseUrl = replateUrlParameter(baseUrl,names);
         return baseUrl;
     }
 
     /**
-     * 将map转换成url参数
+     * Convert map to URL parameters
      * @param map
      * @return
      */

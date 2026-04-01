@@ -25,7 +25,7 @@ public class UserInfoController {
     private UserInfoService userInfoService;
 
     /****
-     * 登录  http://localhost:8088/user/info/login
+     * Login http://localhost:8088/user/info/login
      * @param username
      * @param pwd
      * @return
@@ -34,23 +34,23 @@ public class UserInfoController {
     public RespResult<String> login(@RequestParam(value = "username")String username,
                                     @RequestParam(value = "pwd")String pwd,
                                     HttpServletRequest request) throws Exception{
-        //查询用户
+        //Query user
         UserInfo userinfo = userInfoService.getById(username);
-        //匹配
+        //Match
         if(userinfo!=null && pwd.equals(userinfo.getPassword())){
-            //封装令牌
+            //Create token
             Map<String,Object> dataMap = new HashMap<String,Object>();
             dataMap.put("username",userinfo.getUsername());
             dataMap.put("name",userinfo.getName());
             dataMap.put("roles",userinfo.getRoles());
-            //获取IP
+            //Get IP
             String ip = IPUtils.getIpAddr(request);
             dataMap.put("ip", MD5.md5(ip));
-            //'创建令牌
+            //Create JWT token
             String token = JwtToken.createToken(dataMap);
             return RespResult.ok(token);
         }
-        return RespResult.error("账号或者密码不对");
+        return RespResult.error("Invalid username or password");
     }
 
 }

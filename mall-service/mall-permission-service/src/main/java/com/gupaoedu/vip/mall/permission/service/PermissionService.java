@@ -8,12 +8,12 @@ import java.util.Map;
 public interface PermissionService extends IService<Permission> {
 
     /***
-     * 根据不同匹配方式查询权限列表
+     * Query permission list by match method
      */
     List<Permission> findByMatch(Integer matchMethod);
 
     /****
-     * 查询所有角色的权限映射关系
+     * Query all role-permission mappings
      */
     List<Map<Integer,Integer>> allRolePermissions();
 

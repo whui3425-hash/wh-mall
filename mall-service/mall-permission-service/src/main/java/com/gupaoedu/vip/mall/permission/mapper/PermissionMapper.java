@@ -10,7 +10,7 @@ import java.util.Map;
 public interface PermissionMapper extends BaseMapper<Permission> {
 
     /***
-     * 查询所有角色的权限映射关系
+     * Query all role-permission mappings
      */
     @Select("SELECT * FROM role_permission")
     List<Map<Integer,Integer>> allRolePermissions();

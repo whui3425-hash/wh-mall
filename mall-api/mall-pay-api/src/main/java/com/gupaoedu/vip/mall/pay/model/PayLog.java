@@ -9,14 +9,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
-/*****
- * @Author:
- * @Description:
- ****/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-//MyBatisPlus表映射注解
 @TableName(value = "pay_log")
 public class PayLog {
 

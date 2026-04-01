@@ -22,10 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 
-/*****
- * @Author:
- * @Description:
- ****/
 @Service
 public class OrderServiceImpl extends ServiceImpl<OrderMapper,Order> implements OrderService {
 
@@ -45,23 +41,23 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper,Order> implements 
     private OrderRefundMapper orderRefundMapper;
 
     /****
-     * 退款申请
+     * Refund application
      * @param orderRefund
      * @return
      */
     @Override
     public int refund(OrderRefund orderRefund) {
-        //1记录退款申请
+        //1. Record refund application
         orderRefundMapper.insert(orderRefund);
 
-        //2修改订单状态
+        //2. Update order status
         Order order = new Order();
-        order.setOrderStatus(4);    //申请退款
+        order.setOrderStatus(4);    //Apply for refund
 
-        //构建条件
+        //Build conditions
         QueryWrapper<Order> queryWrapper = new QueryWrapper<Order>();
-        queryWrapper.eq("id",orderRefund.getOrderNo()); //订单ID
-        queryWrapper.eq("username",orderRefund.getUsername()); //用户名
+        queryWrapper.eq("id",orderRefund.getOrderNo()); //Order ID
+        queryWrapper.eq("username",orderRefund.getUsername()); //Username
         queryWrapper.eq("order_status",1);
         queryWrapper.eq("pay_status",1);
         int count = orderMapper.update(order, queryWrapper);
@@ -69,45 +65,45 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper,Order> implements 
     }
 
     /***
-     * 添加订单
+     * Add order
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean add(Order order) {
-        //数据完善
+        //Complete data
         order.setId(IdWorker.getIdStr());   //ID
-        order.setCreateTime(new Date());    //创建时间
+        order.setCreateTime(new Date());    //Create time
         order.setUpdateTime(order.getCreateTime());
 
-        //1、查询购物车数据
+        //1. Query shopping cart data
         RespResult<List<Cart>> cartResp = cartFeign.list(order.getCartIds());
         List<Cart> carts = cartResp.getData();
         if(carts==null || carts.size()==0){
             return false;
         }
 
-        //2、递减库存
+        //2. Decrease inventory
         skuFeign.dcount(carts);
 
-        //3、添加订单明细
+        //3. Add order details
         int totalNum=0;
         int moneys = 0;
         for (Cart cart : carts) {
-            //将Cart转成OrderSku
+            //Convert Cart to OrderSku
             OrderSku orderSku = JSON.parseObject(JSON.toJSONString(cart), OrderSku.class);
             orderSku.setId(IdWorker.getIdStr());
-            orderSku.setOrderId(order.getId()); //提前赋值
+            orderSku.setOrderId(order.getId()); //Pre-assign
             orderSku.setMoney(orderSku.getPrice()*orderSku.getNum());
 
-            //添加
+            //Add
             orderSkuMapper.insert(orderSku);
 
-            //统计计算
+            //Statistics calculation
             totalNum +=orderSku.getNum();
             moneys += orderSku.getMoney();
         }
 
-        //4、添加订单
+        //4. Add order
         order.setTotalNum(totalNum);
         order.setMoneys(moneys);
         orderMapper.insert(order);
@@ -115,25 +111,25 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper,Order> implements 
         //Exception--->TestTransaction
         //int q=10/0;
 
-        //5、删除购物车数据
+        //5. Delete shopping cart data
         cartFeign.delete(order.getCartIds());
         return true;
     }
 
     /****
-     * 支付成功后状态修改
+     * Update status after successful payment
      * @param id
      * @return
      */
     @Override
     public int updateAfterPayStatus(String id) {
-        //修改后的状态
+        //Modified status
         Order order = new Order();
         order.setId(id);
-        order.setOrderStatus(1);    // 待发货
-        order.setPayStatus(1);  //已支付
+        order.setOrderStatus(1);    // Pending shipment
+        order.setPayStatus(1);  //Paid
 
-        //修改条件
+        //Update conditions
         QueryWrapper<Order> queryWrapper = new QueryWrapper<Order>();
         queryWrapper.eq("id",id);
         queryWrapper.eq("order_status",0);

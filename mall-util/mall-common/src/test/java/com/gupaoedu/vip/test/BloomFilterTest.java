@@ -7,14 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BloomFilterTest {
-    //集合大小
+    // Collection size
     private static int size = 1000000;
 
-    //Google的布隆过滤器
+    // Google's Bloom Filter
     private static BloomFilter<Integer> bloomFilter =BloomFilter.create(Funnels.integerFunnel(), size,0.01);
 
     public static void main(String[] args) {
-        //放一百万个key到布隆过滤器中
+        // Put one million keys into the Bloom filter
         for (int i = 0; i < size; i++) {
             bloomFilter.put(i);
         }
@@ -22,9 +22,9 @@ public class BloomFilterTest {
         List<Integer> list = new ArrayList<Integer>(1000);
 
 
-        //取10000个不在过滤器里的值，看看有多少个会被认为在过滤器里
+        // Take 10000 values not in the filter to check false positives
         for (int i = size + 1; i < size + 20000; i++) {
-            //判断布隆过滤器是否存在该数据
+            // Check if the Bloom filter might contain this data
             if (bloomFilter.mightContain(i)) {
                 list.add(i);
             }

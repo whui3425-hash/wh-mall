@@ -1,6 +1,6 @@
 package com.gupaoedu.vip.mall.cart.service.impl;
 
-import com.google.common.collect.Lists;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.gupaoedu.mall.util.RespResult;
 import com.gupaoedu.vip.mall.cart.mapper.CartMapper;
 import com.gupaoedu.vip.mall.cart.model.Cart;
@@ -8,19 +8,10 @@ import com.gupaoedu.vip.mall.cart.service.CartService;
 import com.gupaoedu.vip.mall.goods.feign.SkuFeign;
 import com.gupaoedu.vip.mall.goods.model.Sku;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/*****
- * @Author:
- * @Description:
- ****/
 @Service
 public class CartServiceImpl implements CartService {
 
@@ -30,64 +21,80 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private SkuFeign skuFeign;
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-
     /***
-     * 根据集合ID删除指定的购物车列表
+     * Delete shopping cart list by IDs
      */
     @Override
     public void delete(List<String> ids) {
-        // _id in(ids)
-        mongoTemplate.remove(Query.query(Criteria.where("_id").in(ids)),Cart.class);
+        // TODO: MongoDB degraded to MySQL, needs optimization for batch delete
+        for (String id : ids) {
+            cartMapper.deleteById(Long.valueOf(id));
+        }
     }
 
     /***
-     * 查询指定购物车ID集合的列表
+     * Query shopping cart list by ID collection
      */
     @Override
     public List<Cart> list(List<String> ids) {
-        if(ids!=null && ids.size()>0){
-            //根据ID集合查询
-            Iterable<Cart> carts = cartMapper.findAllById(ids);
-            return Lists.newArrayList(carts);
+        if (ids != null && !ids.isEmpty()) {
+            // TODO: MongoDB degraded to MySQL, needs optimization for batch query
+            QueryWrapper<Cart> queryWrapper = new QueryWrapper<>();
+            queryWrapper.in("id", ids);
+            return cartMapper.selectList(queryWrapper);
         }
         return null;
     }
 
     /***
-     * 购物车列表
+     * Shopping cart list
      */
     @Override
     public List<Cart> list(String userName) {
-        //条件构建
-        Cart cart = new Cart();
-        cart.setUserName(userName);
-        return cartMapper.findAll(Example.of(cart), Sort.by("_id"));
+        // Use MyBatis-Plus conditional query
+        QueryWrapper<Cart> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_name", userName);
+        return cartMapper.selectList(queryWrapper);
     }
 
     /***
-     * 加入购物车
+     * Add to shopping cart
      * @param id
      * @param userName
-     * @param num:当前商品加入购物车总数量
+     * @param num: total quantity of current product in shopping cart
      * @return
      */
     @Override
     public void add(String id, String userName, Integer num) {
-        //ID 不能冲突
-        //1)删除当前ID对应的商品之前的购物车记录
-        cartMapper.deleteById(userName+id);
+        // Generate composite primary key: username + SKU_ID
+        String cartKey = userName + id;
+        
+        // 1) Check if shopping cart record exists
+        QueryWrapper<Cart> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_name", userName).eq("sku_id", id);
+        Cart existingCart = cartMapper.selectOne(queryWrapper);
+        
+        if (existingCart != null) {
+            // Delete old record if exists
+            cartMapper.deleteById(existingCart.getId());
+        }
 
-        if(num>0){
-            //2）根据ID查询Sku详情
+        if (num > 0) {
+            // 2) Query Sku details by ID
             RespResult<Sku> skuResp = skuFeign.one(id);
 
-            //3)将当前ID商品对应的数据加入购物车（存入到MongoDB）
-            Sku sku= skuResp.getData();
-            Cart cart = new Cart(userName+id,userName,sku.getName(),sku.getPrice(),sku.getImage(),id,num);
-            cartMapper.save(cart);
+            // 3) Add current product to shopping cart (store in MySQL)
+            Sku sku = skuResp.getData();
+            Cart cart = new Cart();
+            cart.setUserName(userName);
+            cart.setName(sku.getName());
+            cart.setPrice(sku.getPrice());
+            cart.setImage(sku.getImage());
+            cart.setSkuId(id);
+            cart.setNum(num);
+            // TODO: Get tenantId from login context
+            cart.setTenantId("default");
+            cartMapper.insert(cart);
         }
     }
 }

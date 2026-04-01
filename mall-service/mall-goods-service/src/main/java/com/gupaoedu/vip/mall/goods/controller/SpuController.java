@@ -8,10 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/*****
- * @Author: 波波
- * @Description: 云商城
- ****/
 @RestController
 @RequestMapping(value = "/spu")
 @CrossOrigin
@@ -21,7 +17,7 @@ public class SpuController {
     private SpuService spuService;
 
     /*****
-     * 产品保存
+     * Save product
      */
     @PostMapping(value = "/save")
     public RespResult save(@RequestBody Product product){
@@ -30,7 +26,7 @@ public class SpuController {
     }
 
     /***
-     * 查询Product
+     * Query Product
      */
     @GetMapping(value = "/product/{id}")
     public RespResult<Product> one(@PathVariable(value = "id")String id){

@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-//MyBatisPlus表映射注解
 @TableName(value = "user_info")
 public class UserInfo {
     @TableId(type = IdType.ASSIGN_ID)

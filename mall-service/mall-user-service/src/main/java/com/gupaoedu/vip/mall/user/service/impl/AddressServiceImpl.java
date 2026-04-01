@@ -10,10 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/*****
- * @Author:
- * @Description:
- ****/
 @Service
 public class AddressServiceImpl extends ServiceImpl<AddressMapper,Address> implements AddressService {
 
@@ -21,7 +17,7 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper,Address> imple
     private AddressMapper addressMapper;
 
     /****
-     * 查询用户收件地址列表
+     * Query user address list
      */
     @Override
     public List<Address> list(String userName) {

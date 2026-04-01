@@ -9,10 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/*****
- * @Author: 波波
- * @Description: 云商城
- ****/
 @RestController
 @RequestMapping(value = "/sku")
 public class SkuController {
@@ -22,7 +18,7 @@ public class SkuController {
 
 
     /***
-     * 库存递减
+     * Inventory decrease
      */
     @PostMapping(value = "/dcount")
     public RespResult dcount(@RequestBody List<Cart> carts){
@@ -31,7 +27,7 @@ public class SkuController {
     }
 
     /***
-     * 根据ID查询商品详情
+     * Query product details by ID
      * @return
      */
     @GetMapping(value = "/{id}")
@@ -41,18 +37,16 @@ public class SkuController {
     }
 
     /****
-     * 根据推广分类查询推广产品列表
-     *
+     * Query promotion product list by promotion category
      */
     @GetMapping(value = "/aditems/type")
     public List<Sku> typeItems(@RequestParam(value = "id")Integer id){
-        //查询
         List<Sku> skus = sKuService.typeSkuItems(id);
         return skus;
     }
 
     /****
-     * 根据推广分类查询推广产品列表
+     * Delete promotion data by category id
      */
     @DeleteMapping(value = "/aditems/type")
     public RespResult delTypeItems(@RequestParam(value = "id")Integer id){
@@ -61,12 +55,10 @@ public class SkuController {
     }
 
     /****
-     * 根据推广分类查询推广产品列表
-     *
+     * Update promotion product list by promotion category
      */
     @PutMapping(value = "/aditems/type")
     public RespResult updateTypeItems(@RequestParam(value = "id")Integer id){
-        //修改
         sKuService.updateTypeSkuItems(id);
         return RespResult.ok();
     }

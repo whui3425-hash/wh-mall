@@ -4,29 +4,25 @@ import com.gupaoedu.vip.mall.cart.model.Cart;
 
 import java.util.List;
 
-/*****
- * @Author:
- * @Description:
- ****/
 public interface CartService {
 
     /***
-     * 根据集合ID删除指定的购物车列表
+     * Delete shopping cart list by IDs
      */
     void delete(List<String> ids);
 
     /***
-     * 查询指定购物车ID集合的列表
+     * Query shopping cart list by ID collection
      */
     List<Cart> list(List<String> ids);
 
     /***
-     * 购物车列表
+     * Shopping cart list
      */
     List<Cart> list(String userName);
 
     /***
-     * 加入购物车
+     * Add to shopping cart
      */
     void add(String id,String userName,Integer num);
 

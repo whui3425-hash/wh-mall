@@ -13,8 +13,8 @@ public class ApiGatewayApplication {
         SpringApplication.run(ApiGatewayApplication.class,args);
     }
 
-    /***
-     * IP 限流
+    /**
+     * IP rate limiting
      * @return
      */
     @Bean("ipKeyResolver")

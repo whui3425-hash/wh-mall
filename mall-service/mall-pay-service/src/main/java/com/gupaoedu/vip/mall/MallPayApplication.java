@@ -7,10 +7,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-/*****
- * @Author:
- * @Description:
- ****/
 @SpringBootApplication
 @MapperScan(basePackages = {"com.gupaoedu.vip.mall.pay.mapper"})
 public class MallPayApplication {
@@ -20,7 +16,7 @@ public class MallPayApplication {
     }
 
     /****
-     * 微信支付SDK对象
+     * WeChat Pay SDK object
      * @param weixinPayConfig
      * @return
      * @throws Exception

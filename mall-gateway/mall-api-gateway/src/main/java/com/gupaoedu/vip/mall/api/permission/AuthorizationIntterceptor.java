@@ -19,125 +19,108 @@ import java.util.Set;
 @Component
 public class AuthorizationIntterceptor {
 
-    // TODO: SaaS MVP 极简版暂不使用Redis
-    // @Autowired
-    // private RedisTemplate redisTemplate;
-
-    // TODO: SaaS MVP 极简版暂不使用Redisson
-    // @Autowired
-    // private RedissonClient redissonClient;
-
-    /****
-     * 判断uri是否为有效路径
+    /**
+     * Check if URI is valid
      * @param uri
      * @return
      */
     public Boolean isInvalid(String uri){
-        // TODO: SaaS MVP 极简版暂不使用Redisson布隆过滤器，默认所有URI有效
-        // RBloomFilter<String> uriBloomFilterArray = redissonClient.getBloomFilter("UriBloomFilterArray");
-        // return uriBloomFilterArray.contains(uri);
         return true;
     }
 
-    /***
-     * 权限校验
+    /**
+     * Permission validation
      */
     public Boolean rolePermission(ServerWebExchange exchange,Map<String, Object> token){
         ServerHttpRequest request = exchange.getRequest();
-        //获取uri  /cart/list
+        // Get URI /cart/list
         String uri = request.getURI().getPath();
-        //提交方式  GET/POST/*
+        // Request method GET/POST/*
         String method = request.getMethodValue();
-        //服务名字
+        // Service name
         URI routerUri = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR);
         String servicename = routerUri.getHost();
 
-        //匹配->获取角色集合
+        // Match -> Get role collection
         String[] roles = token.get("roles").toString().split(",");
 
         Permission permission = null;
-        //循环判断每个角色是否有权限
+        // Check each role for permission
         for (String role : roles) {
-            // TODO: SaaS MVP 极简版暂不使用Redis，直接从内存或数据库获取权限
-            // Set<Permission> permissions = (Set<Permission>) redisTemplate.boundHashOps("RolePermissionMap").get("Role_0_" + role);
-            Set<Permission> permissions = null; // 暂时返回null，需要后续实现从数据库查询
+            Set<Permission> permissions = null;
 
             if(permissions==null){
                 continue;
             }
-            //循环判断
+            // Loop check
             permission = match0(new ArrayList<Permission>(permissions), uri, method, servicename);
             if(permission!=null){
                 break;
             }
         }
 
-        //permission==null，通配符方式匹配
+        // permission==null, wildcard matching
         if(permission==null){
-            //通配符匹配
+            // Wildcard matching
         }
         return permission!=null;
     }
 
-    /***
-     * 令牌校验
+    /**
+     * Token validation
      */
     public Map<String,Object> tokenIntercept(ServerWebExchange exchange){
         ServerHttpRequest request = exchange.getRequest();
-        //校验其他地址
+        // Validate other addresses
         String clientIp = IpUtil.getIp(request);
-        //获取令牌
+        // Get token
         String token = request.getHeaders().getFirst("authorization");
-        //令牌校验
+        // Token validation
         Map<String, Object> resultMap = AuthorizationIntterceptor.jwtVerify(token, clientIp);
         return resultMap;
     }
 
-    /***
-     * 是否需要拦截校验
-     * true:需要拦截
-     * false:不需要拦截
+    /**
+     * Whether interception is required
+     * true: interception required
+     * false: interception not required
      */
     public Boolean isIntercept(ServerWebExchange exchange){
         ServerHttpRequest request = exchange.getRequest();
-        //获取uri  /cart/list
+        // Get URI /cart/list
         String uri = request.getURI().getPath();
-        //提交方式  GET/POST/*
+        // Request method GET/POST/*
         String method = request.getMethodValue();
-        //服务名字
+        // Service name
         URI routerUri = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR);
         String servicename = routerUri.getHost();
 
-        // TODO: SaaS MVP 极简版暂不使用Redis缓存
-        // 从Redis缓存中进行匹配
-        // 0:完全匹配
-        // List<Permission> permissionsMatch0 = (List<Permission>) redisTemplate.boundHashOps("RolePermissionAll").get("PermissionMatch0");
-        List<Permission> permissionsMatch0 = null; // 暂时返回null，需要后续实现从数据库查询
+        List<Permission> permissionsMatch0 = null;
         if(permissionsMatch0!=null){
 
         }
-        // 1:通配符匹配
+        // Wildcard matching
         Permission permission = match0(permissionsMatch0, uri, method, servicename);
-        //如果permission==null，则执行通配符匹配
+        // If permission==null, execute wildcard matching
         if(permission==null){
-            //通配符匹配
+            // Wildcard matching
 
-            //如果通配符匹配也为空，表明当前请求不需要进行权限校验
+            // If wildcard matching is also empty, no permission check needed
             return false;
         }
         return true;
     }
 
 
-    /***
-     * 匹配方法:完全匹配
+    /**
+     * Matching method: exact match
      */
     public Permission match0(List<Permission> permissionsMatch0,String uri,String method,String serviceName){
         for (Permission permission : permissionsMatch0) {
             String matchUrl = permission.getUrl();
             String matchMethod = permission.getMethod();
             if(matchUrl.equals(uri)){
-                //提交方式和服务匹配
+                // Method and service match
                 if(matchMethod.equals(method) && serviceName.equals(permission.getServiceName())){
                     return permission;
                 }
@@ -149,16 +132,16 @@ public class AuthorizationIntterceptor {
         return null;
     }
 
-    /*****
-     * 令牌解析
+    /**
+     * Token parsing
      */
     public static Map<String,Object> jwtVerify(String token,String clientIp){
         try {
-            //解析Token
+            // Parse Token
             Map<String, Object> dataMap = JwtToken.parseToken(token);
-            //获取Token中IP的MD5
+            // Get MD5 of IP in Token
             String ip = dataMap.get("ip").toString();
-            //比较Token中IP的MD5值和用户的IPMD5值
+            // Compare MD5 of IP in Token with user's IP MD5
             if(ip.equals(MD5.md5(clientIp))){
                 return dataMap;
             }

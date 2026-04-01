@@ -8,10 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/*****
- * @Author:
- * @Description:
- ****/
 @RestController
 @RequestMapping(value = "/cart")
 @CrossOrigin
@@ -21,7 +17,7 @@ public class CartController {
     private CartService cartService;
 
     /***
-     * 删除购物车数据
+     * Delete shopping cart data
      */
     @DeleteMapping
     public RespResult delete(@RequestBody List<String> ids){
@@ -31,7 +27,7 @@ public class CartController {
 
 
     /***
-     * 指定ID集合的购物车数据
+     * Shopping cart data by specified ID collection
      * http://localhost:8087/cart/list
      */
     @PostMapping(value = "/list")
@@ -41,7 +37,7 @@ public class CartController {
     }
 
     /****
-     * 增加购物车方法
+     * Add to shopping cart
      */
     @GetMapping(value = "/{id}/{num}")
     public RespResult add(@PathVariable(value = "id")String id,
@@ -53,7 +49,7 @@ public class CartController {
 
 
     /****
-     * 购物车列表
+     * Shopping cart list
      */
     @GetMapping(value = "/list")
     public RespResult<List<Cart>> list(){

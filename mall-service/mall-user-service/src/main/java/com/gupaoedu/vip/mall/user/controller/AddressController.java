@@ -11,10 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/*****
- * @Author:
- * @Description:
- ****/
 @RestController
 @RequestMapping(value = "/address")
 @CrossOrigin
@@ -24,7 +20,7 @@ public class AddressController {
     private AddressService addressService;
 
     /****
-     * 用户收件地址列表
+     * User address list
      */
     @GetMapping(value = "/list")
     public RespResult<List<Address>> list(){

@@ -20,18 +20,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-/*****
- * @Author:
- * @Description:
- ****/
 @RestController
 @RequestMapping(value = "/wx")
 @CrossOrigin
 public class WeixinPayController {
-
-    // TODO: SaaS极简版，后续替换为普通的 Feign 同步调用或本地逻辑
-    // @Autowired
-    // private RocketMQTemplate rocketMQTemplate;
 
     @Autowired
     private WeixinPayService weixinPayService;
@@ -39,12 +31,12 @@ public class WeixinPayController {
     @Autowired
     private Signature signature;
 
-    //秘钥->MD5（skey）
+    //Secret key -> MD5 (skey)
     @Value("${payconfig.weixin.key}")
     private String skey;
 
     /****
-     * 查询订单支付状态
+     * Query order payment status
      */
     @GetMapping(value = "/result/{outno}")
     public RespResult<PayLog> result(@PathVariable(value = "outno")String outno) throws Exception{
@@ -53,12 +45,11 @@ public class WeixinPayController {
     }
 
     /****
-     * 微信支付二维码获取
+     * Get WeChat payment QR code
      */
     @GetMapping(value = "/pay")
-    //public RespResult<Map> pay(@RequestParam Map<String,String> dataMap) throws Exception {
     public RespResult<Map> pay(@RequestParam("ciptext") String ciphertext) throws Exception {
-        //ciphertext->AES->移除签名数据signature->MD5==signature?
+        //ciphertext->AES->remove signature data signature->MD5==signature?
         Map<String, String> dataMap = signature.security(ciphertext);
 
         Map<String, String> map = weixinPayService.preOrder(dataMap);
@@ -67,55 +58,46 @@ public class WeixinPayController {
             map.put("money",dataMap.get("total_fee"));
             return RespResult.ok(map);
         }
-        return RespResult.error("支付系统繁忙，请稍后再试！");
+        return RespResult.error("Payment system is busy, please try again later!");
     }
 
     /****
-     * 支付结果回调
+     * Payment result callback
      */
     @RequestMapping(value = "/result")
     public String result(HttpServletRequest request) throws Exception{
-        //读取网络输入流
+        //Read network input stream
         ServletInputStream is = request.getInputStream();
 
-        //定义接收输入流对象（输出流）
+        //Define output stream to receive input stream
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-        //将网络输入流读取到输出流中
+        //Read network input stream into output stream
         byte[] buffer = new byte[1024];
         int len=0;
         while ((len=is.read(buffer))!=-1){
             os.write(buffer,0,len);
         }
 
-        //关闭资源
+        //Close resources
         os.close();
         is.close();
 
-        //将支付结果的XML结构转换成Map结构
+        //Convert payment result XML to Map
         String xmlResult = new String(os.toByteArray(),"UTF-8");
         Map<String, String> map = WXPayUtil.xmlToMap(xmlResult);
         System.out.println("xmlResult:"+xmlResult);
-        //判断支付结果状态  日志状态：2 成功 ， 7 失败
+        //Payment status: 2 success, 7 failure
         int status = 7;
         // return_code/result_code
         if(map.get("return_code").equals(WXPayConstants.SUCCESS) && map.get("result_code").equals(WXPayConstants.SUCCESS)){
             status=2;
         }
 
-        //创建日志对象
+        //Create log object
         PayLog payLog = new PayLog(map.get("out_trade_no"),status,JSON.toJSONString(map),map.get("out_trade_no"),new Date());
 
-        // TODO: SaaS极简版，后续替换为普通的 Feign 同步调用或本地逻辑
-        // 原代码：发送MQ消息
-        // Message<String> message = MessageBuilder.withPayload(JSON.toJSONString(payLog)).build();
-        // rocketMQTemplate.sendMessageInTransaction("rocket","log",message,null);
-
-        // 简化版：直接保存支付日志（后续订单状态更新应通过Feign调用订单服务）
-        // TODO: SaaS极简版，此处应调用订单服务Feign接口更新订单状态
-        // payLogService.add(payLog);
-
-        //Map 响应数据
+        //Map response data
         Map<String,String> resultResp = new HashMap<String,String>();
         resultResp.put("return_code","SUCCESS");
         resultResp.put("return_msg","OK");
@@ -124,39 +106,39 @@ public class WeixinPayController {
 
 
     /****
-     * 申请退款状态
+     * Refund status
      */
     @RequestMapping(value = "/refund/result")
     public String refund(HttpServletRequest request) throws Exception{
-        //读取网络输入流
+        //Read network input stream
         ServletInputStream is = request.getInputStream();
 
-        //定义接收输入流对象（输出流）
+        //Define output stream to receive input stream
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-        //将网络输入流读取到输出流中
+        //Read network input stream into output stream
         byte[] buffer = new byte[1024];
         int len=0;
         while ((len=is.read(buffer))!=-1){
             os.write(buffer,0,len);
         }
 
-        //关闭资源
+        //Close resources
         os.close();
         is.close();
 
-        //将支付结果的XML结构转换成Map结构
+        //Convert payment result XML to Map
         String xmlResult = new String(os.toByteArray(),"UTF-8");
         Map<String, String> map = WXPayUtil.xmlToMap(xmlResult);
-        System.out.println("退款数据-xmlResult:"+xmlResult);
+        System.out.println("Refund data-xmlResult:"+xmlResult);
 
-        //获取退款信息（加密了-AES）
+        //Get refund info (encrypted - AES)
         String reqinfo = map.get("req_info");
         String key = MD5.md5(skey);
         byte[] decode = AESUtil.encryptAndDecrypt(Base64Util.decode(reqinfo), key, 2);
-        System.out.println("退款解密后的数据："+new String(decode, "UTF-8"));
+        System.out.println("Decrypted refund data:"+new String(decode, "UTF-8"));
 
-        //Map 响应数据
+        //Map response data
         Map<String,String> resultResp = new HashMap<String,String>();
         resultResp.put("return_code","SUCCESS");
         resultResp.put("return_msg","OK");

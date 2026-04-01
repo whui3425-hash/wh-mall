@@ -14,18 +14,16 @@ import java.io.InputStream;
 @Component
 public class WeixinPayConfig extends WXPayConfig {
 
-    //微信支付信息
     @Value("${payconfig.weixin.appId}")
-    private String appId;       //应用ID
+    private String appId;
     @Value("${payconfig.weixin.mchID}")
-    private String mchID;       //商户号
+    private String mchID;
     @Value("${payconfig.weixin.key}")
-    private String key;         //秘钥
+    private String key;
     @Value("${payconfig.weixin.notifyUrl}")
-    private String notifyUrl;   //回调地址
+    private String notifyUrl;
     @Value("${payconfig.weixin.certPath}")
-    private String certPath;    //证书路径
-    //证书字节数组
+    private String certPath;
     private byte[] certData;
 
     @Override
@@ -44,13 +42,13 @@ public class WeixinPayConfig extends WXPayConfig {
     }
 
     /***
-     * 获取商户证书内容
+     * Get merchant certificate content
      * @return
      */
     @Override
     public InputStream getCertStream() {
         /****
-         * 加载证书
+         * Load certificate
          */
         if(certData==null){
             synchronized (WeixinPayConfig.class){
@@ -72,12 +70,11 @@ public class WeixinPayConfig extends WXPayConfig {
     }
 
     /***
-     * 获取WXPayDomain, 用于多域名容灾自动切换
+     * Get WXPayDomain for multi-domain disaster recovery
      * @return
      */
     @Override
     public IWXPayDomain getWXPayDomain() {
-        // 这个方法需要这样实现, 否则无法正常初始化WXPay
         IWXPayDomain iwxPayDomain = new IWXPayDomain() {
             @Override
             public void report(String domain, long elapsedTimeMillis, Exception ex) {

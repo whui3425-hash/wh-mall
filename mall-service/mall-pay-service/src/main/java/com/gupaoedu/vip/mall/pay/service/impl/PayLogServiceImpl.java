@@ -7,10 +7,6 @@ import com.gupaoedu.vip.mall.pay.service.PayLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/*****
- * @Author:
- * @Description:
- ****/
 @Service
 public class PayLogServiceImpl extends ServiceImpl<PayLogMapper,PayLog> implements PayLogService {
 
@@ -18,14 +14,12 @@ public class PayLogServiceImpl extends ServiceImpl<PayLogMapper,PayLog> implemen
     private PayLogMapper payLogMapper;
 
     /***
-     * log
+     * Add log
      * @param payLog
      */
     @Override
     public void add(PayLog payLog) {
-        //删除
         payLogMapper.deleteById(payLog.getId());
-        //增加
         payLogMapper.insert(payLog);
     }
 }

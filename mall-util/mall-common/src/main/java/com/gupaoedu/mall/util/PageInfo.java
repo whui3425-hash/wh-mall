@@ -1,34 +1,31 @@
 package com.gupaoedu.mall.util;
 import java.io.Serializable;
-/*****
- * @Author:
- * @Description:分页工具
- ****/
+
 public class PageInfo implements Serializable {
 
-    // 页数（第几页）
+    // Page number (which page)
     private long currentpage;
 
-    // 查询数据库里面对应的数据有多少条
-    private long total;// 从数据库查处的总记录数
+    // Total records queried from database
+    private long total;
 
-    // 每页查5条
+    // Query 5 items per page
     private int size;
 
-    // 下页
+    // Next page
     private int next;
 
-    // 最后一页
+    // Last page
     private int last;
 
     private int lpage;
 
     private int rpage;
 
-    //从哪条开始查
+    // Start from which record
     private long start;
 
-    //全局偏移量
+    // Global offset
     public int offsize = 2;
 
     public PageInfo() {
@@ -42,38 +39,38 @@ public class PageInfo implements Serializable {
      * @param pagesize
      */
     public void setCurrentpage(long currentpage, long total, long pagesize) {
-        //可以整除的情况下
+        // Divisible case
         long pagecount = total / pagesize;
 
-        //如果整除表示正好分N页，如果不能整除在N页的基础上+1页
+        // If divisible, exactly N pages; if not, N+1 pages
         int totalPages = (int) (total % pagesize == 0 ? total / pagesize : (total / pagesize) + 1);
 
-        //总页数
+        // Total pages
         this.last = totalPages;
 
-        //判断当前页是否越界,如果越界，我们就查最后一页
+        // Check if current page exceeds bounds; if so, query last page
         if (currentpage > totalPages) {
             this.currentpage = totalPages;
         } else {
             this.currentpage = currentpage;
         }
 
-        //计算start
+        // Calculate start
         this.start = (this.currentpage - 1) * pagesize;
     }
 
-    //上一页
+    // Previous page
     public long getUpper() {
         return currentpage > 1 ? currentpage - 1 : currentpage;
     }
 
-    //总共有多少页，即末页
+    // Total pages, i.e., last page
     public void setLast(int last) {
         this.last = (int) (total % size == 0 ? total / size : (total / size) + 1);
     }
 
     /****
-     * 带有偏移量设置的分页
+     * Pagination with offset setting
      * @param total
      * @param currentpage
      * @param pagesize
@@ -86,68 +83,68 @@ public class PageInfo implements Serializable {
 
     /****
      *
-     * @param total   总记录数
-     * @param currentpage    当前页
-     * @param pagesize    每页显示多少条
+     * @param total   Total records
+     * @param currentpage    Current page
+     * @param pagesize    Items per page
      */
     public PageInfo(long total, int currentpage, int pagesize) {
         initPage(total, currentpage, pagesize);
     }
 
     /****
-     * 初始化分页
+     * Initialize pagination
      * @param total
      * @param currentpage
      * @param pagesize
      */
     public void initPage(long total, int currentpage, int pagesize) {
-        //总记录数
+        // Total records
         this.total = total;
-        //每页显示多少条
+        // Items per page
         this.size = pagesize;
 
-        //计算当前页和数据库查询起始值以及总页数
+        // Calculate current page, DB query start value, and total pages
         setCurrentpage(currentpage, total, pagesize);
 
-        //分页计算
-        int leftcount = this.offsize,    //需要向上一页执行多少次
+        // Pagination calculation
+        int leftcount = this.offsize,    // Times to go to previous page
                 rightcount = this.offsize;
 
-        //起点页
+        // Start page
         this.lpage = currentpage;
-        //结束页
+        // End page
         this.rpage = currentpage;
 
-        //2点判断
-        this.lpage = currentpage - leftcount;            //正常情况下的起点
-        this.rpage = currentpage + rightcount;        //正常情况下的终点
+        // 2-point judgment
+        this.lpage = currentpage - leftcount;            // Normal start
+        this.rpage = currentpage + rightcount;        // Normal end
 
-        //页差=总页数和结束页的差
-        int topdiv = this.last - rpage;                //判断是否大于最大页数
+        // Page difference = difference between total pages and end page
+        int topdiv = this.last - rpage;                // Check if exceeds max page
 
         /***
-         * 起点页
-         * 1、页差<0  起点页=起点页+页差值
-         * 2、页差>=0 起点和终点判断
+         * Start page
+         * 1. If page difference < 0, start page = start page + page difference
+         * 2. If page difference >= 0, judge start and end pages
          */
         this.lpage = topdiv < 0 ? this.lpage + topdiv : this.lpage;
 
         /***
-         * 结束页
-         * 1、起点页<=0   结束页=|起点页|+1
-         * 2、起点页>0    结束页
+         * End page
+         * 1. If start page <= 0, end page = |start page| + 1
+         * 2. If start page > 0, end page
          */
         this.rpage = this.lpage <= 0 ? this.rpage + (this.lpage * -1) + 1 : this.rpage;
 
         /***
-         * 当起点页<=0  让起点页为第一页
-         * 否则不管
+         * If start page <= 0, set start page to first page
+         * Otherwise unchanged
          */
         this.lpage = this.lpage <= 0 ? 1 : this.lpage;
 
         /***
-         * 如果结束页>总页数   结束页=总页数
-         * 否则不管
+         * If end page > total pages, end page = total pages
+         * Otherwise unchanged
          */
         this.rpage = this.rpage > last ? this.last : this.rpage;
     }
