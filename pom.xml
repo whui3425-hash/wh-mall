@@ -17,7 +17,7 @@
     <groupId>com.wanghui</groupId>
     <artifactId>wanghui-vip-mall</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>gupaoedu-vip-mall</name>
+    <name>wanghui-vip-mall</name>
     <packaging>pom</packaging>
     <description>SpringCloud Alibaba 云商城</description>
 

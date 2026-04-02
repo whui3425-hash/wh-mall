@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>mall-service</artifactId>
-        <groupId>com.gupaoedu</groupId>
+        <groupId>com.wanghui</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -12,28 +12,28 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.gupaoedu</groupId>
+            <groupId>com.wanghui</groupId>
             <artifactId>mall-order-api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <!--goodsapi-->
         <dependency>
-            <groupId>com.gupaoedu</groupId>
+            <groupId>com.wanghui</groupId>
             <artifactId>mall-goods-api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <!--cart-->
         <dependency>
-            <groupId>com.gupaoedu</groupId>
+            <groupId>com.wanghui</groupId>
             <artifactId>mall-cart-api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
 
         <dependency>
-            <groupId>com.gupaoedu</groupId>
+            <groupId>com.wanghui</groupId>
             <artifactId>mall-pay-api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>

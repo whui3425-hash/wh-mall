@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>mall-service</artifactId>
-        <groupId>com.gupaoedu</groupId>
+        <groupId>com.wanghui</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -15,9 +15,30 @@
     <dependencies>
         <!--goods-api-->
         <dependency>
-            <groupId>com.gupaoedu</groupId>
+            <groupId>com.wanghui</groupId>
             <artifactId>mall-goods-api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <!--MyBatis Plus-->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.3.2</version>
+        </dependency>
+
+        <!--MySQL-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!--JSqlParser for MyBatis-Plus tenant plugin-->
+        <dependency>
+            <groupId>com.github.jsqlparser</groupId>
+            <artifactId>jsqlparser</artifactId>
+            <version>4.0</version>
         </dependency>
 
     </dependencies>

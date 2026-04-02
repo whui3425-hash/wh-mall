@@ -53,7 +53,7 @@ payconfig:
     #默认回调地址
     notifyUrl: http://2cw4969042.wicp.vip:50381/wx/result
     #证书存储路径
-    certPath: D:/alibaba/dev/shop/gupaoedu-vip-mall/mall-service/mall-pay-service/src/main/resources/apiclient_cert.p12
+    certPath: D:/alibaba/dev/shop/wanghui-vip-mall/mall-service/mall-pay-service/src/main/resources/apiclient_cert.p12
   #支付安全校验(验签)
   aes:
     #AES加密秘钥

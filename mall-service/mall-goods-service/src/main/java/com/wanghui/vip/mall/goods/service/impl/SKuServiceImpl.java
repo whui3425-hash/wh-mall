@@ -1,0 +1,95 @@
+package com.wanghui.vip.mall.goods.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wanghui.vip.mall.cart.model.Cart;
+import com.wanghui.vip.mall.goods.mapper.AdItemsMapper;
+import com.wanghui.vip.mall.goods.mapper.SkuMapper;
+import com.wanghui.vip.mall.goods.model.AdItems;
+import com.wanghui.vip.mall.goods.model.Sku;
+import com.wanghui.vip.mall.goods.service.SKuService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@CacheConfig(cacheNames = "ad-items-skus")
+@Service
+public class SKuServiceImpl extends ServiceImpl<SkuMapper,Sku> implements SKuService {
+
+    @Autowired
+    private AdItemsMapper adItemsMapper;
+
+    @Autowired
+    private SkuMapper skuMapper;
+
+    /***
+     * Inventory decrease
+     * @param carts
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void dcount(List<Cart> carts) {
+        for (Cart cart : carts) {
+            //Inventory decrease
+            int dcount = skuMapper.dcount(cart.getSkuId(), cart.getNum());
+            System.out.println("dcount:"+dcount);
+            if(dcount<=0){
+                throw new RuntimeException("Insufficient inventory!");
+            }
+        }
+    }
+
+    /***
+     * Query product list by promotion category ID
+     * @param id
+     * @return
+     * ad-items-skus::1
+     */
+    @Cacheable(key ="#id" )
+    @Override
+    public List<Sku> typeSkuItems(Integer id) {
+        //1. Query all list info under current category
+        QueryWrapper<AdItems> adItemsQueryWrapper = new QueryWrapper<AdItems>();
+        adItemsQueryWrapper.eq("type",id);
+        List<AdItems> adItems = adItemsMapper.selectList(adItemsQueryWrapper);
+
+        //2. Query product list info based on promotion list
+        List<String> skuids = adItems.stream().map(adItem->adItem.getSkuId()).collect(Collectors.toList());
+        return skuids==null || skuids.size()<=0? null : skuMapper.selectBatchIds(skuids);
+    }
+
+    /***
+     * Delete promotion data by category id
+     * @param id
+     * @return
+     */
+    @CacheEvict(key ="#id" )
+    @Override
+    public void delTypeSkuItems(Integer id) {}
+
+    /****
+     * Update cache
+     * @param id
+     * @return
+     */
+    @CachePut(key = "#id")
+    @Override
+    public List<Sku> updateTypeSkuItems(Integer id) {
+        //1. Query all list info under current category
+        QueryWrapper<AdItems> adItemsQueryWrapper = new QueryWrapper<AdItems>();
+        adItemsQueryWrapper.eq("type",id);
+        List<AdItems> adItems = adItemsMapper.selectList(adItemsQueryWrapper);
+
+        //2. Query product list info based on promotion list
+        List<String> skuids = adItems.stream().map(adItem->adItem.getSkuId()).collect(Collectors.toList());
+        return skuids==null || skuids.size()<=0? null : skuMapper.selectBatchIds(skuids);
+    }
+
+}
