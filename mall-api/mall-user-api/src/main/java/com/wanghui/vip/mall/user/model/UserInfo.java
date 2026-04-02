@@ -1,4 +1,4 @@
-﻿package com.wanghui.vip.mall.user.model;
+package com.wanghui.vip.mall.user.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -20,4 +20,3 @@ public class UserInfo {
     private Integer points;
     private String roles;
 }
-

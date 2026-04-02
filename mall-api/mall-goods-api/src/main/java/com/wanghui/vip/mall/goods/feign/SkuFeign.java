@@ -1,4 +1,4 @@
-﻿package com.wanghui.vip.mall.goods.feign;
+package com.wanghui.vip.mall.goods.feign;
 
 import com.wanghui.mall.util.RespResult;
 import com.wanghui.vip.mall.cart.model.Cart;
@@ -27,4 +27,3 @@ public interface SkuFeign {
     RespResult updateTypeItems(@RequestParam(value = "id")Integer id);
 
 }
-

@@ -1,7 +1,7 @@
 package com.wanghui.vip.mall.goods.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.gupaoedu.mall.util.RespResult;
+import com.wanghui.mall.util.RespResult;
 import com.wanghui.vip.mall.goods.model.Brand;
 import com.wanghui.vip.mall.goods.service.BrandService;
 import org.springframework.beans.factory.annotation.Autowired;

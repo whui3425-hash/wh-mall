@@ -1,6 +1,6 @@
 package com.wanghui.vip.mall.user.controller;
 
-import com.gupaoedu.mall.util.RespResult;
+import com.wanghui.mall.util.RespResult;
 import com.wanghui.vip.mall.user.model.Address;
 import com.wanghui.vip.mall.user.service.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;

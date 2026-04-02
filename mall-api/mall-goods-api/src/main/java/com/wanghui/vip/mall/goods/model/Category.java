@@ -1,4 +1,4 @@
-﻿package com.wanghui.vip.mall.goods.model;
+package com.wanghui.vip.mall.goods.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -21,4 +21,3 @@ public class Category implements Serializable {
     private Integer sort;
     private Integer parentId;
 }
-

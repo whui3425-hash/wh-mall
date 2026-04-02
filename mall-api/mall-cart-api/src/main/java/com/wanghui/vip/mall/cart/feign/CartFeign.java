@@ -1,4 +1,4 @@
-﻿package com.wanghui.vip.mall.cart.feign;
+package com.wanghui.vip.mall.cart.feign;
 
 import com.wanghui.mall.util.RespResult;
 import com.wanghui.vip.mall.cart.model.Cart;
@@ -18,4 +18,3 @@ public interface CartFeign {
     @PostMapping(value = "/cart/list")
     RespResult<List<Cart>> list(@RequestBody List<String> ids);
 }
-

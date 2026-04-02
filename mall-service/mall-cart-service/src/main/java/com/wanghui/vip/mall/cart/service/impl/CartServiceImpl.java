@@ -1,7 +1,7 @@
 package com.wanghui.vip.mall.cart.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.gupaoedu.mall.util.RespResult;
+import com.wanghui.mall.util.RespResult;
 import com.wanghui.vip.mall.cart.mapper.CartMapper;
 import com.wanghui.vip.mall.cart.model.Cart;
 import com.wanghui.vip.mall.cart.service.CartService;

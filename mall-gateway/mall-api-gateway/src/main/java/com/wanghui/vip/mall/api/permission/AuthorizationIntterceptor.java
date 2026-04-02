@@ -1,9 +1,9 @@
 package com.wanghui.vip.mall.api.permission;
 
-import com.gupaoedu.mall.util.JwtToken;
-import com.gupaoedu.mall.util.MD5;
+import com.wanghui.mall.util.JwtToken;
+import com.wanghui.mall.util.MD5;
 import com.wanghui.vip.mall.api.util.IpUtil;
-import com.gupaoedu.vip.mall.permission.model.Permission;
+import com.wanghui.vip.mall.permission.model.Permission;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;

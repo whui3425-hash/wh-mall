@@ -1,8 +1,6 @@
-﻿package com.wanghui.vip.mall.goods.model;
+package com.wanghui.vip.mall.goods.model;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,4 +18,3 @@ public class CategoryBrand {
     @TableField
     private Integer brandId;
 }
-

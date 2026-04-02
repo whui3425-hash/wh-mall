@@ -1,4 +1,4 @@
-﻿package com.wanghui.vip.mall.goods.model;
+package com.wanghui.vip.mall.goods.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -19,4 +19,3 @@ public class CategoryAttr {
     private Integer attrId;
 
 }
-

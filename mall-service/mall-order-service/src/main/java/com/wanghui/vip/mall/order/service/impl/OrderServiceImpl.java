@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.gupaoedu.mall.util.RespResult;
+import com.wanghui.mall.util.RespResult;
 import com.wanghui.vip.mall.cart.feign.CartFeign;
 import com.wanghui.vip.mall.cart.model.Cart;
 import com.wanghui.vip.mall.goods.feign.SkuFeign;

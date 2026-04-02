@@ -1,8 +1,8 @@
 package com.wanghui.vip.mall.user.controller;
 
-import com.gupaoedu.mall.util.JwtToken;
-import com.gupaoedu.mall.util.MD5;
-import com.gupaoedu.mall.util.RespResult;
+import com.wanghui.mall.util.JwtToken;
+import com.wanghui.mall.util.MD5;
+import com.wanghui.mall.util.RespResult;
 import com.wanghui.vip.mall.user.model.UserInfo;
 import com.wanghui.vip.mall.user.service.UserInfoService;
 import com.wanghui.vip.mall.util.IPUtils;

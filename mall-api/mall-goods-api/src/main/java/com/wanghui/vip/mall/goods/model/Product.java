@@ -1,4 +1,4 @@
-﻿package com.wanghui.vip.mall.goods.model;
+package com.wanghui.vip.mall.goods.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,4 +13,3 @@ public class Product {
     private Spu spu;
     private List<Sku> skus;
 }
-

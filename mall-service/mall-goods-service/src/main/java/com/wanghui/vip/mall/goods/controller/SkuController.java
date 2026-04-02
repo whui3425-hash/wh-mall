@@ -1,6 +1,6 @@
 package com.wanghui.vip.mall.goods.controller;
 
-import com.gupaoedu.mall.util.RespResult;
+import com.wanghui.mall.util.RespResult;
 import com.wanghui.vip.mall.cart.model.Cart;
 import com.wanghui.vip.mall.goods.model.Sku;
 import com.wanghui.vip.mall.goods.service.SKuService;

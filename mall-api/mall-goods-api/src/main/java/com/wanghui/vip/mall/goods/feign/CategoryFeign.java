@@ -1,4 +1,4 @@
-﻿package com.wanghui.vip.mall.goods.feign;
+package com.wanghui.vip.mall.goods.feign;
 
 import com.wanghui.mall.util.RespResult;
 import com.wanghui.vip.mall.goods.model.Category;
@@ -12,4 +12,3 @@ public interface CategoryFeign {
     @GetMapping(value = "/category/{id}")
     RespResult<Category> one(@PathVariable(value = "id")Integer id);
 }
-

@@ -1,6 +1,6 @@
 package com.wanghui.vip.mall.cart.controller;
 
-import com.gupaoedu.mall.util.RespResult;
+import com.wanghui.mall.util.RespResult;
 import com.wanghui.vip.mall.cart.model.Cart;
 import com.wanghui.vip.mall.cart.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;

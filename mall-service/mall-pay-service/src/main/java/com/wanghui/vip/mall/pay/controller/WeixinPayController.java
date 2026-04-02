@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.github.wxpay.sdk.WXPay;
 import com.github.wxpay.sdk.WXPayConstants;
 import com.github.wxpay.sdk.WXPayUtil;
-import com.gupaoedu.mall.util.*;
+import com.wanghui.mall.util.*;
 import com.wanghui.vip.mall.pay.model.PayLog;
 import com.wanghui.vip.mall.pay.service.WeixinPayService;
 import org.springframework.beans.factory.annotation.Autowired;

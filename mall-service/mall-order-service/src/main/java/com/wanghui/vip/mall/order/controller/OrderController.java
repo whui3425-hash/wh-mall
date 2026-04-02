@@ -1,8 +1,8 @@
 package com.wanghui.vip.mall.order.controller;
 
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
-import com.gupaoedu.mall.util.RespCode;
-import com.gupaoedu.mall.util.RespResult;
+import com.wanghui.mall.util.RespCode;
+import com.wanghui.mall.util.RespResult;
 import com.wanghui.vip.mall.order.model.Order;
 import com.wanghui.vip.mall.order.model.OrderRefund;
 import com.wanghui.vip.mall.order.service.OrderService;

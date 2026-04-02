@@ -1,6 +1,6 @@
 package com.wanghui.vip.mall.config;
 
-import com.gupaoedu.mall.util.Signature;
+import com.wanghui.mall.util.Signature;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

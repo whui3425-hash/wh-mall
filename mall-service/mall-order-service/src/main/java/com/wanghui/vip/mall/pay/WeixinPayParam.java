@@ -1,6 +1,6 @@
 package com.wanghui.vip.mall.pay;
 
-import com.gupaoedu.mall.util.Signature;
+import com.wanghui.mall.util.Signature;
 import com.wanghui.vip.mall.order.model.Order;
 import com.wanghui.vip.mall.order.model.OrderRefund;
 import com.wanghui.vip.mall.util.IPUtils;

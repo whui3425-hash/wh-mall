@@ -1,4 +1,4 @@
-﻿package com.wanghui.vip.mall.permission.model;
+package com.wanghui.vip.mall.permission.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -25,4 +25,3 @@ public class RoleInfo implements Serializable {
     @TableField(exist = false)
     private List<Permission> permissions;
 }
-

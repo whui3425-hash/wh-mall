@@ -1,4 +1,4 @@
-﻿package com.wanghui.vip.mall.goods.model;
+package com.wanghui.vip.mall.goods.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -26,4 +26,3 @@ public class Brand implements Serializable {
     @TableField(exist = false)
     private List<Category> categories;
 }
-

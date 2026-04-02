@@ -1,4 +1,4 @@
-﻿package com.wanghui.vip.mall.goods.feign;
+package com.wanghui.vip.mall.goods.feign;
 
 import com.wanghui.mall.util.RespResult;
 import com.wanghui.vip.mall.goods.model.Product;
@@ -14,4 +14,3 @@ public interface SpuFeign {
     @GetMapping(value = "/spu/product/{id}")
     RespResult<Product> one(@PathVariable(value = "id")String id);
 }
-

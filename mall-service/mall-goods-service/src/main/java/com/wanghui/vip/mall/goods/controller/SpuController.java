@@ -1,6 +1,6 @@
 package com.wanghui.vip.mall.goods.controller;
 
-import com.gupaoedu.mall.util.RespResult;
+import com.wanghui.mall.util.RespResult;
 import com.wanghui.vip.mall.goods.model.Product;
 import com.wanghui.vip.mall.goods.service.SpuService;
 import org.springframework.beans.factory.annotation.Autowired;

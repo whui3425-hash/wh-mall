@@ -1,4 +1,4 @@
-﻿package com.wanghui.vip.mall.pay.model;
+package com.wanghui.vip.mall.pay.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
