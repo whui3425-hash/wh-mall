@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { useTenantStore } from '../store/tenant.js'
 
 const request = axios.create({
   baseURL: '/api',
@@ -8,7 +9,8 @@ const request = axios.create({
 
 request.interceptors.request.use(
   (config) => {
-    const tenantId = localStorage.getItem('tenantId') || '1001'
+    const tenantStore = useTenantStore()
+    const tenantId = tenantStore.tenantId || '1001'
     if (tenantId) {
       config.headers['X-Tenant-Id'] = tenantId
     }
