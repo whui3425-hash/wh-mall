@@ -16,6 +16,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
 import javax.annotation.PostConstruct;
@@ -55,6 +58,32 @@ public class GatewayConfiguration {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public GlobalFilter sentinelGatewayFilter() {
         return new SentinelGatewayFilter();
+    }
+
+    /**
+     * Global CORS configuration for frontend SaaS access
+     * Allows all origins, methods, headers including X-Tenant-Id
+     * @return
+     */
+    @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    public CorsWebFilter corsWebFilter() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        // Allow all origins
+        corsConfig.addAllowedOriginPattern("*");
+        // Allow all methods
+        corsConfig.addAllowedMethod("*");
+        // Allow all headers including X-Tenant-Id
+        corsConfig.addAllowedHeader("*");
+        // Allow credentials (cookies)
+        corsConfig.setAllowCredentials(true);
+        // Max age for preflight cache
+        corsConfig.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
+
+        return new CorsWebFilter(source);
     }
 
 

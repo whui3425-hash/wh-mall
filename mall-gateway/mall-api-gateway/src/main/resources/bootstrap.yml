@@ -1,12 +1,12 @@
 server:
-  port: 9001
+  port: 8080
 spring:
   application:
     name: mall-gateway
   cloud:
     sentinel:
       transport:
-        #服务本地端口，实现当前服务和Sentinel控制台通信的端口，推送规则
+        # Sentinel communication port
         port: 8719
         dashboard: 192.168.31.101:8858
     nacos:
@@ -16,42 +16,52 @@ spring:
         username: nacos
         password: nacos
       discovery:
-        #Nacos的注册地址
+        # Nacos discovery address
         server-addr: 192.168.31.101:8848
         username: nacos
         password: nacos
     gateway:
+      # Enable dynamic service discovery locator
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
       routes:
-        #购物车
-        - id: cart_route
+        # Cart service route
+        - id: mall-cart-route
           uri: lb://mall-cart
           predicates:
-            - Path=/mall/cart/**
+            - Path=/api/cart/**
           filters:
             - StripPrefix=1
-        #用户服务
-        - id: user_route
-          uri: lb://mall-user
+        # Order service route
+        - id: mall-order-route
+          uri: lb://mall-order
           predicates:
-            - Path=/mall/address/**,/mall/user/info/**
+            - Path=/api/order/**
           filters:
             - StripPrefix=1
-        #商品服务
-        - id: goods_route
+        # Goods service route
+        - id: mall-goods-route
           uri: lb://mall-goods
           predicates:
-            - Path=/mall/brand/**,/mall/category/**,/mall/skuAttribute/**,/mall/sku/**,/mall/spu/**
+            - Path=/api/goods/**
           filters:
             - StripPrefix=1
-            #指定过滤器
-            #- name: RequestRateLimiter
-            #  args:
-            #    #指定当前限流标识 IP/URI
-            #    key-resolver: '#{@ipKeyResolver}'
-            #    #速率限流值
-            #    redis-rate-limiter.replenishRate: 1
-            #    #能容纳的并发流量总数
-            #    redis-rate-limiter.burstCapacity: 2
+        # User service route
+        - id: mall-user-route
+          uri: lb://mall-user
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - StripPrefix=1
+        # Pay service route
+        - id: mall-pay-route
+          uri: lb://mall-pay
+          predicates:
+            - Path=/api/pay/**
+          filters:
+            - StripPrefix=1
 
 logging:
   pattern:
