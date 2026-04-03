@@ -32,7 +32,7 @@ feign:
 # ====================MybatisPlus====================
 mybatis-plus:
   mapper-locations: mapper/*.xml
-  type-aliases-package: com.gupaoedu.vip.mall.*.model
+  type-aliases-package: com.wanghui.vip.mall.*.model
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

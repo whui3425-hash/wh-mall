@@ -23,7 +23,7 @@ spring:
 # ====================MybatisPlus====================
 mybatis-plus:
   mapper-locations: mapper/*.xml
-  type-aliases-package: com.gupaoedu.vip.mall.*.model
+  type-aliases-package: com.wanghuiedu.vip.mall.*.model
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
