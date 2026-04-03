@@ -70,7 +70,7 @@ public class GatewayConfiguration {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
         // Allow all origins
-        corsConfig.addAllowedOriginPattern("*");
+        corsConfig.addAllowedOrigin("*");
         // Allow all methods
         corsConfig.addAllowedMethod("*");
         // Allow all headers including X-Tenant-Id
