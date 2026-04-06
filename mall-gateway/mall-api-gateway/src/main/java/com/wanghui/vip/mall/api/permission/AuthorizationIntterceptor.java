@@ -83,31 +83,14 @@ public class AuthorizationIntterceptor {
      * Whether interception is required
      * true: interception required
      * false: interception not required
+     * 
+     * MVP Phase: Simplified - return false to bypass permission check
+     * In production, should query permission from database
      */
     public Boolean isIntercept(ServerWebExchange exchange){
-        ServerHttpRequest request = exchange.getRequest();
-        // Get URI /cart/list
-        String uri = request.getURI().getPath();
-        // Request method GET/POST/*
-        String method = request.getMethodValue();
-        // Service name
-        URI routerUri = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR);
-        String servicename = routerUri.getHost();
-
-        List<Permission> permissionsMatch0 = null;
-        if(permissionsMatch0!=null){
-
-        }
-        // Wildcard matching
-        Permission permission = match0(permissionsMatch0, uri, method, servicename);
-        // If permission==null, execute wildcard matching
-        if(permission==null){
-            // Wildcard matching
-
-            // If wildcard matching is also empty, no permission check needed
-            return false;
-        }
-        return true;
+        // MVP: Temporarily disable permission check
+        // TODO: Implement real permission query from database in production
+        return false;
     }
 
 
