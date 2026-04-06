@@ -1,7 +1,9 @@
 package com.wanghui.vip.mall.order.config;
 
+import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import com.wanghui.vip.mall.order.config.tenant.TenantContextHolder;
 import net.sf.jsqlparser.expression.Expression;
@@ -17,14 +19,14 @@ import org.springframework.context.annotation.Configuration;
 public class MyBatisPlusTenantConfig {
 
     /**
-     * MyBatis-Plus interceptor with tenant line inner interceptor
-     * Automatically adds tenant_id filter to all queries
+     * MyBatis-Plus interceptor with tenant line and pagination inner interceptors
+     * Automatically adds tenant_id filter and pagination support to all queries
      */
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
 
-        // Add tenant line interceptor
+        // Add tenant line interceptor for SaaS data isolation
         interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
 
             @Override
@@ -47,6 +49,9 @@ public class MyBatisPlusTenantConfig {
                 return false;
             }
         }));
+
+        // Add pagination interceptor for MySQL
+        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
 
         return interceptor;
     }

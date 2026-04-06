@@ -1,21 +1,13 @@
 package com.wanghui.vip.mall.config;
 
-import com.baomidou.mybatisplus.annotation.DbType;
-import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Service dependency configuration
+ * Note: MyBatis-Plus plugins are now configured in each microservice
+ */
 @Configuration
 public class StartConfig {
-
-    /****
-     * Pagination interceptor
-     */
-    @Bean
-    public PaginationInterceptor paginationInterceptor(){
-        PaginationInterceptor pageInterceptor = new PaginationInterceptor();
-        // Set database type
-        pageInterceptor.setDbType(DbType.MYSQL);
-        return pageInterceptor;
-    }
+    // Pagination and tenant plugins are now configured per-service
+    // to avoid Bean conflicts and support SaaS multi-tenant isolation
 }
