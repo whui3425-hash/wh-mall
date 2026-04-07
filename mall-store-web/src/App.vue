@@ -1,29 +1,44 @@
 <template>
-  <div class="mall-store" :style="{ '--primary-color': themeColor }">
+  <div class="mall-store">
     <!-- Header / Navigation Bar -->
     <header class="store-header" :style="{ background: themeColor }">
       <div class="header-content">
         <div class="store-info">
-          <el-icon :size="28" color="#fff"><Shop /></el-icon>
-          <h1 class="store-name">{{ storeName }}</h1>
-          <el-tag effect="dark" type="warning" size="small" class="tenant-tag">
-            ID: {{ tenantId }}
-          </el-tag>
+          <el-icon :size="32" color="#fff"><Shop /></el-icon>
+          <div class="store-title">
+            <h1 class="store-name">{{ storeName }}</h1>
+            <span class="store-slogan">{{ storeSlogan }}</span>
+          </div>
         </div>
         <div class="header-actions">
-          <el-icon :size="24" color="#fff" class="action-icon"><Search /></el-icon>
-          <el-icon :size="24" color="#fff" class="action-icon"><ShoppingCart /></el-icon>
-          <el-icon :size="24" color="#fff" class="action-icon"><User /></el-icon>
+          <div class="search-box">
+            <el-input 
+              placeholder="Search products..." 
+              :suffix-icon="Search"
+              class="search-input"
+            />
+          </div>
+          <el-badge :value="3" class="action-badge">
+            <el-icon :size="26" color="#fff" class="action-icon"><ShoppingCart /></el-icon>
+          </el-badge>
+          <el-icon :size="26" color="#fff" class="action-icon"><User /></el-icon>
         </div>
       </div>
     </header>
 
-    <!-- Banner -->
-    <section class="banner-section">
-      <div class="banner-content" :style="{ background: `linear-gradient(135deg, ${themeColor} 0%, ${themeColor}99 100%)` }">
-        <h2 class="banner-title">Welcome to {{ storeName }}</h2>
-        <p class="banner-subtitle">Discover amazing products just for you</p>
-        <el-button type="warning" size="large" round class="shop-now-btn">
+    <!-- Hero Banner -->
+    <section class="hero-section" :style="{ background: bannerGradient }">
+      <div class="hero-content">
+        <h2 class="hero-title">{{ heroTitle }}</h2>
+        <p class="hero-subtitle">{{ heroSubtitle }}</p>
+        <el-button 
+          :color="themeColor" 
+          size="large" 
+          round 
+          class="cta-button"
+          @click="scrollToProducts"
+        >
+          <el-icon><ShoppingBag /></el-icon>
           Shop Now
         </el-button>
       </div>
@@ -31,141 +46,246 @@
 
     <!-- Category Tags -->
     <section class="category-section">
-      <div class="category-list">
-        <el-tag
-          v-for="cat in categories"
+      <div class="category-container">
+        <div 
+          v-for="cat in categories" 
           :key="cat.id"
-          :type="cat.type"
-          effect="dark"
-          size="large"
-          class="category-tag"
+          class="category-item"
+          :class="{ active: activeCategory === cat.id }"
+          @click="activeCategory = cat.id"
         >
-          {{ cat.name }}
-        </el-tag>
+          <el-icon :size="20"><component :is="cat.icon" /></el-icon>
+          <span>{{ cat.name }}</span>
+        </div>
       </div>
     </section>
 
-    <!-- Product / Brand List -->
-    <main class="product-section">
-      <h3 class="section-title">
-        <el-icon><Goods /></el-icon>
-        Hot Products
-      </h3>
+    <!-- Product Grid -->
+    <main class="products-section" id="products">
+      <div class="section-header">
+        <h3 class="section-title">
+          <el-icon><StarFilled /></el-icon>
+          Featured Products
+        </h3>
+        <el-tag :type="tenantId === '1001' ? 'primary' : 'danger'" effect="dark" round>
+          {{ tenantId === '1001' ? 'Tech Store' : 'Beauty Store' }}
+        </el-tag>
+      </div>
       
+      <!-- Loading State -->
       <div v-if="loading" class="loading-container">
-        <el-skeleton :rows="5" animated />
+        <el-row :gutter="20">
+          <el-col :xs="12" :sm="12" :md="8" :lg="6" v-for="i in 8" :key="i">
+            <el-skeleton animated>
+              <template #template>
+                <el-skeleton-item variant="image" style="width: 100%; height: 200px; border-radius: 12px;" />
+                <div style="padding: 14px 0;">
+                  <el-skeleton-item variant="text" style="width: 50%; margin-bottom: 8px;" />
+                  <el-skeleton-item variant="text" style="width: 30%;" />
+                </div>
+              </template>
+            </el-skeleton>
+          </el-col>
+        </el-row>
       </div>
       
+      <!-- Empty State -->
       <div v-else-if="products.length === 0" class="empty-container">
-        <el-empty description="No products available" />
+        <el-empty description="No products available at the moment" :image-size="200">
+          <el-button type="primary" @click="fetchProducts">Refresh</el-button>
+        </el-empty>
       </div>
       
-      <div v-else class="product-grid">
-        <div
-          v-for="product in products"
+      <!-- Product Grid -->
+      <el-row v-else :gutter="20" class="product-row">
+        <el-col 
+          :xs="12" 
+          :sm="12" 
+          :md="8" 
+          :lg="6" 
+          v-for="product in products" 
           :key="product.id"
-          class="product-card"
-          @click="handleProductClick(product)"
+          class="product-col"
         >
-          <div class="product-image" :style="{ background: getProductColor(product.initial) }">
-            <el-icon :size="48" color="#fff"><Goods /></el-icon>
-            <span class="initial-badge">{{ product.initial }}</span>
-          </div>
-          <div class="product-info">
-            <h4 class="product-name">{{ product.name }}</h4>
-            <div class="product-meta">
-              <el-tag size="small" effect="light" :type="tenantId === '1001' ? 'primary' : 'danger'">
-                {{ tenantId === '1001' ? 'Tech' : 'Beauty' }}
-              </el-tag>
-              <span class="sort-order">Sort: {{ product.sort }}</span>
+          <el-card class="product-card" shadow="hover" @click="handleProductClick(product)">
+            <div class="product-image-wrapper">
+              <el-image
+                :src="product.image || getDefaultImage(product.id)"
+                :alt="product.name"
+                fit="cover"
+                lazy
+                class="product-image"
+              >
+                <template #placeholder>
+                  <div class="image-placeholder">
+                    <el-icon :size="40" :color="themeColor"><Picture /></el-icon>
+                  </div>
+                </template>
+                <template #error>
+                  <div class="image-error">
+                    <el-icon :size="40"><Picture /></el-icon>
+                  </div>
+                </template>
+              </el-image>
+              <div class="product-badge" v-if="product.sort <= 3">HOT</div>
             </div>
-            <p v-if="product.tenantId" class="tenant-info">
-              Tenant: {{ product.tenantId }}
-            </p>
-          </div>
-        </div>
-      </div>
+            
+            <div class="product-details">
+              <h4 class="product-name" :title="product.name">{{ product.name }}</h4>
+              <div class="product-tags">
+                <el-tag size="small" :type="tenantId === '1001' ? 'primary' : 'danger'" effect="light">
+                  {{ tenantId === '1001' ? '数码' : '美妆' }}
+                </el-tag>
+                <el-tag size="small" type="warning" effect="plain" v-if="product.sort <= 3">
+                  热销
+                </el-tag>
+              </div>
+              <div class="product-price-row">
+                <span class="product-price">${{ (product.sort * 99 + 199) }}</span>
+                <span class="product-original">${{ (product.sort * 99 + 399) }}</span>
+              </div>
+              <div class="product-actions">
+                <el-button 
+                  :color="themeColor" 
+                  size="small" 
+                  round
+                  class="buy-button"
+                >
+                  <el-icon><ShoppingCart /></el-icon>
+                  Add to Cart
+                </el-button>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
     </main>
 
     <!-- Footer -->
     <footer class="store-footer">
-      <p>© 2024 {{ storeName }} - Powered by WH-SaaS Mall</p>
-      <p class="domain-info">Domain: {{ currentDomain }}</p>
+      <div class="footer-content">
+        <div class="footer-brand">
+          <el-icon :size="24" :color="themeColor"><Shop /></el-icon>
+          <span class="footer-name">{{ storeName }}</span>
+        </div>
+        <p class="footer-copyright">© 2024 {{ storeName }} - SaaS Multi-Tenant Demo</p>
+        <p class="footer-domain">Domain: {{ currentDomain }} | Tenant: {{ tenantId }}</p>
+      </div>
     </footer>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { post } from './utils/request.js'
-import { Shop, Search, ShoppingCart, User, Goods } from '@element-plus/icons-vue'
+import axios from 'axios'
+import { 
+  Shop, Search, ShoppingCart, User, ShoppingBag, 
+  StarFilled, Picture, Cellphone, Lipstick, Watch, Headset
+} from '@element-plus/icons-vue'
 
-// Reactive data
-const storeName = ref('Store')
-const tenantId = ref('1001')
-const themeColor = ref('#409EFF')
+// Theme configuration based on domain
+const themeConfig = {
+  shop1: {
+    tenantId: '1001',
+    storeName: '极客数码专营店',
+    storeSlogan: 'Shop1 · 科技改变生活',
+    themeColor: '#1E3A5F', // Deep tech blue
+    accentColor: '#00D4FF', // Cyan accent
+    heroTitle: '探索科技新境界',
+    heroSubtitle: '精选全球顶尖数码装备，让科技更有温度',
+    categories: [
+      { id: 1, name: 'All', icon: 'StarFilled' },
+      { id: 2, name: 'Phones', icon: 'Cellphone' },
+      { id: 3, name: 'Audio', icon: 'Headset' },
+      { id: 4, name: 'Wearables', icon: 'Watch' }
+    ]
+  },
+  shop2: {
+    tenantId: '1002',
+    storeName: '星颜美妆甄选',
+    storeSlogan: 'Shop2 · 美丽由此绽放',
+    themeColor: '#D4237A', // Rose pink
+    accentColor: '#FFB6C1', // Light pink
+    heroTitle: '发现最美的自己',
+    heroSubtitle: '甄选全球美妆好物，绽放独特魅力',
+    categories: [
+      { id: 1, name: 'All', icon: 'StarFilled' },
+      { id: 2, name: 'Skincare', icon: 'Lipstick' },
+      { id: 3, name: 'Makeup', icon: 'Lipstick' },
+      { id: 4, name: 'Fragrance', icon: 'StarFilled' }
+    ]
+  }
+}
+
+// Reactive state
 const currentDomain = ref('')
+const tenantId = ref('1001')
+const themeColor = ref('#1E3A5F')
+const storeName = ref('极客数码专营店')
+const storeSlogan = ref('Shop1 · 科技改变生活')
+const heroTitle = ref('探索科技新境界')
+const heroSubtitle = ref('精选全球顶尖数码装备，让科技更有温度')
+const categories = ref(themeConfig.shop1.categories)
+const activeCategory = ref(1)
 const products = ref([])
 const loading = ref(true)
 
-const categories = ref([
-  { id: 1, name: 'All', type: 'primary' },
-  { id: 2, name: 'Hot Sale', type: 'danger' },
-  { id: 3, name: 'New Arrival', type: 'success' },
-  { id: 4, name: 'Discount', type: 'warning' }
-])
+// Computed
+const bannerGradient = computed(() => {
+  const accent = tenantId.value === '1001' ? '#00D4FF' : '#FFB6C1'
+  return `linear-gradient(135deg, ${themeColor.value} 0%, ${accent} 100%)`
+})
 
-// Get theme config based on domain
-const getThemeConfig = (hostname) => {
+const axiosInstance = axios.create({
+  baseURL: '/api',
+  timeout: 10000
+})
+
+// Default images for different products
+const getDefaultImage = (id) => {
+  const images = tenantId.value === '1001' ? [
+    'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&q=80',
+    'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=500&q=80',
+    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80',
+    'https://images.unsplash.com/photo-1546868871-7041f3107145?w=500&q=80'
+  ] : [
+    'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&q=80',
+    'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=500&q=80',
+    'https://images.unsplash.com/photo-1595225476474-87563907a212?w=500&q=80',
+    'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&q=80'
+  ]
+  return images[(id - 1) % images.length]
+}
+
+// Resolve theme from domain
+const resolveTheme = () => {
+  const hostname = window.location.hostname.toLowerCase()
+  currentDomain.value = hostname
+  
   if (hostname.includes('shop1')) {
-    return {
-      tenantId: '1001',
-      storeName: 'Shop A (科技专营)',
-      themeColor: '#409EFF', // Blue
-      category: 'Tech'
-    }
+    return themeConfig.shop1
   } else if (hostname.includes('shop2')) {
-    return {
-      tenantId: '1002',
-      storeName: 'Shop B (美妆严选)',
-      themeColor: '#F56C6C', // Red
-      category: 'Beauty'
-    }
+    return themeConfig.shop2
   }
-  // Default
-  return {
-    tenantId: '1001',
-    storeName: 'WH-SaaS Mall',
-    themeColor: '#409EFF',
-    category: 'Default'
-  }
+  return themeConfig.shop1
 }
 
-// Generate product card color
-const brandColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dfe6e9', '#74b9ff', '#a29bfe']
-
-const getProductColor = (initial) => {
-  const index = initial ? initial.charCodeAt(0) % brandColors.length : 0
-  return brandColors[index]
-}
-
-// Fetch brand/product data from backend
+// Fetch products from backend
 const fetchProducts = async () => {
   loading.value = true
   try {
-    // Call real backend API: POST /api/goods/brand/search/1/10
-    const res = await post('/goods/brand/search/1/10', {})
-    if (res.code === 200 && res.data) {
-      products.value = res.data.records || []
-      ElMessage.success(`Loaded ${products.value.length} products from tenant ${tenantId.value}`)
+    // Gateway will inject X-Tenant-Id based on Origin domain
+    const res = await axiosInstance.post('/goods/brand/search/1/10', {})
+    if (res.data && res.data.code === 200 && res.data.data) {
+      products.value = res.data.data.records || []
+      ElMessage.success(`Loaded ${products.value.length} products`)
     } else {
-      // Fallback to mock data
       useMockData()
     }
   } catch (error) {
     console.error('API Error:', error)
-    ElMessage.warning('Using mock data - API not available')
+    ElMessage.warning('Using demo data')
     useMockData()
   } finally {
     loading.value = false
@@ -174,37 +294,47 @@ const fetchProducts = async () => {
 
 // Mock data fallback
 const useMockData = () => {
+  const isTech = tenantId.value === '1001'
   products.value = [
-    { id: 1, name: 'iPhone 15 Pro Max', initial: 'A', sort: 1, tenantId: tenantId.value },
-    { id: 2, name: 'Huawei Mate 60 Pro', initial: 'H', sort: 2, tenantId: tenantId.value },
-    { id: 3, name: 'Xiaomi 14 Pro', initial: 'X', sort: 3, tenantId: tenantId.value },
-    { id: 4, name: 'Samsung Galaxy S24', initial: 'S', sort: 4, tenantId: tenantId.value }
+    { id: 1, name: isTech ? 'iPhone 15 Pro Max' : 'Estée Lauder Advanced Night Repair', sort: 1 },
+    { id: 2, name: isTech ? 'MacBook Pro M3' : 'SK-II Facial Treatment Essence', sort: 2 },
+    { id: 3, name: isTech ? 'AirPods Pro 2' : 'YSL Rouge Volupté Shine', sort: 3 },
+    { id: 4, name: isTech ? 'Sony WH-1000XM5' : 'Dior Sauvage Eau de Toilette', sort: 4 },
+    { id: 5, name: isTech ? 'iPad Pro 12.9' : 'Chanel Coco Mademoiselle', sort: 5 },
+    { id: 6, name: isTech ? 'Apple Watch Ultra 2' : 'Lancôme Advanced Génifique', sort: 6 },
+    { id: 7, name: isTech ? 'Canon EOS R6 Mark II' : 'Tom Ford Black Orchid', sort: 7 },
+    { id: 8, name: isTech ? 'DJI Mavic 3 Pro' : 'La Mer Crème de la Mer', sort: 8 }
   ]
 }
 
 // Handle product click
 const handleProductClick = (product) => {
-  ElMessage.info(`Selected: ${product.name}`)
+  ElMessage.info(`Viewing: ${product.name}`)
 }
 
-// Initialize on mount
+// Scroll to products section
+const scrollToProducts = () => {
+  document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })
+}
+
+// Initialize
 onMounted(() => {
-  const hostname = window.location.hostname
-  currentDomain.value = hostname
+  const theme = resolveTheme()
   
-  // Apply theme based on domain
-  const config = getThemeConfig(hostname)
-  tenantId.value = config.tenantId
-  storeName.value = config.storeName
-  themeColor.value = config.themeColor
+  tenantId.value = theme.tenantId
+  themeColor.value = theme.themeColor
+  storeName.value = theme.storeName
+  storeSlogan.value = theme.storeSlogan
+  heroTitle.value = theme.heroTitle
+  heroSubtitle.value = theme.heroSubtitle
+  categories.value = theme.categories
   
-  // Apply CSS variable for Element Plus
-  document.documentElement.style.setProperty('--el-color-primary', config.themeColor)
+  // Apply Element Plus primary color
+  document.documentElement.style.setProperty('--el-color-primary', theme.themeColor)
   
-  console.log(`[Store] Domain: ${hostname}`)
-  console.log(`[Store] Tenant: ${config.tenantId} | Theme: ${config.themeColor}`)
+  console.log(`[Store] Domain: ${currentDomain.value}`)
+  console.log(`[Store] Tenant: ${theme.tenantId}`)
   
-  // Fetch real data from backend
   fetchProducts()
 })
 </script>
@@ -212,18 +342,21 @@ onMounted(() => {
 <style scoped>
 .mall-store {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: #f8f9fa;
 }
 
-/* Header */
+/* Header Styles */
 .store-header {
-  padding: 0 20px;
-  height: 60px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 0 24px;
+  height: 70px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
 }
 
 .header-content {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   height: 100%;
   display: flex;
@@ -234,230 +367,386 @@ onMounted(() => {
 .store-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+}
+
+.store-title {
+  display: flex;
+  flex-direction: column;
 }
 
 .store-name {
   color: #fff;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
   margin: 0;
+  letter-spacing: 0.5px;
 }
 
-.tenant-tag {
-  background: rgba(255, 255, 255, 0.2) !important;
-  border: none !important;
+.store-slogan {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  margin-top: 2px;
 }
 
 .header-actions {
   display: flex;
-  gap: 20px;
+  align-items: center;
+  gap: 24px;
+}
+
+.search-box {
+  width: 300px;
+}
+
+.search-input :deep(.el-input__wrapper) {
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.search-input :deep(.el-input__inner) {
+  color: #fff;
+}
+
+.search-input :deep(.el-input__inner::placeholder) {
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .action-icon {
   cursor: pointer;
-  transition: opacity 0.3s;
+  transition: transform 0.3s, opacity 0.3s;
 }
 
 .action-icon:hover {
-  opacity: 0.7;
+  transform: scale(1.1);
+  opacity: 0.8;
 }
 
-/* Banner */
-.banner-section {
-  padding: 20px;
-}
-
-.banner-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 60px 40px;
-  border-radius: 16px;
+/* Hero Section */
+.hero-section {
+  padding: 80px 24px;
   text-align: center;
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  color: #fff;
+  font-size: 48px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 18px;
+  margin-bottom: 32px;
+}
+
+.cta-button {
+  font-weight: 600;
+  padding: 14px 40px;
+  font-size: 16px;
+}
+
+.cta-button :deep(.el-icon) {
+  margin-right: 8px;
+}
+
+/* Category Section */
+.category-section {
+  padding: 24px;
+  background: #fff;
+  border-bottom: 1px solid #e4e7ed;
+  position: sticky;
+  top: 70px;
+  z-index: 99;
+}
+
+.category-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.category-container::-webkit-scrollbar {
+  display: none;
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+  color: #606266;
+  background: #f4f4f5;
+}
+
+.category-item:hover {
+  background: #e9e9eb;
+}
+
+.category-item.active {
+  background: v-bind(themeColor);
   color: #fff;
 }
 
-.banner-title {
-  font-size: 36px;
-  font-weight: 700;
-  margin-bottom: 16px;
-}
-
-.banner-subtitle {
-  font-size: 18px;
-  opacity: 0.9;
-  margin-bottom: 24px;
-}
-
-.shop-now-btn {
-  font-weight: 600;
-  padding: 12px 32px;
-}
-
-/* Categories */
-.category-section {
-  padding: 0 20px 20px;
-}
-
-.category-list {
-  max-width: 1200px;
+/* Products Section */
+.products-section {
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.section-header {
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.category-tag {
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.category-tag:hover {
-  transform: translateY(-2px);
-}
-
-/* Product Section */
-.product-section {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px 40px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
 }
 
 .section-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #303133;
-  margin-bottom: 24px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  margin: 0;
 }
 
 .loading-container {
-  padding: 40px;
-  background: #fff;
-  border-radius: 12px;
+  margin: 40px 0;
 }
 
 .empty-container {
-  padding: 60px;
-  background: #fff;
-  border-radius: 12px;
+  padding: 80px 0;
+  text-align: center;
 }
 
 /* Product Grid */
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+.product-row {
+  margin: 0 !important;
+}
+
+.product-col {
+  margin-bottom: 24px;
 }
 
 .product-card {
-  background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  border: none;
+  background: #fff;
 }
 
 .product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+.product-card :deep(.el-card__body) {
+  padding: 0;
+}
+
+.product-image-wrapper {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
 }
 
 .product-image {
-  height: 180px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+.image-placeholder,
+.image-error {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  background: #f5f7fa;
 }
 
-.initial-badge {
+.product-badge {
   position: absolute;
   top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  left: 12px;
+  background: #ff4757;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
   font-weight: 600;
-  color: #606266;
 }
 
-.product-info {
+.product-details {
   padding: 16px;
 }
 
 .product-name {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: #1a1a1a;
   margin: 0 0 12px 0;
-  white-space: nowrap;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  height: 42px;
 }
 
-.product-meta {
+.product-tags {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
-.sort-order {
-  font-size: 13px;
-  color: #909399;
+.product-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.tenant-info {
-  font-size: 12px;
+.product-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ff4757;
+}
+
+.product-original {
+  font-size: 14px;
   color: #909399;
-  margin: 0;
+  text-decoration: line-through;
+}
+
+.product-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.buy-button {
+  width: 100%;
+  font-weight: 600;
 }
 
 /* Footer */
 .store-footer {
+  background: #1a1a1a;
+  color: #fff;
+  padding: 40px 24px;
   text-align: center;
-  padding: 40px 20px;
-  background: #fff;
-  border-top: 1px solid #e4e7ed;
-  color: #606266;
 }
 
-.domain-info {
-  font-size: 13px;
-  color: #909399;
-  margin-top: 8px;
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.footer-name {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.footer-copyright {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.footer-domain {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 12px;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
+  .store-header {
+    padding: 0 16px;
+    height: 60px;
+  }
+  
   .store-name {
-    font-size: 16px;
+    font-size: 18px;
   }
   
-  .banner-title {
-    font-size: 24px;
+  .store-slogan {
+    display: none;
   }
   
-  .banner-subtitle {
+  .search-box {
+    display: none;
+  }
+  
+  .hero-section {
+    padding: 40px 16px;
+  }
+  
+  .hero-title {
+    font-size: 28px;
+  }
+  
+  .hero-subtitle {
     font-size: 14px;
   }
   
-  .product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px;
+  .category-section {
+    padding: 16px;
+    top: 60px;
   }
   
-  .product-image {
-    height: 140px;
+  .category-item {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  .products-section {
+    padding: 24px 16px;
+  }
+  
+  .section-title {
+    font-size: 20px;
+  }
+  
+  .product-image-wrapper {
+    height: 160px;
+  }
+  
+  .product-price {
+    font-size: 18px;
   }
 }
 </style>
