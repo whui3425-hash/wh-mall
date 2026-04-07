@@ -21,7 +21,30 @@
           <el-badge :value="3" class="action-badge">
             <el-icon :size="26" color="#fff" class="action-icon"><ShoppingCart /></el-icon>
           </el-badge>
-          <el-icon :size="26" color="#fff" class="action-icon"><User /></el-icon>
+          
+          <!-- 用户登录状态区域 -->
+          <div v-if="isLoggedIn" class="user-info">
+            <el-dropdown @command="handleUserCommand">
+              <span class="user-name" :style="{ color: '#fff' }">
+                {{ currentUsername }}
+                <el-icon><ArrowDown /></el-icon>
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+          <el-icon 
+            v-else 
+            :size="26" 
+            color="#fff" 
+            class="action-icon"
+            @click="showLoginDialog = true"
+          >
+            <User />
+          </el-icon>
         </div>
       </div>
     </header>
@@ -172,6 +195,61 @@
         <p class="footer-domain">Domain: {{ currentDomain }} | Tenant: {{ tenantId }}</p>
       </div>
     </footer>
+
+    <!-- ================== 买家登录弹窗 ================== -->
+    <el-dialog
+      v-model="showLoginDialog"
+      title="买家登录"
+      width="400px"
+      :close-on-click-modal="false"
+      center
+    >
+      <el-form 
+        :model="loginForm" 
+        :rules="loginRules"
+        ref="loginFormRef"
+        label-position="top"
+      >
+        <el-form-item label="用户名" prop="username">
+          <el-input 
+            v-model="loginForm.username" 
+            placeholder="请输入用户名"
+            prefix-icon="User"
+            @keyup.enter="handleLogin"
+          />
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input 
+            v-model="loginForm.password" 
+            type="password" 
+            placeholder="请输入密码"
+            prefix-icon="Lock"
+            show-password
+            @keyup.enter="handleLogin"
+          />
+        </el-form-item>
+      </el-form>
+      
+      <div class="login-tips">
+        <p>测试账号：</p>
+        <p>租户 1001: zhangsan / 123456, lisi / 123456</p>
+        <p>租户 1002: wangwu / 123456, zhaoliu / 123456</p>
+      </div>
+      
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showLoginDialog = false">取消</el-button>
+          <el-button 
+            type="primary" 
+            @click="handleLogin"
+            :loading="loginLoading"
+            :color="themeColor"
+          >
+            登录
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -181,7 +259,8 @@ import { ElMessage } from 'element-plus'
 import { post } from '@/utils/request'
 import {
   Shop, Search, ShoppingCart, User, ShoppingBag,
-  StarFilled, Picture, Cellphone, Brush, Watch, Headset
+  StarFilled, Picture, Cellphone, Brush, Watch, Headset,
+  ArrowDown, Lock
 } from '@element-plus/icons-vue'
 
 // Theme configuration based on domain
@@ -230,6 +309,29 @@ const categories = ref(themeConfig.shop1.categories)
 const activeCategory = ref(1)
 const products = ref([])
 const loading = ref(true)
+
+// ================== 登录相关状态 ==================
+const showLoginDialog = ref(false)          // 控制登录弹窗显示
+const loginLoading = ref(false)             // 登录按钮加载状态
+const isLoggedIn = ref(false)               // 是否已登录
+const currentUsername = ref('')             // 当前登录用户名
+const loginFormRef = ref(null)              // 表单引用
+
+// 登录表单数据
+const loginForm = ref({
+  username: '',
+  password: ''
+})
+
+// 登录表单校验规则
+const loginRules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' }
+  ]
+}
 
 // Computed
 const bannerGradient = computed(() => {
@@ -313,6 +415,105 @@ const scrollToProducts = () => {
   document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })
 }
 
+// ================== 登录相关方法 ==================
+
+/**
+ * 检查本地登录状态
+ * 【核心】如果未登录（无 buyer_token），自动弹出登录弹窗
+ */
+const checkLoginStatus = () => {
+  const buyerToken = localStorage.getItem('buyer_token')
+  const savedUsername = localStorage.getItem('buyer_username')
+
+  if (buyerToken && savedUsername) {
+    // 已登录状态
+    isLoggedIn.value = true
+    currentUsername.value = savedUsername
+    console.log('[Buyer] 已登录用户:', savedUsername)
+    return true
+  } else {
+    // 未登录状态：自动弹出登录弹窗
+    console.log('[Buyer] 未登录，自动弹出登录框')
+    isLoggedIn.value = false
+    currentUsername.value = ''
+    showLoginDialog.value = true
+    return false
+  }
+}
+
+/**
+ * 处理买家登录
+ */
+const handleLogin = async () => {
+  if (!loginFormRef.value) return
+  
+  // 表单校验
+  await loginFormRef.value.validate((valid) => {
+    if (!valid) return
+  })
+  
+  loginLoading.value = true
+  
+  try {
+    // 调用 C 端登录接口
+    const res = await post('/user/login', {
+      username: loginForm.value.username,
+      password: loginForm.value.password
+    })
+    
+    if (res.code === 20000 && res.data) {
+      // 【核心】存储买家 Token 到 localStorage
+      localStorage.setItem('buyer_token', res.data.token)
+      localStorage.setItem('buyer_username', res.data.username)
+      localStorage.setItem('buyer_userId', res.data.userId)
+      localStorage.setItem('buyer_tenantId', res.data.tenantId)
+      
+      // 更新登录状态
+      isLoggedIn.value = true
+      currentUsername.value = res.data.username
+      
+      // 关闭弹窗并提示
+      showLoginDialog.value = false
+      ElMessage.success(`登录成功！欢迎 ${res.data.name || res.data.username}`)
+      
+      // 清空表单
+      loginForm.value = { username: '', password: '' }
+      
+      console.log('[Buyer] 登录成功:', {
+        userId: res.data.userId,
+        username: res.data.username,
+        tenantId: res.data.tenantId
+      })
+    } else {
+      ElMessage.error(res.message || '登录失败，请检查用户名和密码')
+    }
+  } catch (error) {
+    console.error('[Buyer] 登录失败:', error)
+    ElMessage.error(error.message || '网络错误，请检查网关服务是否启动')
+  } finally {
+    loginLoading.value = false
+  }
+}
+
+/**
+ * 处理用户下拉菜单命令
+ */
+const handleUserCommand = (command) => {
+  if (command === 'logout') {
+    // 清除买家登录态
+    localStorage.removeItem('buyer_token')
+    localStorage.removeItem('buyer_username')
+    localStorage.removeItem('buyer_userId')
+    localStorage.removeItem('buyer_tenantId')
+    
+    // 重置状态
+    isLoggedIn.value = false
+    currentUsername.value = ''
+    
+    ElMessage.success('已退出登录')
+  }
+}
+
 // Initialize
 onMounted(() => {
   const theme = resolveTheme()
@@ -330,6 +531,9 @@ onMounted(() => {
   
   console.log(`[Store] Domain: ${currentDomain.value}`)
   console.log(`[Store] Tenant: ${theme.tenantId}`)
+  
+  // 检查买家登录状态
+  checkLoginStatus()
   
   fetchProducts()
 })
@@ -744,5 +948,52 @@ onMounted(() => {
   .product-price {
     font-size: 18px;
   }
+}
+
+/* ================== 用户登录相关样式 ================== */
+
+/* 用户信息区域 */
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.3s;
+}
+
+.user-name:hover {
+  opacity: 0.8;
+}
+
+/* 登录弹窗样式 */
+.login-tips {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #f5f7fa;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #909399;
+}
+
+.login-tips p {
+  margin: 4px 0;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* 下拉菜单样式调整 */
+:deep(.el-dropdown-menu__item) {
+  font-size: 14px;
 }
 </style>

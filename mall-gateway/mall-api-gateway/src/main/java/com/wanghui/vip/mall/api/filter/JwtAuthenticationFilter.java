@@ -11,51 +11,68 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
- * JWT 认证过滤器 - B端 API 安全网关
- * 
- * 核心职责：
- * 1. 拦截所有 B 端 API 请求（放行登录接口）
- * 2. 从 Authorization Header 提取并验证 JWT Token
- * 3. 从 Token 载荷中提取 tenant_id
- * 4. 【强制】向 Header 写入 X-Tenant-Id（覆盖前端伪造值）
- * 5. 401 拦截非法请求
+ * JWT 认证过滤器 - SaaS 网关安全核心
+ *
+ * 核心分流策略：
+ * 1. 【白名单】C端公开浏览接口（商品/分类等）直接放行，无需登录
+ * 2. 【黑名单】B端管理/C端交易接口（购物车/订单等）必须携带合法JWT
+ * 3. 【租户注入】从JWT提取 tenant_id 和 user_id，强制覆盖前端伪造值
  */
 @Component
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String TENANT_HEADER = "X-Tenant-Id";
-    private static final String LOGIN_PATH = "/api/permission/admin/login";
+    private static final String USER_ID_HEADER = "X-User-Id";
+    private static final String USER_NAME_HEADER = "X-User-Name";
     private static final String BEARER_PREFIX = "Bearer ";
+
+    /**
+     * 【白名单】C端公开接口，无需登录即可访问
+     * 包含：B端登录、C端登录、商品浏览相关接口
+     */
+    private static final List<String> WHITE_LIST = Arrays.asList(
+            "/api/permission/admin/login",  // B端管理员登录
+            "/api/user/login",              // C端用户登录（预留）
+            "/api/brand/**",                // 品牌查询
+            "/api/category/**",             // 分类查询
+            "/api/spu/**",                  // SPU商品查询
+            "/api/sku/**"                   // SKU商品查询
+    );
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
 
-        // 1. 【必须放行】登录接口 - 否则无法获取 Token
-        if (path.equals(LOGIN_PATH)) {
+        // ================== 1. 白名单校验 ==================
+        // C端公开浏览接口直接放行，不校验Token（TenantRoutingFilter仍会注入租户ID）
+        if (isInWhiteList(path)) {
             return chain.filter(exchange);
         }
 
-        // 2. 提取 Authorization Header
+        // ================== 2. JWT 严格校验（非白名单接口）==================
+
+        // 2.1 提取 Authorization Header
         String authHeader = request.getHeaders().getFirst(AUTHORIZATION_HEADER);
-        
-        // 3. 验证 Token 存在性
+
+        // 2.2 验证 Token 存在性
         if (authHeader == null || authHeader.isEmpty()) {
             return unauthorized(exchange, "Missing Authorization header");
         }
 
-        // 4. 提取 Token 值（支持 Bearer 前缀）
+        // 2.3 提取 Token 值（支持 Bearer 前缀）
         String token = extractToken(authHeader);
         if (token == null || token.isEmpty()) {
             return unauthorized(exchange, "Invalid token format");
         }
 
-        // 5. 【核心】解析并验证 JWT Token
+        // 2.4 【核心】解析并验证 JWT Token
         Map<String, Object> tokenPayload;
         try {
             tokenPayload = JwtToken.parseToken(token);
@@ -63,31 +80,84 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return unauthorized(exchange, "Invalid or expired token");
         }
 
-        // 6. 验证 Token 载荷有效性
+        // 2.5 验证 Token 载荷有效性
         if (tokenPayload == null || tokenPayload.isEmpty()) {
             return unauthorized(exchange, "Empty token payload");
         }
 
-        // 7. 【核心租户注入】从 Token 中提取 tenant_id
+        // ================== 3. 用户身份提取 ==================
+        Object userIdObj = tokenPayload.get("id");
+        Object userNameObj = tokenPayload.get("username");
+        if (userIdObj == null) {
+            return unauthorized(exchange, "Missing user id in token");
+        }
+        String userId = userIdObj.toString();
+        String userName = userNameObj != null ? userNameObj.toString() : "";
+
+        // ================== 4. 【核心租户注入】====================
         Object tenantIdObj = tokenPayload.get("tenantId");
         if (tenantIdObj == null) {
             return unauthorized(exchange, "Missing tenant_id in token");
         }
         String tenantId = tenantIdObj.toString();
 
-        // 8. 【强制覆盖】使用 mutate 机制写入 X-Tenant-Id Header
-        // 这会覆盖掉前端可能伪造的任何 X-Tenant-Id 值
+        // ================== 5. 【强制覆盖】Header 注入 ==================
+        // 使用 mutate 机制写入 Header，覆盖前端可能伪造的任何值
         ServerHttpRequest mutatedRequest = request.mutate()
-                .header(TENANT_HEADER, tenantId)
+                .header(TENANT_HEADER, tenantId)       // 租户ID（核心）
+                .header(USER_ID_HEADER, userId)        // 用户ID（用于C端业务）
+                .header(USER_NAME_HEADER, userName)    // 用户名（用于C端业务）
                 .build();
 
-        // 9. 可选：将解析出的用户信息放入 attributes，供后续使用
         ServerWebExchange mutatedExchange = exchange.mutate()
                 .request(mutatedRequest)
                 .build();
 
-        // 10. 继续向下游转发
+        // 6. 继续向下游转发
         return chain.filter(mutatedExchange);
+    }
+
+    /**
+     * 判断请求路径是否在白名单中
+     * 支持精确匹配和 Ant 风格通配符匹配（如 /api/brand/**）
+     */
+    private boolean isInWhiteList(String path) {
+        for (String pattern : WHITE_LIST) {
+            if (matchPath(pattern, path)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 路径匹配算法
+     * - 精确匹配：/api/permission/admin/login
+     * - 通配符匹配：/api/brand/** 匹配 /api/brand/1, /api/brand/list 等
+     */
+    private boolean matchPath(String pattern, String path) {
+        // 1. 精确匹配
+        if (pattern.equals(path)) {
+            return true;
+        }
+
+        // 2. 通配符匹配 /api/brand/**
+        if (pattern.endsWith("/**")) {
+            String prefix = pattern.substring(0, pattern.length() - 3);
+            return path.startsWith(prefix);
+        }
+
+        // 3. 单级通配符 /api/brand/*
+        if (pattern.endsWith("/*")) {
+            String prefix = pattern.substring(0, pattern.length() - 2);
+            if (path.startsWith(prefix)) {
+                String remaining = path.substring(prefix.length());
+                // 确保只有一级路径
+                return !remaining.contains("/") || remaining.indexOf("/") == remaining.length() - 1;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -108,7 +178,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         response.getHeaders().add("Content-Type", "application/json");
-        
+
         String body = String.format("{\"code\":40100,\"message\":\"%s\"}", message);
         return response.writeWith(
                 Mono.just(response.bufferFactory().wrap(body.getBytes()))
@@ -117,8 +187,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        // 优先级高于 TenantRoutingFilter，确保先认证再路由
-        // HIGHEST_PRECEDENCE + 50 表示在 CORS 之后，但在租户路由之前
+        // 优先级高于 TenantRoutingFilter (HIGHEST_PRECEDENCE + 150)
+        // 确保JWT注入的Header能被后续过滤器读取
         return Ordered.HIGHEST_PRECEDENCE + 50;
     }
 }

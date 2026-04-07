@@ -53,8 +53,8 @@ spring:
           uri: lb://mall-user
           predicates:
             - Path=/api/user/**
-          filters:
-            - StripPrefix=1
+          # filters:
+          #   - StripPrefix=1  # 去掉，保持 /api/user/** 路径，与 Controller 映射一致
         # Pay service route
         - id: mall-pay-route
           uri: lb://mall-pay

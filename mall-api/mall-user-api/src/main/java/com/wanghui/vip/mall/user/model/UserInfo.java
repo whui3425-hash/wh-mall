@@ -7,16 +7,21 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName(value = "user_info")
-public class UserInfo {
-    @TableId(type = IdType.ASSIGN_ID)
-    private String username;
-    private String password;
-    private String phone;
-    private String name;
-    private Integer points;
-    private String roles;
+public class UserInfo implements Serializable {
+    @TableId(type = IdType.AUTO)
+    private Long id;           // 用户ID（主键）
+    
+    private String username;   // 用户名（唯一）
+    private String password;   // 密码
+    private String phone;      // 手机号
+    private String name;       // 昵称
+    private Integer points;    // 积分
+    private String roles;      // 角色
+    private String tenantId;   // 租户ID（多租户隔离）
 }
