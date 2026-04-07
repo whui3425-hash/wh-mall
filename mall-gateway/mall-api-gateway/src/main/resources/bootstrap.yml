@@ -62,6 +62,11 @@ spring:
             - Path=/api/pay/**
           filters:
             - StripPrefix=1
+        # Permission service route (for login)
+        - id: mall-permission-route
+          uri: lb://mall-permission
+          predicates:
+            - Path=/api/permission/**
 
 logging:
   pattern:

@@ -9,9 +9,14 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
- * Global filter for SaaS multi-tenant routing
- * Forces X-Tenant-Id header based on request domain (Origin/Host)
- * Overrides any client-side forged tenant ID for security
+ * 多租户路由过滤器 - 作为 JWT 过滤器的降级兜底
+ * 
+ * 逻辑变更：
+ * 1. 优先检查是否已有 X-Tenant-Id（由 JwtAuthenticationFilter 注入）
+ * 2. 如果 JWT 过滤器已注入，则直接放行（不覆盖）
+ * 3. 仅在没有 X-Tenant-Id 时，才从域名解析租户 ID
+ * 
+ * 执行顺序：在 JwtAuthenticationFilter 之后（Ordered + 150）
  */
 @Component
 public class TenantRoutingFilter implements GlobalFilter, Ordered {
@@ -23,59 +28,56 @@ public class TenantRoutingFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         
-        // ALWAYS resolve tenant from domain - ignore any client-provided tenant ID
-        // This prevents frontend from forging tenant ID
+        // 【关键逻辑】检查是否已有 X-Tenant-Id（来自 JWT Token）
+        String existingTenantId = request.getHeaders().getFirst(TENANT_HEADER);
+        
+        if (existingTenantId != null && !existingTenantId.isEmpty()) {
+            // JWT 过滤器已注入 tenant_id，直接放行（不覆盖）
+            // 这保证了 Token 中的租户信息优先级最高
+            return chain.filter(exchange);
+        }
+        
+        // 没有 X-Tenant-Id 时，才从域名解析（降级兜底）
         String tenantId = resolveTenantId(request);
         
-        // Force override any existing X-Tenant-Id header with server-resolved value
+        // 注入解析的租户 ID
         ServerHttpRequest mutatedRequest = request.mutate()
                 .header(TENANT_HEADER, tenantId)
                 .build();
         
-        // Continue with mutated request
         return chain.filter(exchange.mutate().request(mutatedRequest).build());
     }
     
     /**
-     * Resolve tenant ID based on Origin, Host, or Referer header
-     * Priority: Origin > Host > Referer
+     * 基于域名解析租户 ID（降级策略）
      */
     private String resolveTenantId(ServerHttpRequest request) {
-        // Try Origin first (most reliable for CORS requests)
+        // Try Origin first
         String origin = request.getHeaders().getFirst("Origin");
         if (origin != null && !origin.isEmpty()) {
             String tenant = extractTenantFromDomain(origin);
-            if (tenant != null) {
-                return tenant;
-            }
+            if (tenant != null) return tenant;
         }
         
-        // Try Host header (for direct requests)
+        // Try Host header
         String host = request.getHeaders().getFirst("Host");
         if (host != null && !host.isEmpty()) {
             String tenant = extractTenantFromDomain(host);
-            if (tenant != null) {
-                return tenant;
-            }
+            if (tenant != null) return tenant;
         }
         
-        // Try Referer as fallback
+        // Try Referer
         String referer = request.getHeaders().getFirst("Referer");
         if (referer != null && !referer.isEmpty()) {
             String tenant = extractTenantFromDomain(referer);
-            if (tenant != null) {
-                return tenant;
-            }
+            if (tenant != null) return tenant;
         }
         
-        // Default fallback
         return DEFAULT_TENANT;
     }
     
     /**
-     * Extract tenant ID from domain string
-     * shop1 -> 1001 (Tech store)
-     * shop2 -> 1002 (Beauty store)
+     * 从域名提取租户 ID
      */
     private String extractTenantFromDomain(String domain) {
         String lowerDomain = domain.toLowerCase();
@@ -89,7 +91,8 @@ public class TenantRoutingFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        // Highest precedence + 100 to ensure this runs early but after CORS
-        return Ordered.HIGHEST_PRECEDENCE + 100;
+        // 在 JwtAuthenticationFilter (HIGHEST_PRECEDENCE + 50) 之后执行
+        // 这样 JWT 注入的 tenant_id 会优先被保留
+        return Ordered.HIGHEST_PRECEDENCE + 150;
     }
 }

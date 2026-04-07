@@ -17,7 +17,10 @@ public class SysAdmin implements Serializable {
 
     @TableId(type = IdType.AUTO)
     private Integer id;
+
     private String username;
+
     private String password;
+
     private String tenantId;
 }

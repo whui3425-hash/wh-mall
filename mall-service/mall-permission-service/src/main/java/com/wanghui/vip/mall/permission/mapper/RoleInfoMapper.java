@@ -1,8 +1,7 @@
 package com.wanghui.vip.mall.permission.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-
-import javax.management.relation.RoleInfo;
+import com.wanghui.vip.mall.permission.model.RoleInfo;
 
 public interface RoleInfoMapper extends BaseMapper<RoleInfo> {
 }
