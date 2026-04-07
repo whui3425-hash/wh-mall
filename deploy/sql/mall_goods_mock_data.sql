@@ -6,7 +6,8 @@ INSERT INTO brand (id, name, image, initial, sort, tenant_id) VALUES
 (1, 'Apple', 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=500&q=80', 'A', 1, '1001'),
 (2, 'Sony', 'https://images.unsplash.com/photo-1606567595334-069f7c8d47a2?w=500&q=80', 'S', 2, '1001'),
 (3, 'Logitech', 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=500&q=80', 'L', 3, '1001'),
-(4, 'DJI', 'https://images.unsplash.com/photo-1569263979104-f2c500e151e1?w=500&q=80', 'D', 4, '1001');
+(4, 'DJI', 'https://images.unsplash.com/photo-1569263979104-f2c500e151e1?w=500&q=80', 'D', 4, '1001'),
+(9, 'Samsung', 'https://images.unsplash.com/photo-1610945265078-3858a0828a41?w=500&q=80', 'S', 5, '1001');
 
 -- ========================================================-- 2. Brand Data - Tenant 1002 (Beauty & Fashion)-- ========================================================
 INSERT INTO brand (id, name, image, initial, sort, tenant_id) VALUES

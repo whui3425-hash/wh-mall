@@ -25,8 +25,15 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper,Brand> implements 
     @Override
     public List<Brand> queryList(Brand brand) {
         QueryWrapper<Brand> queryWrapper = new QueryWrapper<Brand>();
-        queryWrapper.like("name",brand.getName());
-        queryWrapper.eq("initial",brand.getInitial());
+        if (brand != null) {
+            if (brand.getName() != null && !brand.getName().isEmpty()) {
+                queryWrapper.like("name", brand.getName());
+            }
+            if (brand.getInitial() != null && !brand.getInitial().isEmpty()) {
+                queryWrapper.eq("initial", brand.getInitial());
+            }
+        }
+        queryWrapper.orderByAsc("sort");
         return brandMapper.selectList(queryWrapper);
     }
 
@@ -37,7 +44,10 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper,Brand> implements 
     @Override
     public Page<Brand> queryPageList(Brand brand, Long currentPage, Long size) {
         QueryWrapper<Brand> queryWrapper = new QueryWrapper<Brand>();
-        queryWrapper.like("name",brand.getName());
+        if (brand != null && brand.getName() != null && !brand.getName().isEmpty()) {
+            queryWrapper.like("name", brand.getName());
+        }
+        queryWrapper.orderByAsc("sort");
         return brandMapper.selectPage(new Page<Brand>(currentPage,size),queryWrapper);
     }
 

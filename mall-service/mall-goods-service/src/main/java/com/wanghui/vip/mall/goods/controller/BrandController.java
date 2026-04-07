@@ -49,7 +49,10 @@ public class BrandController {
      * Conditional query
      */
     @PostMapping(value = "/search")
-    public RespResult<List<Brand>> queryList(@RequestBody Brand brand){
+    public RespResult<List<Brand>> queryList(@RequestBody(required = false) Brand brand){
+        if (brand == null) {
+            brand = new Brand();
+        }
         List<Brand> brands = brandService.queryList(brand);
         return RespResult.ok(brands);
     }
@@ -61,7 +64,10 @@ public class BrandController {
     public RespResult<Page<Brand>> queryPageList(
             @PathVariable(value = "page")Long page,
             @PathVariable(value = "size")Long size,
-            @RequestBody Brand brand){
+            @RequestBody(required = false) Brand brand){
+        if (brand == null) {
+            brand = new Brand();
+        }
         Page<Brand> pageInfo = brandService.queryPageList(brand,page,size);
         return RespResult.ok(pageInfo);
     }

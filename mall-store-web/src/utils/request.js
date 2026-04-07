@@ -1,13 +1,16 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
-// Create axios instance
+// Create axios instance with base URL
 const request = axios.create({
   baseURL: '/api',
-  timeout: 10000
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 })
 
-// Get tenant ID based on domain
+// Get tenant ID based on current domain
 const getTenantIdByDomain = () => {
   const hostname = window.location.hostname.toLowerCase()
   if (hostname.includes('shop1')) {
@@ -15,10 +18,10 @@ const getTenantIdByDomain = () => {
   } else if (hostname.includes('shop2')) {
     return '1002'
   }
-  return '1001' // Default
+  return '1001'
 }
 
-// Request interceptor
+// Request interceptor - inject X-Tenant-Id header
 request.interceptors.request.use(
   (config) => {
     const tenantId = getTenantIdByDomain()
@@ -27,22 +30,39 @@ request.interceptors.request.use(
     return config
   },
   (error) => {
+    console.error('Request error:', error)
     return Promise.reject(error)
   }
 )
 
-// Response interceptor
+// Response interceptor - handle responses and errors
 request.interceptors.response.use(
   (response) => {
+    // Return the full response data
     return response.data
   },
   (error) => {
-    ElMessage.error(error.message || 'Request failed')
+    const message = error.response?.data?.message || error.message || 'Request failed'
+    ElMessage.error(message)
     return Promise.reject(error)
   }
 )
 
-export const get = (url, params) => request.get(url, { params })
-export const post = (url, data) => request.post(url, data)
+// Export HTTP methods
+export const get = (url, params) => {
+  return request.get(url, { params })
+}
+
+export const post = (url, data) => {
+  return request.post(url, data)
+}
+
+export const put = (url, data) => {
+  return request.put(url, data)
+}
+
+export const del = (url) => {
+  return request.delete(url)
+}
 
 export default request

@@ -178,10 +178,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import axios from 'axios'
-import { 
-  Shop, Search, ShoppingCart, User, ShoppingBag, 
-  StarFilled, Picture, Cellphone, Lipstick, Watch, Headset
+import { post } from '@/utils/request'
+import {
+  Shop, Search, ShoppingCart, User, ShoppingBag,
+  StarFilled, Picture, Cellphone, Brush, Watch, Headset
 } from '@element-plus/icons-vue'
 
 // Theme configuration based on domain
@@ -211,8 +211,8 @@ const themeConfig = {
     heroSubtitle: '甄选全球美妆好物，绽放独特魅力',
     categories: [
       { id: 1, name: 'All', icon: 'StarFilled' },
-      { id: 2, name: 'Skincare', icon: 'Lipstick' },
-      { id: 3, name: 'Makeup', icon: 'Lipstick' },
+      { id: 2, name: 'Skincare', icon: 'Brush' },
+      { id: 3, name: 'Makeup', icon: 'Brush' },
       { id: 4, name: 'Fragrance', icon: 'StarFilled' }
     ]
   }
@@ -235,11 +235,6 @@ const loading = ref(true)
 const bannerGradient = computed(() => {
   const accent = tenantId.value === '1001' ? '#00D4FF' : '#FFB6C1'
   return `linear-gradient(135deg, ${themeColor.value} 0%, ${accent} 100%)`
-})
-
-const axiosInstance = axios.create({
-  baseURL: '/api',
-  timeout: 10000
 })
 
 // Default images for different products
@@ -276,9 +271,10 @@ const fetchProducts = async () => {
   loading.value = true
   try {
     // Gateway will inject X-Tenant-Id based on Origin domain
-    const res = await axiosInstance.post('/goods/brand/search/1/10', {})
-    if (res.data && res.data.code === 200 && res.data.data) {
-      products.value = res.data.data.records || []
+    const res = await post('/goods/brand/search/1/10', {})
+    console.log('API Response:', res)
+    if (res && res.code === 20000 && res.data) {
+      products.value = res.data.records || []
       ElMessage.success(`Loaded ${products.value.length} products`)
     } else {
       useMockData()
