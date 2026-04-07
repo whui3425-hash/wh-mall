@@ -10,7 +10,8 @@ import reactor.core.publisher.Mono;
 
 /**
  * Global filter for SaaS multi-tenant routing
- * Injects X-Tenant-Id header based on request domain (Origin/Referer)
+ * Forces X-Tenant-Id header based on request domain (Origin/Host)
+ * Overrides any client-side forged tenant ID for security
  */
 @Component
 public class TenantRoutingFilter implements GlobalFilter, Ordered {
@@ -22,17 +23,11 @@ public class TenantRoutingFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         
-        // Try to get tenant from existing header first
-        String existingTenant = request.getHeaders().getFirst(TENANT_HEADER);
-        if (existingTenant != null && !existingTenant.isEmpty()) {
-            // Tenant already set, proceed
-            return chain.filter(exchange);
-        }
-        
-        // Determine tenant based on Origin or Referer
+        // ALWAYS resolve tenant from domain - ignore any client-provided tenant ID
+        // This prevents frontend from forging tenant ID
         String tenantId = resolveTenantId(request);
         
-        // Mutate request with tenant header
+        // Force override any existing X-Tenant-Id header with server-resolved value
         ServerHttpRequest mutatedRequest = request.mutate()
                 .header(TENANT_HEADER, tenantId)
                 .build();
@@ -42,10 +37,11 @@ public class TenantRoutingFilter implements GlobalFilter, Ordered {
     }
     
     /**
-     * Resolve tenant ID based on Origin or Referer header
+     * Resolve tenant ID based on Origin, Host, or Referer header
+     * Priority: Origin > Host > Referer
      */
     private String resolveTenantId(ServerHttpRequest request) {
-        // Try Origin first
+        // Try Origin first (most reliable for CORS requests)
         String origin = request.getHeaders().getFirst("Origin");
         if (origin != null && !origin.isEmpty()) {
             String tenant = extractTenantFromDomain(origin);
@@ -54,7 +50,16 @@ public class TenantRoutingFilter implements GlobalFilter, Ordered {
             }
         }
         
-        // Try Referer if Origin not available
+        // Try Host header (for direct requests)
+        String host = request.getHeaders().getFirst("Host");
+        if (host != null && !host.isEmpty()) {
+            String tenant = extractTenantFromDomain(host);
+            if (tenant != null) {
+                return tenant;
+            }
+        }
+        
+        // Try Referer as fallback
         String referer = request.getHeaders().getFirst("Referer");
         if (referer != null && !referer.isEmpty()) {
             String tenant = extractTenantFromDomain(referer);
@@ -69,6 +74,8 @@ public class TenantRoutingFilter implements GlobalFilter, Ordered {
     
     /**
      * Extract tenant ID from domain string
+     * shop1 -> 1001 (Tech store)
+     * shop2 -> 1002 (Beauty store)
      */
     private String extractTenantFromDomain(String domain) {
         String lowerDomain = domain.toLowerCase();
@@ -82,7 +89,7 @@ public class TenantRoutingFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        // Highest precedence to ensure tenant is set before other filters
-        return Ordered.HIGHEST_PRECEDENCE + 1;
+        // Highest precedence + 100 to ensure this runs early but after CORS
+        return Ordered.HIGHEST_PRECEDENCE + 100;
     }
 }
