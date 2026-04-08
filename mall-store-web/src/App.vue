@@ -18,8 +18,8 @@
               class="search-input"
             />
           </div>
-          <el-badge :value="3" class="action-badge">
-            <el-icon :size="26" color="#fff" class="action-icon"><ShoppingCart /></el-icon>
+          <el-badge :value="cartCount" :hidden="cartCount === 0" class="action-badge">
+            <el-icon :size="26" color="#fff" class="action-icon" @click="handleCartClick"><ShoppingCart /></el-icon>
           </el-badge>
           
           <!-- 用户登录状态区域 -->
@@ -173,6 +173,8 @@
                   size="small" 
                   round
                   class="buy-button"
+                  @click.stop="handleAddToCart(product)"
+                  :loading="product.addingToCart"
                 >
                   <el-icon><ShoppingCart /></el-icon>
                   Add to Cart
@@ -310,6 +312,10 @@ const activeCategory = ref(1)
 const products = ref([])
 const loading = ref(true)
 
+// ================== 购物车相关状态 ==================
+const cartCount = ref(0)                    // 购物车商品种类数量（Badge显示）
+const cartItems = ref([])                   // 购物车数据列表
+
 // ================== 登录相关状态 ==================
 const showLoginDialog = ref(false)          // 控制登录弹窗显示
 const loginLoading = ref(false)             // 登录按钮加载状态
@@ -376,7 +382,11 @@ const fetchProducts = async () => {
     const res = await post('/goods/brand/search/1/10', {})
     console.log('API Response:', res)
     if (res && res.code === 20000 && res.data) {
-      products.value = res.data.records || []
+      // 为每个产品添加 addingToCart 属性（用于按钮loading状态）
+      products.value = (res.data.records || []).map(product => ({
+        ...product,
+        addingToCart: false
+      }))
       ElMessage.success(`Loaded ${products.value.length} products`)
     } else {
       useMockData()
@@ -394,14 +404,14 @@ const fetchProducts = async () => {
 const useMockData = () => {
   const isTech = tenantId.value === '1001'
   products.value = [
-    { id: 1, name: isTech ? 'iPhone 15 Pro Max' : 'Estée Lauder Advanced Night Repair', sort: 1 },
-    { id: 2, name: isTech ? 'MacBook Pro M3' : 'SK-II Facial Treatment Essence', sort: 2 },
-    { id: 3, name: isTech ? 'AirPods Pro 2' : 'YSL Rouge Volupté Shine', sort: 3 },
-    { id: 4, name: isTech ? 'Sony WH-1000XM5' : 'Dior Sauvage Eau de Toilette', sort: 4 },
-    { id: 5, name: isTech ? 'iPad Pro 12.9' : 'Chanel Coco Mademoiselle', sort: 5 },
-    { id: 6, name: isTech ? 'Apple Watch Ultra 2' : 'Lancôme Advanced Génifique', sort: 6 },
-    { id: 7, name: isTech ? 'Canon EOS R6 Mark II' : 'Tom Ford Black Orchid', sort: 7 },
-    { id: 8, name: isTech ? 'DJI Mavic 3 Pro' : 'La Mer Crème de la Mer', sort: 8 }
+    { id: 1, name: isTech ? 'iPhone 15 Pro Max' : 'Estée Lauder Advanced Night Repair', sort: 1, addingToCart: false },
+    { id: 2, name: isTech ? 'MacBook Pro M3' : 'SK-II Facial Treatment Essence', sort: 2, addingToCart: false },
+    { id: 3, name: isTech ? 'AirPods Pro 2' : 'YSL Rouge Volupté Shine', sort: 3, addingToCart: false },
+    { id: 4, name: isTech ? 'Sony WH-1000XM5' : 'Dior Sauvage Eau de Toilette', sort: 4, addingToCart: false },
+    { id: 5, name: isTech ? 'iPad Pro 12.9' : 'Chanel Coco Mademoiselle', sort: 5, addingToCart: false },
+    { id: 6, name: isTech ? 'Apple Watch Ultra 2' : 'Lancôme Advanced Génifique', sort: 6, addingToCart: false },
+    { id: 7, name: isTech ? 'Canon EOS R6 Mark II' : 'Tom Ford Black Orchid', sort: 7, addingToCart: false },
+    { id: 8, name: isTech ? 'DJI Mavic 3 Pro' : 'La Mer Crème de la Mer', sort: 8, addingToCart: false }
   ]
 }
 
@@ -484,6 +494,9 @@ const handleLogin = async () => {
         username: res.data.username,
         tenantId: res.data.tenantId
       })
+      
+      // 登录成功后刷新购物车数量
+      loadCartCount()
     } else {
       ElMessage.error(res.message || '登录失败，请检查用户名和密码')
     }
@@ -509,9 +522,101 @@ const handleUserCommand = (command) => {
     // 重置状态
     isLoggedIn.value = false
     currentUsername.value = ''
+    cartCount.value = 0  // 清空购物车数量
+    cartItems.value = []
     
     ElMessage.success('已退出登录')
+    
+    // 退出后弹出登录框（因为购物车需要登录）
+    showLoginDialog.value = true
   }
+}
+
+// ================== 购物车相关方法 ==================
+
+/**
+ * 加载购物车数量
+ */
+const loadCartCount = async () => {
+  const buyerToken = localStorage.getItem('buyer_token')
+  if (!buyerToken) {
+    cartCount.value = 0
+    return
+  }
+  
+  try {
+    const res = await get('/cart/list')
+    if (res.code === 20000 && res.data) {
+      cartItems.value = res.data
+      cartCount.value = res.data.length  // 商品种类数量
+      console.log('[Cart] 购物车数量:', cartCount.value)
+    }
+  } catch (error) {
+    console.error('[Cart] 获取购物车失败:', error)
+    cartCount.value = 0
+  }
+}
+
+/**
+ * 【核心】添加商品到购物车
+ * @param product 商品对象
+ */
+const handleAddToCart = async (product) => {
+  // 1. 检查是否已登录（有 buyer_token）
+  const buyerToken = localStorage.getItem('buyer_token')
+  if (!buyerToken) {
+    ElMessage.warning('请先登录后再添加商品到购物车')
+    showLoginDialog.value = true
+    return
+  }
+  
+  // 设置加载状态
+  product.addingToCart = true
+  
+  try {
+    // 2. 调用添加购物车 API
+    const res = await post('/cart/add', {
+      skuId: product.id,
+      num: 1
+    })
+    
+    if (res.code === 20000) {
+      // 3. 成功提示
+      ElMessage.success('已加入购物车')
+      
+      // 4. 刷新购物车数量
+      await loadCartCount()
+    } else {
+      ElMessage.error(res.message || '添加购物车失败')
+    }
+  } catch (error) {
+    console.error('[Cart] 添加购物车失败:', error)
+    
+    // 处理 401 未授权（Token过期）
+    if (error.response?.status === 401 || error.message?.includes('Unauthorized')) {
+      ElMessage.error('登录已过期，请重新登录')
+      localStorage.removeItem('buyer_token')
+      showLoginDialog.value = true
+    } else {
+      ElMessage.error('添加购物车失败，请检查网络连接')
+    }
+  } finally {
+    product.addingToCart = false
+  }
+}
+
+/**
+ * 点击购物车图标
+ */
+const handleCartClick = () => {
+  const buyerToken = localStorage.getItem('buyer_token')
+  if (!buyerToken) {
+    ElMessage.info('请先登录查看购物车')
+    showLoginDialog.value = true
+    return
+  }
+  // 后续可跳转到购物车页面
+  ElMessage.info('购物车功能开发中，当前商品数: ' + cartCount.value)
 }
 
 // Initialize
@@ -536,6 +641,9 @@ onMounted(() => {
   checkLoginStatus()
   
   fetchProducts()
+  
+  // 加载购物车数量（如果已登录）
+  loadCartCount()
 })
 </script>
 

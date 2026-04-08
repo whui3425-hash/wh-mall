@@ -17,11 +17,12 @@ public class Cart implements Serializable {
 
     @TableId(type = IdType.AUTO)
     private Long id;
-    private String userName;
-    private String name;
-    private Integer price;
-    private String image;
-    private String skuId;
-    private Integer num;
-    private String tenantId;
+    private String userId;       // 用户ID（从JWT解析）
+    private String userName;     // 用户名
+    private String name;         // 商品名称
+    private Integer price;       // 商品价格（单位：分）
+    private String image;        // 商品图片
+    private String skuId;        // SKU ID
+    private Integer num;         // 购买数量
+    private String tenantId;     // 租户ID（多租户隔离）
 }
