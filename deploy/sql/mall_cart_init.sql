@@ -1,35 +1,55 @@
--- ========================================================-- mall-cart-service Database Initialization Script-- ========================================================-- 1. Create database if not exists
-CREATE DATABASE IF NOT EXISTS mall_cart CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- ============================================
+-- 购物车表初始化脚本
+-- 包含 mall_cart 表 DDL 和 DML（多租户、用户隔离设计）
+-- ============================================
 
-USE mall_cart;
+USE mall_goods;
 
--- ========================================================-- 2. Create Tables (DDL)-- ========================================================
+-- ============================================
+-- 删除旧表（如需重新创建）
+-- ============================================
+-- DROP TABLE IF EXISTS mall_cart;
 
--- Cart table
-CREATE TABLE IF NOT EXISTS mall_cart (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Cart item ID',
-    user_name VARCHAR(100) NOT NULL COMMENT 'Username (buyer)',
-    name VARCHAR(200) NOT NULL COMMENT 'Product name',
-    price INT DEFAULT 0 COMMENT 'Unit price (in cents)',
-    image VARCHAR(500) COMMENT 'Product image URL',
-    sku_id VARCHAR(64) NOT NULL COMMENT 'SKU ID',
-    num INT DEFAULT 1 COMMENT 'Quantity',
-    tenant_id VARCHAR(32) DEFAULT '1001' COMMENT 'Tenant ID',
-    INDEX idx_tenant_id (tenant_id),
-    INDEX idx_user_name (user_name),
-    INDEX idx_sku_id (sku_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Shopping cart table';
+-- ============================================
+-- 创建购物车表
+-- ============================================
+CREATE TABLE IF NOT EXISTS `mall_cart` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '购物车记录ID（主键）',
+    `user_id` VARCHAR(64) NOT NULL DEFAULT '1' COMMENT '用户ID（从JWT Header X-User-Id获取）',
+    `user_name` VARCHAR(100) NOT NULL COMMENT '用户名',
+    `name` VARCHAR(200) NOT NULL COMMENT '商品名称（通过Feign从SKU同步）',
+    `price` INT NOT NULL COMMENT '商品价格（单位：分，通过Feign从SKU同步）',
+    `image` VARCHAR(500) DEFAULT NULL COMMENT '商品图片URL（通过Feign从SKU同步）',
+    `sku_id` VARCHAR(64) NOT NULL COMMENT 'SKU ID（关联商品）',
+    `num` INT NOT NULL DEFAULT 1 COMMENT '购买数量（累加模式）',
+    `tenant_id` VARCHAR(32) DEFAULT '1001' COMMENT '租户ID（多租户隔离）',
+    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_user_sku` (`user_id`, `sku_id`, `tenant_id`) COMMENT '同一用户同一租户下同一SKU只能有一条记录',
+    INDEX `idx_user_id` (`user_id`),
+    INDEX `idx_sku_id` (`sku_id`),
+    INDEX `idx_tenant_id` (`tenant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='购物车表（支持多租户、用户隔离）';
 
--- ========================================================-- 3. Insert Test Data (DML)-- ========================================================
+-- ============================================
+-- 清理现有数据（可选）
+-- ============================================
+-- TRUNCATE TABLE mall_cart;
 
--- Cart test data - Tenant A (1001)
-INSERT INTO mall_cart (id, user_name, name, price, image, sku_id, num, tenant_id) VALUES
-(1, 'zhangsan', 'iPhone 15 Pro Max 256GB', 999900, 'https://example.com/iphone15.jpg', 'SKU001', 1, '1001'),
-(2, 'zhangsan', 'AirPods Pro 2nd Generation', 199900, 'https://example.com/airpods.jpg', 'SKU002', 2, '1001');
+-- ============================================
+-- 插入测试数据（可选）
+-- ============================================
+-- 租户 1001 用户 zhangsan (user_id=1) 的购物车
+-- INSERT INTO `mall_cart` (`user_id`, `user_name`, `name`, `price`, `image`, `sku_id`, `num`, `tenant_id`) VALUES
+-- ('1', 'zhangsan', 'iPhone 15 Pro Max', 99900, 'https://example.com/iphone.jpg', 'SKU_001', 2, '1001'),
+-- ('1', 'zhangsan', 'MacBook Pro M3', 129900, 'https://example.com/macbook.jpg', 'SKU_002', 1, '1001');
 
--- Cart test data - Tenant B (1002) - Same user, different tenant
-INSERT INTO mall_cart (id, user_name, name, price, image, sku_id, num, tenant_id) VALUES
-(3, 'zhangsan', 'Huawei Mate 60 Pro 512GB', 699900, 'https://example.com/mate60.jpg', 'SKU003', 1, '1002'),
-(4, 'zhangsan', 'Xiaomi 14 Pro 256GB', 499900, 'https://example.com/xiaomi14.jpg', 'SKU004', 1, '1002');
+-- 租户 1002 用户 wangwu (user_id=3) 的购物车  
+-- INSERT INTO `mall_cart` (`user_id`, `user_name`, `name`, `price`, `image`, `sku_id`, `num`, `tenant_id`) VALUES
+-- ('3', 'wangwu', 'SK-II神仙水', 154000, 'https://example.com/skii.jpg', 'SKU_101', 1, '1002');
 
--- ========================================================-- Initialization Complete-- ========================================================
+-- ============================================
+-- 查看表结构
+-- ============================================
+DESCRIBE mall_cart;

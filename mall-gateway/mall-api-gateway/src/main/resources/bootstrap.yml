@@ -32,8 +32,8 @@ spring:
           uri: lb://mall-cart
           predicates:
             - Path=/api/cart/**
-          filters:
-            - StripPrefix=1
+          # filters:
+          #   - StripPrefix=1  # 去掉，保持 /api/cart/** 路径，与 Controller 映射一致
         # Order service route
         - id: mall-order-route
           uri: lb://mall-order

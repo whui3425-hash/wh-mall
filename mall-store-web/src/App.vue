@@ -252,17 +252,110 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- ================== 购物车抽屉 ================== -->
+    <el-drawer
+      v-model="showCartDrawer"
+      title="购物车"
+      direction="rtl"
+      size="450px"
+      :with-header="true"
+      class="cart-drawer"
+    >
+      <!-- 购物车列表 -->
+      <div class="cart-content" v-if="cartItems.length > 0">
+        <div class="cart-items">
+          <div 
+            v-for="item in cartItems" 
+            :key="item.id"
+            class="cart-item"
+          >
+            <!-- 商品图片 -->
+            <div class="cart-item-image">
+              <el-image
+                :src="item.image || getDefaultImage(parseInt(item.skuId))"
+                fit="cover"
+                class="cart-img"
+              >
+                <template #error>
+                  <div class="cart-img-placeholder">
+                    <el-icon :size="30"><Picture /></el-icon>
+                  </div>
+                </template>
+              </el-image>
+            </div>
+            
+            <!-- 商品信息 -->
+            <div class="cart-item-info">
+              <h4 class="cart-item-name">{{ item.name }}</h4>
+              <p class="cart-item-price">${{ (item.price / 100).toFixed(2) }}</p>
+            </div>
+            
+            <!-- 数量控制 -->
+            <div class="cart-item-actions">
+              <el-input-number
+                v-model="item.num"
+                :min="1"
+                :max="99"
+                size="small"
+                controls-position="right"
+                @change="(val) => handleUpdateCartItem(item, val)"
+              />
+              <el-button 
+                type="danger" 
+                link
+                size="small"
+                @click="handleDeleteCartItem(item)"
+                class="delete-btn"
+              >
+                <el-icon><Delete /></el-icon>
+              </el-button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 底部结算区域 -->
+        <div class="cart-footer">
+          <div class="cart-total">
+            <span class="total-label">Total Amount:</span>
+            <span class="total-price">${{ calculateTotal.toFixed(2) }}</span>
+          </div>
+          <el-button 
+            type="primary" 
+            size="large"
+            :color="themeColor"
+            class="checkout-btn"
+            @click="handleCheckout"
+          >
+            去结算 ({{ cartItems.length }} items)
+          </el-button>
+        </div>
+      </div>
+      
+      <!-- 空购物车状态 -->
+      <div class="cart-empty" v-else>
+        <el-icon :size="60" :color="'#dcdfe6'"><ShoppingCart /></el-icon>
+        <p class="empty-text">购物车是空的</p>
+        <el-button 
+          :color="themeColor" 
+          @click="showCartDrawer = false"
+          class="continue-shopping-btn"
+        >
+          继续购物
+        </el-button>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
-import { post } from '@/utils/request'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { post, get, del, put } from '@/utils/request'
 import {
   Shop, Search, ShoppingCart, User, ShoppingBag,
   StarFilled, Picture, Cellphone, Brush, Watch, Headset,
-  ArrowDown, Lock
+  ArrowDown, Lock, Delete
 } from '@element-plus/icons-vue'
 
 // Theme configuration based on domain
@@ -315,6 +408,8 @@ const loading = ref(true)
 // ================== 购物车相关状态 ==================
 const cartCount = ref(0)                    // 购物车商品种类数量（Badge显示）
 const cartItems = ref([])                   // 购物车数据列表
+const showCartDrawer = ref(false)           // 控制购物车抽屉显示
+const cartLoading = ref(false)                // 购物车加载状态
 
 // ================== 登录相关状态 ==================
 const showLoginDialog = ref(false)          // 控制登录弹窗显示
@@ -343,6 +438,15 @@ const loginRules = {
 const bannerGradient = computed(() => {
   const accent = tenantId.value === '1001' ? '#00D4FF' : '#FFB6C1'
   return `linear-gradient(135deg, ${themeColor.value} 0%, ${accent} 100%)`
+})
+
+/**
+ * 计算购物车总金额
+ */
+const calculateTotal = computed(() => {
+  return cartItems.value.reduce((total, item) => {
+    return total + (item.price * item.num / 100)
+  }, 0)
 })
 
 // Default images for different products
@@ -535,7 +639,7 @@ const handleUserCommand = (command) => {
 // ================== 购物车相关方法 ==================
 
 /**
- * 加载购物车数量
+ * 加载购物车数量（简化版，不展开详情）
  */
 const loadCartCount = async () => {
   const buyerToken = localStorage.getItem('buyer_token')
@@ -547,7 +651,6 @@ const loadCartCount = async () => {
   try {
     const res = await get('/cart/list')
     if (res.code === 20000 && res.data) {
-      cartItems.value = res.data
       cartCount.value = res.data.length  // 商品种类数量
       console.log('[Cart] 购物车数量:', cartCount.value)
     }
@@ -606,17 +709,124 @@ const handleAddToCart = async (product) => {
 }
 
 /**
- * 点击购物车图标
+ * 【核心】点击购物车图标 - 打开购物车抽屉
  */
-const handleCartClick = () => {
+const handleCartClick = async () => {
   const buyerToken = localStorage.getItem('buyer_token')
   if (!buyerToken) {
     ElMessage.info('请先登录查看购物车')
     showLoginDialog.value = true
     return
   }
-  // 后续可跳转到购物车页面
-  ElMessage.info('购物车功能开发中，当前商品数: ' + cartCount.value)
+  
+  // 打开购物车抽屉
+  showCartDrawer.value = true
+  
+  // 刷新购物车数据
+  await loadCartItems()
+}
+
+/**
+ * 【核心】加载购物车详细数据
+ */
+const loadCartItems = async () => {
+  cartLoading.value = true
+  try {
+    const res = await get('/cart/list')
+    if (res.code === 20000 && res.data) {
+      cartItems.value = res.data
+      cartCount.value = res.data.length
+      console.log('[Cart] 购物车数据:', cartItems.value)
+    } else {
+      cartItems.value = []
+      cartCount.value = 0
+    }
+  } catch (error) {
+    console.error('[Cart] 加载购物车失败:', error)
+    ElMessage.error('加载购物车失败')
+    cartItems.value = []
+    cartCount.value = 0
+  } finally {
+    cartLoading.value = false
+  }
+}
+
+/**
+ * 【核心】更新购物车商品数量
+ * @param item 购物车项
+ * @param newNum 新数量
+ */
+const handleUpdateCartItem = async (item, newNum) => {
+  if (!newNum || newNum < 1) return
+  
+  try {
+    const res = await put('/cart/update', {
+      id: item.id,
+      num: newNum
+    })
+    
+    if (res.code === 20000) {
+      ElMessage.success('数量已更新')
+      item.num = newNum
+    } else {
+      ElMessage.error(res.message || '更新失败')
+      // 恢复原数量（重新加载）
+      await loadCartItems()
+    }
+  } catch (error) {
+    console.error('[Cart] 更新数量失败:', error)
+    ElMessage.error('更新数量失败')
+    await loadCartItems()
+  }
+}
+
+/**
+ * 【核心】删除购物车商品
+ * @param item 购物车项
+ */
+const handleDeleteCartItem = async (item) => {
+  try {
+    // 确认删除
+    await ElMessageBox.confirm(
+      `确定要删除 "${item.name}" 吗？`,
+      '删除确认',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    const res = await del(`/cart/${item.id}`)
+    
+    if (res.code === 20000) {
+      ElMessage.success('已删除')
+      // 从列表中移除
+      cartItems.value = cartItems.value.filter(i => i.id !== item.id)
+      cartCount.value = cartItems.value.length
+    } else {
+      ElMessage.error(res.message || '删除失败')
+    }
+  } catch (error) {
+    if (error === 'cancel') return
+    console.error('[Cart] 删除失败:', error)
+    ElMessage.error('删除失败')
+  }
+}
+
+/**
+ * 【核心】去结算
+ */
+const handleCheckout = () => {
+  if (cartItems.value.length === 0) {
+    ElMessage.warning('购物车为空')
+    return
+  }
+  
+  ElMessage.success('正在跳转结算页面...')
+  console.log('[Cart] 结算商品:', cartItems.value)
+  console.log('[Cart] 总金额:', calculateTotal.value)
+  // 后续实现跳转到订单确认页面
 }
 
 // Initialize
@@ -998,6 +1208,170 @@ onMounted(() => {
 .footer-domain {
   color: rgba(255, 255, 255, 0.4);
   font-size: 12px;
+}
+
+/* ================== 购物车抽屉样式 ================== */
+
+.cart-drawer :deep(.el-drawer__header) {
+  padding: 20px;
+  margin-bottom: 0;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.cart-drawer :deep(.el-drawer__body) {
+  padding: 0;
+  overflow: hidden;
+}
+
+.cart-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.cart-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  background: #f5f7fa;
+  border-radius: 12px;
+  transition: all 0.3s;
+}
+
+.cart-item:hover {
+  background: #ebeef5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.cart-item-image {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.cart-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cart-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e4e7ed;
+}
+
+.cart-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cart-item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cart-item-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ff4757;
+  margin: 0;
+}
+
+.cart-item-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.cart-item-actions :deep(.el-input-number) {
+  width: 90px;
+}
+
+.delete-btn {
+  padding: 4px 8px;
+  color: #909399;
+  transition: color 0.3s;
+}
+
+.delete-btn:hover {
+  color: #f56c6c;
+}
+
+.cart-footer {
+  padding: 20px;
+  border-top: 1px solid #e4e7ed;
+  background: #fff;
+}
+
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.total-label {
+  font-size: 14px;
+  color: #606266;
+}
+
+.total-price {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ff4757;
+}
+
+.checkout-btn {
+  width: 100%;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.cart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+}
+
+.empty-text {
+  font-size: 16px;
+  color: #909399;
+  margin: 16px 0 24px 0;
+}
+
+.continue-shopping-btn {
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* Responsive */
