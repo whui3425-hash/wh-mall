@@ -46,8 +46,8 @@ public class JwtToken {
                 .withIssuer("GP")   // Issuer
                 .withSubject("JWT Token")   // Subject
                 .withAudience("member") // Audience
-                .withExpiresAt(new Date(System.currentTimeMillis()+3600000))    // Expiration time
-                .withNotBefore(new Date(System.currentTimeMillis()+1000))       // Available after 1 second
+                .withExpiresAt(new Date(System.currentTimeMillis()+3600000))    // Expiration time (1 hour)
+                // .withNotBefore(new Date(System.currentTimeMillis()+1000))    // 移除：立即生效，不需要等待1秒
                 .withIssuedAt(new Date())   // Issue time
                 .withJWTId(UUID.randomUUID().toString().replace("-",""))    // Unique identifier
                 .sign(algorithm);

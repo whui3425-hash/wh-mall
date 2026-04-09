@@ -15,4 +15,11 @@ public interface SKuService extends IService<Sku> {
     void delTypeSkuItems(Integer id);
 
     List<Sku> updateTypeSkuItems(Integer id);
+
+    /**
+     * 根据SPU ID获取第一个SKU
+     * @param spuId SPU ID
+     * @return 第一个SKU
+     */
+    Sku getFirstBySpuId(String spuId);
 }

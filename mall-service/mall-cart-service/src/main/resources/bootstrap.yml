@@ -17,12 +17,21 @@ spring:
         password: nacos
   main:
     allow-bean-definition-overriding: true
-  # MySQL数据源配置
+  # MySQL数据源配置 - 所有表都在 mall_goods 库中
   datasource:
-    url: jdbc:mysql://192.168.31.101:3306/mall_cart?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://192.168.31.101:3306/mall_goods?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: your_strong_password
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+# ====================MybatisPlus====================
+mybatis-plus:
+  mapper-locations: mapper/*.xml
+  type-aliases-package: com.wanghui.vip.mall.cart.model
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
 #日志配置
 logging:
   pattern:

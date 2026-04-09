@@ -42,12 +42,12 @@ CREATE TABLE IF NOT EXISTS `mall_cart` (
 -- ============================================
 -- 租户 1001 用户 zhangsan (user_id=1) 的购物车
 -- INSERT INTO `mall_cart` (`user_id`, `user_name`, `name`, `price`, `image`, `sku_id`, `num`, `tenant_id`) VALUES
--- ('1', 'zhangsan', 'iPhone 15 Pro Max', 99900, 'https://example.com/iphone.jpg', 'SKU_001', 2, '1001'),
--- ('1', 'zhangsan', 'MacBook Pro M3', 129900, 'https://example.com/macbook.jpg', 'SKU_002', 1, '1001');
+-- ('1', 'zhangsan', 'iPhone 15 Pro Max', 99900, '/images/goods/spu001-1.jpg', 'SKU_001', 2, '1001'),
+-- ('1', 'zhangsan', 'MacBook Pro M3', 129900, '/images/goods/spu002-1.jpg', 'SKU_002', 1, '1001');
 
 -- 租户 1002 用户 wangwu (user_id=3) 的购物车  
 -- INSERT INTO `mall_cart` (`user_id`, `user_name`, `name`, `price`, `image`, `sku_id`, `num`, `tenant_id`) VALUES
--- ('3', 'wangwu', 'SK-II神仙水', 154000, 'https://example.com/skii.jpg', 'SKU_101', 1, '1002');
+-- ('3', 'wangwu', 'SK-II神仙水', 154000, '/images/goods/spu005-1.jpg', 'SKU_101', 1, '1002');
 
 -- ============================================
 -- 查看表结构

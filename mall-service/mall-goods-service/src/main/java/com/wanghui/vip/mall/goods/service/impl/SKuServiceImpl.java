@@ -92,4 +92,18 @@ public class SKuServiceImpl extends ServiceImpl<SkuMapper,Sku> implements SKuSer
         return skuids==null || skuids.size()<=0? null : skuMapper.selectBatchIds(skuids);
     }
 
+    /**
+     * 根据SPU ID获取第一个SKU（用于SPU直接添加购物车场景）
+     * @param spuId SPU ID
+     * @return 第一个SKU
+     */
+    @Override
+    public Sku getFirstBySpuId(String spuId) {
+        List<Sku> skus = skuMapper.selectBySpuId(spuId);
+        if (skus != null && !skus.isEmpty()) {
+            return skus.get(0);
+        }
+        return null;
+    }
+
 }

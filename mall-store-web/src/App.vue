@@ -164,8 +164,8 @@
                 </el-tag>
               </div>
               <div class="product-price-row">
-                <span class="product-price">${{ (product.sort * 99 + 199) }}</span>
-                <span class="product-original">${{ (product.sort * 99 + 399) }}</span>
+                <span class="product-price">${{ ((product.price || 0) / 100).toFixed(2) }}</span>
+                <span class="product-original">${{ ((product.price || 0) / 100 * 1.2).toFixed(2) }}</span>
               </div>
               <div class="product-actions">
                 <el-button 
@@ -478,21 +478,27 @@ const resolveTheme = () => {
   return themeConfig.shop1
 }
 
-// Fetch products from backend
+// Fetch products from backend - 调用SKU广告列表接口
 const fetchProducts = async () => {
   loading.value = true
   try {
-    // Gateway will inject X-Tenant-Id based on Origin domain
-    const res = await post('/goods/brand/search/1/10', {})
+    // 【关键】调用 SKU 广告列表接口获取真实SKU数据
+    // 类型1是首页轮播/推荐商品
+    const res = await get('/sku/aditems/type?id=1')
     console.log('API Response:', res)
-    if (res && res.code === 20000 && res.data) {
-      // 为每个产品添加 addingToCart 属性（用于按钮loading状态）
-      products.value = (res.data.records || []).map(product => ({
-        ...product,
+    if (res && res.code === 20000 && res.data && res.data.length > 0) {
+      // 为每个SKU添加 addingToCart 属性（用于按钮loading状态）
+      products.value = res.data.map(sku => ({
+        id: sku.id,           // SKU ID (如 SKU001)
+        name: sku.name,       // SKU 名称
+        price: sku.price,     // 价格（分）
+        image: sku.image,    // 图片
+        sort: sku.sort || 1,  // 排序
         addingToCart: false
       }))
       ElMessage.success(`Loaded ${products.value.length} products`)
     } else {
+      console.warn('API returned empty data, using mock data')
       useMockData()
     }
   } catch (error) {
@@ -504,19 +510,34 @@ const fetchProducts = async () => {
   }
 }
 
-// Mock data fallback
+// Mock data fallback - 使用正确的SKU ID（与数据库匹配）
 const useMockData = () => {
   const isTech = tenantId.value === '1001'
-  products.value = [
-    { id: 1, name: isTech ? 'iPhone 15 Pro Max' : 'Estée Lauder Advanced Night Repair', sort: 1, addingToCart: false },
-    { id: 2, name: isTech ? 'MacBook Pro M3' : 'SK-II Facial Treatment Essence', sort: 2, addingToCart: false },
-    { id: 3, name: isTech ? 'AirPods Pro 2' : 'YSL Rouge Volupté Shine', sort: 3, addingToCart: false },
-    { id: 4, name: isTech ? 'Sony WH-1000XM5' : 'Dior Sauvage Eau de Toilette', sort: 4, addingToCart: false },
-    { id: 5, name: isTech ? 'iPad Pro 12.9' : 'Chanel Coco Mademoiselle', sort: 5, addingToCart: false },
-    { id: 6, name: isTech ? 'Apple Watch Ultra 2' : 'Lancôme Advanced Génifique', sort: 6, addingToCart: false },
-    { id: 7, name: isTech ? 'Canon EOS R6 Mark II' : 'Tom Ford Black Orchid', sort: 7, addingToCart: false },
-    { id: 8, name: isTech ? 'DJI Mavic 3 Pro' : 'La Mer Crème de la Mer', sort: 8, addingToCart: false }
-  ]
+  if (isTech) {
+    // 租户1001 - 数码产品（对应数据库SKU）- 价格以"分"为单位
+    products.value = [
+      { id: 'SKU001', name: 'iPhone 15 Pro Max - Natural Titanium 256GB', sort: 1, price: 999900, image: '/images/goods/sku-iphone-256.jpg', addingToCart: false },
+      { id: 'SKU002', name: 'iPhone 15 Pro Max - Blue Titanium 512GB', sort: 2, price: 1199900, image: '/images/goods/sku-iphone-512.jpg', addingToCart: false },
+      { id: 'SKU003', name: 'iPhone 15 Pro Max - Black Titanium 1TB', sort: 3, price: 1399900, image: '/images/goods/pic1.jpg', addingToCart: false },
+      { id: 'SKU004', name: 'MacBook Pro 16 - Space Black 36GB', sort: 4, price: 2499900, image: '/images/goods/spu002-1.jpg', addingToCart: false },
+      { id: 'SKU005', name: 'MacBook Pro 16 - Silver 48GB', sort: 5, price: 2999900, image: '/images/goods/spu002-2.jpg', addingToCart: false },
+      { id: 'SKU006', name: 'Sony WH-1000XM5 - Black', sort: 6, price: 349900, image: '/images/goods/spu003-1.jpg', addingToCart: false },
+      { id: 'SKU007', name: 'Sony WH-1000XM5 - Silver', sort: 7, price: 349900, image: '/images/goods/spu003-2.jpg', addingToCart: false },
+      { id: 'SKU008', name: 'MX Mechanical - Tactile Full Size', sort: 8, price: 129900, image: '/images/goods/spu004-1.jpg', addingToCart: false }
+    ]
+  } else {
+    // 租户1002 - 美妆/时尚产品（对应数据库SKU）- 价格以"分"为单位
+    products.value = [
+      { id: 'SKU010', name: 'Advanced Night Repair 50ml', sort: 1, price: 85000, image: '/images/goods/spu005-1.jpg', addingToCart: false },
+      { id: 'SKU011', name: 'Advanced Night Repair 100ml', sort: 2, price: 120000, image: '/images/goods/spu005-2.jpg', addingToCart: false },
+      { id: 'SKU012', name: 'Air Jordan 1 Retro - Chicago US 9', sort: 3, price: 159900, image: '/images/goods/spu006-1.jpg', addingToCart: false },
+      { id: 'SKU013', name: 'Air Jordan 1 Retro - Bred US 10', sort: 4, price: 169900, image: '/images/goods/spu006-2.jpg', addingToCart: false },
+      { id: 'SKU014', name: 'Ultraboost 23 - Core Black US 10', sort: 5, price: 139900, image: '/images/goods/spu007-1.jpg', addingToCart: false },
+      { id: 'SKU015', name: 'Ultraboost 23 - White US 9', sort: 6, price: 139900, image: '/images/goods/spu007-2.jpg', addingToCart: false },
+      { id: 'SKU016', name: 'Oversized Hoodie - Black M', sort: 7, price: 69900, image: '/images/goods/spu008-1.jpg', addingToCart: false },
+      { id: 'SKU017', name: 'Oversized Hoodie - Grey L', sort: 8, price: 69900, image: '/images/goods/spu008-2.jpg', addingToCart: false }
+    ]
+  }
 }
 
 // Handle product click
@@ -532,22 +553,35 @@ const scrollToProducts = () => {
 // ================== 登录相关方法 ==================
 
 /**
- * 检查本地登录状态
- * 【核心】如果未登录（无 buyer_token），自动弹出登录弹窗
+ * 【修复1】页面初始化状态唤醒 - 从 localStorage 恢复登录状态
+ * 页面刷新后 Vue 状态丢失，这里主动恢复登录态
  */
 const checkLoginStatus = () => {
+  // 【强物理校验】直接从 localStorage 读取，不依赖内存变量
   const buyerToken = localStorage.getItem('buyer_token')
   const savedUsername = localStorage.getItem('buyer_username')
+  const savedUserId = localStorage.getItem('buyer_userId')
 
-  if (buyerToken && savedUsername) {
-    // 已登录状态
+  // 【调试】输出 localStorage 内容到控制台
+  console.log('[Auth Debug] ===== 登录状态检查 =====')
+  console.log('[Auth Debug] buyer_token:', buyerToken ? buyerToken.substring(0, 20) + '...' : 'null/undefined')
+  console.log('[Auth Debug] buyer_username:', savedUsername)
+  console.log('[Auth Debug] buyer_userId:', savedUserId)
+  console.log('[Auth Debug] localStorage 所有键:', Object.keys(localStorage))
+  console.log('[Auth Debug] ============================')
+
+  if (buyerToken && buyerToken !== 'undefined' && buyerToken !== 'null') {
+    // 【核心】已登录：恢复前端状态，确保页面显示"已登录"
     isLoggedIn.value = true
-    currentUsername.value = savedUsername
-    console.log('[Buyer] 已登录用户:', savedUsername)
+    currentUsername.value = savedUsername || '买家用户'
+    console.log('[Auth] 状态恢复成功 - 用户:', savedUsername)
+    
+    // 确保关闭登录弹窗（防止刷新后弹窗还开着）
+    showLoginDialog.value = false
     return true
   } else {
-    // 未登录状态：自动弹出登录弹窗
-    console.log('[Buyer] 未登录，自动弹出登录框')
+    // 未登录：弹出登录弹窗
+    console.log('[Auth] 未检测到有效 Token，需要登录')
     isLoggedIn.value = false
     currentUsername.value = ''
     showLoginDialog.value = true
@@ -556,7 +590,7 @@ const checkLoginStatus = () => {
 }
 
 /**
- * 处理买家登录
+ * 处理买家登录 - 增强调试版本
  */
 const handleLogin = async () => {
   if (!loginFormRef.value) return
@@ -575,16 +609,31 @@ const handleLogin = async () => {
       password: loginForm.value.password
     })
     
+    console.log('[Login] 登录响应:', res)
+    
     if (res.code === 20000 && res.data) {
-      // 【核心】存储买家 Token 到 localStorage
-      localStorage.setItem('buyer_token', res.data.token)
-      localStorage.setItem('buyer_username', res.data.username)
-      localStorage.setItem('buyer_userId', res.data.userId)
-      localStorage.setItem('buyer_tenantId', res.data.tenantId)
+      // 【核心】存储买家 Token 到 localStorage - 增强检查
+      const token = res.data.token
+      console.log('[Login] 获取到的token:', token ? token.substring(0, 20) + '...' : 'undefined/null')
+      
+      if (!token) {
+        ElMessage.error('登录失败：后端未返回token')
+        console.error('[Login] 响应数据:', res.data)
+        return
+      }
+      
+      localStorage.setItem('buyer_token', token)
+      localStorage.setItem('buyer_username', res.data.username || '')
+      localStorage.setItem('buyer_userId', res.data.userId || '')
+      localStorage.setItem('buyer_tenantId', res.data.tenantId || '')
+      
+      // 立即验证存储是否成功
+      const storedToken = localStorage.getItem('buyer_token')
+      console.log('[Login] 存储验证 - token已存储:', !!storedToken)
       
       // 更新登录状态
       isLoggedIn.value = true
-      currentUsername.value = res.data.username
+      currentUsername.value = res.data.username || '买家用户'
       
       // 关闭弹窗并提示
       showLoginDialog.value = false
@@ -593,10 +642,10 @@ const handleLogin = async () => {
       // 清空表单
       loginForm.value = { username: '', password: '' }
       
-      console.log('[Buyer] 登录成功:', {
+      console.log('[Login] 登录成功，状态:', {
         userId: res.data.userId,
         username: res.data.username,
-        tenantId: res.data.tenantId
+        hasToken: !!storedToken
       })
       
       // 登录成功后刷新购物车数量
@@ -605,7 +654,7 @@ const handleLogin = async () => {
       ElMessage.error(res.message || '登录失败，请检查用户名和密码')
     }
   } catch (error) {
-    console.error('[Buyer] 登录失败:', error)
+    console.error('[Login] 登录失败:', error)
     ElMessage.error(error.message || '网络错误，请检查网关服务是否启动')
   } finally {
     loginLoading.value = false
@@ -639,39 +688,62 @@ const handleUserCommand = (command) => {
 // ================== 购物车相关方法 ==================
 
 /**
- * 加载购物车数量（简化版，不展开详情）
+ * 加载购物车数量（增强调试版）
  */
 const loadCartCount = async () => {
   const buyerToken = localStorage.getItem('buyer_token')
-  if (!buyerToken) {
+  console.log('[CartCount Debug] 开始加载购物车数量, token存在:', !!buyerToken)
+  
+  if (!buyerToken || buyerToken === 'undefined' || buyerToken === 'null') {
+    console.log('[CartCount Debug] 无有效token，跳过加载')
     cartCount.value = 0
     return
   }
   
   try {
     const res = await get('/cart/list')
+    console.log('[CartCount Debug] 购物车API响应:', res)
+    
     if (res.code === 20000 && res.data) {
       cartCount.value = res.data.length  // 商品种类数量
-      console.log('[Cart] 购物车数量:', cartCount.value)
+      console.log('[CartCount] 购物车数量:', cartCount.value)
+    } else {
+      console.warn('[CartCount] 获取购物车失败:', res.message)
+      cartCount.value = 0
     }
   } catch (error) {
-    console.error('[Cart] 获取购物车失败:', error)
+    console.error('[CartCount] 获取购物车失败:', error)
     cartCount.value = 0
   }
 }
 
 /**
- * 【核心】添加商品到购物车
+ * 【修复2】添加商品到购物车 - 强物理校验，不依赖内存变量
+ * 每次点击都直接读取 localStorage，确保刷新后状态不丢失
  * @param product 商品对象
  */
 const handleAddToCart = async (product) => {
-  // 1. 检查是否已登录（有 buyer_token）
+  // 【强物理校验】直接读取 localStorage，不依赖 isLoggedIn 内存变量
   const buyerToken = localStorage.getItem('buyer_token')
-  if (!buyerToken) {
+  
+  // 【调试】详细输出加购时的检测过程
+  console.log('[Cart Debug] ===== 加购校验 =====')
+  console.log('[Cart Debug] buyer_token:', buyerToken)
+  console.log('[Cart Debug] token类型:', typeof buyerToken)
+  console.log('[Cart Debug] token是否为空:', buyerToken === '')
+  console.log('[Cart Debug] token是否null:', buyerToken === null)
+  console.log('[Cart Debug] token是否undefined:', buyerToken === undefined)
+  console.log('[Cart Debug] isLoggedIn.value:', isLoggedIn.value)
+  console.log('[Cart Debug] =====================')
+  
+  if (!buyerToken || buyerToken === 'undefined' || buyerToken === 'null' || buyerToken === '') {
     ElMessage.warning('请先登录后再添加商品到购物车')
+    console.log('[Cart] 检测到未登录，弹出登录框')
     showLoginDialog.value = true
     return
   }
+  
+  console.log('[Cart] 已登录，继续加购流程')
   
   // 设置加载状态
   product.addingToCart = true
@@ -847,13 +919,35 @@ onMounted(() => {
   console.log(`[Store] Domain: ${currentDomain.value}`)
   console.log(`[Store] Tenant: ${theme.tenantId}`)
   
-  // 检查买家登录状态
-  checkLoginStatus()
+  // 【关键】首先检查并恢复登录状态
+  const isLoggedInResult = checkLoginStatus()
+  console.log('[Init] 登录状态检查结果:', isLoggedInResult)
   
   fetchProducts()
   
-  // 加载购物车数量（如果已登录）
-  loadCartCount()
+  // 【关键】只有登录后才加载购物车数量
+  if (isLoggedInResult) {
+    console.log('[Init] 用户已登录，开始加载购物车')
+    loadCartCount()
+  } else {
+    console.log('[Init] 用户未登录，跳过购物车加载')
+  }
+  
+  // 【调试工具】将检查函数挂载到 window，方便在控制台调试
+  window.checkLoginState = () => {
+    console.log('===== 手动检查登录状态 =====')
+    console.log('buyer_token:', localStorage.getItem('buyer_token'))
+    console.log('buyer_username:', localStorage.getItem('buyer_username'))
+    console.log('buyer_userId:', localStorage.getItem('buyer_userId'))
+    console.log('isLoggedIn.value:', isLoggedIn.value)
+    console.log('showLoginDialog.value:', showLoginDialog.value)
+    console.log('===========================')
+    return {
+      token: localStorage.getItem('buyer_token'),
+      username: localStorage.getItem('buyer_username'),
+      isLoggedIn: isLoggedIn.value
+    }
+  }
 })
 </script>
 

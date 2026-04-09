@@ -36,6 +36,17 @@ public class SkuController {
         return RespResult.ok(sku);
     }
 
+    /**
+     * 根据SPU ID查询第一个SKU（用于SPU直接添加购物车场景）
+     * @param spuId SPU ID
+     * @return 第一个SKU
+     */
+    @GetMapping(value = "/spu/{spuId}")
+    public RespResult<Sku> oneBySpuId(@PathVariable(value = "spuId")String spuId){
+        Sku sku = sKuService.getFirstBySpuId(spuId);
+        return RespResult.ok(sku);
+    }
+
     /****
      * Query promotion product list by promotion category
      */

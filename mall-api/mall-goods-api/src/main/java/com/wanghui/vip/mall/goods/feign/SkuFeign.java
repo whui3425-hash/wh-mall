@@ -17,6 +17,14 @@ public interface SkuFeign {
     @GetMapping(value = "/sku/{id}")
     RespResult<Sku> one(@PathVariable(value = "id")String id);
 
+    /**
+     * 根据SPU ID查询第一个SKU（用于SPU直接添加购物车场景）
+     * @param spuId SPU ID
+     * @return 第一个SKU
+     */
+    @GetMapping(value = "/sku/spu/{spuId}")
+    RespResult<Sku> oneBySpuId(@PathVariable(value = "spuId")String spuId);
+
     @GetMapping(value = "/sku/aditems/type")
     List<Sku> typeItems(@RequestParam(value = "id")Integer id);
 

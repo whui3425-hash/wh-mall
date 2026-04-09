@@ -41,11 +41,39 @@ spring:
             - Path=/api/order/**
           filters:
             - StripPrefix=1
-        # Goods service route
+        # Goods service route - 商品核心服务（SPU/SKU/Brand/Category）
         - id: mall-goods-route
           uri: lb://mall-goods
           predicates:
             - Path=/api/goods/**
+          filters:
+            - StripPrefix=1
+        # SKU service route - SKU相关接口
+        - id: mall-sku-route
+          uri: lb://mall-goods
+          predicates:
+            - Path=/api/sku/**
+          filters:
+            - StripPrefix=1
+        # SPU service route - SPU相关接口
+        - id: mall-spu-route
+          uri: lb://mall-goods
+          predicates:
+            - Path=/api/spu/**
+          filters:
+            - StripPrefix=1
+        # Brand service route - 品牌相关接口
+        - id: mall-brand-route
+          uri: lb://mall-goods
+          predicates:
+            - Path=/api/brand/**
+          filters:
+            - StripPrefix=1
+        # Category service route - 分类相关接口
+        - id: mall-category-route
+          uri: lb://mall-goods
+          predicates:
+            - Path=/api/category/**
           filters:
             - StripPrefix=1
         # User service route

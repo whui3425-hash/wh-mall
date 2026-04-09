@@ -28,15 +28,16 @@ request.interceptors.request.use(
     config.headers['X-Tenant-Id'] = tenantId
     
     // ==========================================
-    // 【C端买家登录】Token 注入逻辑
+    // 【修复3】Axios 拦截器每次发车前强制挂载 Token
     // ==========================================
-    // 从 localStorage 读取 buyer_token（C端专用）
+    // 【关键】每次请求都实时读取 localStorage，确保最新 Token
     const buyerToken = localStorage.getItem('buyer_token')
     if (buyerToken) {
+      // 【关键】必须带 'Bearer ' 前缀，符合后端 JWT 规范
       config.headers['Authorization'] = `Bearer ${buyerToken}`
-      console.log(`[Request] ${config.url} | Tenant: ${tenantId} | Buyer Token: ${buyerToken.substring(0, 20)}...`)
+      console.log(`[Request] ${config.url} | Tenant: ${tenantId} | Token: ${buyerToken.substring(0, 15)}...`)
     } else {
-      console.log(`[Request] ${config.url} | Tenant: ${tenantId} | No Token`)
+      console.log(`[Request] ${config.url} | Tenant: ${tenantId} | 无Token`)
     }
     
     return config

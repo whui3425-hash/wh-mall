@@ -116,9 +116,9 @@ CREATE TABLE IF NOT EXISTS category_attr (
 
 -- Brand test data
 INSERT INTO brand (id, name, image, initial, sort, tenant_id) VALUES
-(1, 'Apple', 'https://example.com/brands/apple.png', 'A', 1, '1001'),
-(2, 'Huawei', 'https://example.com/brands/huawei.png', 'H', 2, '1001'),
-(3, 'Xiaomi', 'https://example.com/brands/xiaomi.png', 'X', 3, '1001');
+(1, 'Apple', '/images/goods/brand-apple.jpg', 'A', 1, '1001'),
+(2, 'Huawei', '/images/goods/brand-huawei.jpg', 'H', 2, '1001'),
+(3, 'Xiaomi', '/images/goods/brand-xiaomi.jpg', 'X', 3, '1001');
 
 -- Category test data (three-level hierarchy)
 INSERT INTO category (id, name, sort, parent_id, tenant_id) VALUES
@@ -135,19 +135,19 @@ INSERT INTO category (id, name, sort, parent_id, tenant_id) VALUES
 
 -- SPU test data
 INSERT INTO spu (id, name, intro, brand_id, category_one_id, category_two_id, category_three_id, images, after_sales_service, content, attribute_list, is_marketable, is_delete, status, tenant_id) VALUES
-('100000001', 'iPhone 15 Pro Max', 'Apple flagship smartphone with A17 Pro chip', 1, 1, 11, 111, '["https://example.com/iphone15-1.jpg", "https://example.com/iphone15-2.jpg"]', '7-day no-reason return, 1-year warranty', '<h1>iPhone 15 Pro Max</h1><p>The most advanced iPhone ever.</p>', '[{"color": "Natural Titanium", "storage": "256GB"}]', 1, 0, 1, '1001'),
-('100000002', 'Huawei Mate 60 Pro', 'Huawei flagship with Kirin 9000S chip', 2, 1, 11, 111, '["https://example.com/mate60-1.jpg", "https://example.com/mate60-2.jpg"]', '7-day no-reason return, 2-year warranty', '<h1>Huawei Mate 60 Pro</h1><p>Satellite communication capability.</p>', '[{"color": "Black", "storage": "512GB"}]', 1, 0, 1, '1001'),
-('100000003', 'Xiaomi 14 Pro', 'Xiaomi flagship with Snapdragon 8 Gen 3', 3, 1, 11, 111, '["https://example.com/xiaomi14-1.jpg", "https://example.com/xiaomi14-2.jpg"]', '7-day no-reason return, 1-year warranty', '<h1>Xiaomi 14 Pro</h1><p>Leica optics system.</p>', '[{"color": "White", "storage": "256GB"}]', 1, 0, 1, '1001');
+('100000001', 'iPhone 15 Pro Max', 'Apple flagship smartphone with A17 Pro chip', 1, 1, 11, 111, '["/images/goods/spu001-1.jpg", "/images/goods/spu001-2.jpg"]', '7-day no-reason return, 1-year warranty', '<h1>iPhone 15 Pro Max</h1><p>The most advanced iPhone ever.</p>', '[{"color": "Natural Titanium", "storage": "256GB"}]', 1, 0, 1, '1001'),
+('100000002', 'Huawei Mate 60 Pro', 'Huawei flagship with Kirin 9000S chip', 2, 1, 11, 111, '["/images/goods/iphone-huawei-1.jpg", "/images/goods/iphone-huawei-2.jpg"]', '7-day no-reason return, 2-year warranty', '<h1>Huawei Mate 60 Pro</h1><p>Satellite communication capability.</p>', '[{"color": "Black", "storage": "512GB"}]', 1, 0, 1, '1001'),
+('100000003', 'Xiaomi 14 Pro', 'Xiaomi flagship with Snapdragon 8 Gen 3', 3, 1, 11, 111, '["/images/goods/iphone-xiaomi-1.jpg", "/images/goods/iphone-xiaomi-2.jpg"]', '7-day no-reason return, 1-year warranty', '<h1>Xiaomi 14 Pro</h1><p>Leica optics system.</p>', '[{"color": "White", "storage": "256GB"}]', 1, 0, 1, '1001');
 
 -- SKU test data
 INSERT INTO sku (id, name, price, num, image, images, spu_id, category_id, category_name, brand_id, brand_name, sku_attribute, status, tenant_id) VALUES
 -- iPhone 15 Pro Max SKUs
-('200000001', 'iPhone 15 Pro Max - Natural Titanium 256GB', 999900, 100, 'https://example.com/iphone15-256.jpg', '["https://example.com/iphone15-1.jpg"]', '100000001', 111, 'Smartphone', 1, 'Apple', '{"color": "Natural Titanium", "storage": "256GB"}', 1, '1001'),
-('200000002', 'iPhone 15 Pro Max - Blue Titanium 512GB', 1199900, 80, 'https://example.com/iphone15-512.jpg', '["https://example.com/iphone15-2.jpg"]', '100000001', 111, 'Smartphone', 1, 'Apple', '{"color": "Blue Titanium", "storage": "512GB"}', 1, '1001'),
+('200000001', 'iPhone 15 Pro Max - Natural Titanium 256GB', 999900, 100, '/images/goods/sku-iphone-256.jpg', '["/images/goods/spu001-1.jpg"]', '100000001', 111, 'Smartphone', 1, 'Apple', '{"color": "Natural Titanium", "storage": "256GB"}', 1, '1001'),
+('200000002', 'iPhone 15 Pro Max - Blue Titanium 512GB', 1199900, 80, '/images/goods/sku-iphone-512.jpg', '["/images/goods/spu001-2.jpg"]', '100000001', 111, 'Smartphone', 1, 'Apple', '{"color": "Blue Titanium", "storage": "512GB"}', 1, '1001'),
 -- Huawei Mate 60 Pro SKUs
-('200000003', 'Huawei Mate 60 Pro - Black 512GB', 699900, 150, 'https://example.com/mate60-black.jpg', '["https://example.com/mate60-1.jpg"]', '100000002', 111, 'Smartphone', 2, 'Huawei', '{"color": "Black", "storage": "512GB"}', 1, '1001'),
+('200000003', 'Huawei Mate 60 Pro - Black 512GB', 699900, 150, '/images/goods/sku-huawei-512.jpg', '["/images/goods/iphone-huawei-1.jpg"]', '100000002', 111, 'Smartphone', 2, 'Huawei', '{"color": "Black", "storage": "512GB"}', 1, '1001'),
 -- Xiaomi 14 Pro SKUs
-('200000004', 'Xiaomi 14 Pro - White 256GB', 499900, 200, 'https://example.com/xiaomi14-white.jpg', '["https://example.com/xiaomi14-1.jpg"]', '100000003', 111, 'Smartphone', 3, 'Xiaomi', '{"color": "White", "storage": "256GB"}', 1, '1001');
+('200000004', 'Xiaomi 14 Pro - White 256GB', 499900, 200, '/images/goods/sku-xiaomi-256.jpg', '["/images/goods/iphone-xiaomi-1.jpg"]', '100000003', 111, 'Smartphone', 3, 'Xiaomi', '{"color": "White", "storage": "256GB"}', 1, '1001');
 
 -- Ad items test data
 INSERT INTO ad_items (id, name, type, sku_id, sort, tenant_id) VALUES

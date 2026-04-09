@@ -33,19 +33,34 @@ public class CartServiceImpl implements CartService {
      * 3. 已存在：数量累加（Update）
      * 4. 不存在：新增记录（Insert）
      * 5. 自动注入当前租户ID（从网关传递的Header中解析）
+     *
+     * 【兼容性处理】前端可能传递SPU ID（如SPU001），此时自动查找该SPU下的第一个SKU
      * @param userId 用户ID（从JWT Header X-User-Id 获取）
      * @param userName 用户名（从JWT Header X-User-Name 获取）
-     * @param skuId SKU ID
+     * @param skuId SKU ID 或 SPU ID
      * @param num 添加数量
      */
     @Override
     public void addCartItem(String userId, String userName, String skuId, Integer num) {
         // 1. 通过Feign调用商品服务，获取SKU详细信息
         RespResult<Sku> skuResp = skuFeign.one(skuId);
-        if (skuResp == null || skuResp.getData() == null) {
-            throw new RuntimeException("商品不存在或已下架，skuId=" + skuId);
+        Sku sku = null;
+
+        if (skuResp != null && skuResp.getData() != null) {
+            sku = skuResp.getData();
+        } else {
+            // 【兼容性】如果直接查询SKU失败，尝试作为SPU ID查询第一个SKU
+            System.out.println("[Cart] SKU not found by direct ID, trying SPU lookup for: " + skuId);
+            RespResult<Sku> spuSkuResp = skuFeign.oneBySpuId(skuId);
+            if (spuSkuResp != null && spuSkuResp.getData() != null) {
+                sku = spuSkuResp.getData();
+                System.out.println("[Cart] Found SKU by SPU lookup: " + sku.getId() + " for SPU: " + skuId);
+            }
         }
-        Sku sku = skuResp.getData();
+
+        if (sku == null) {
+            throw new RuntimeException("商品不存在或已下架，skuId/spuId=" + skuId);
+        }
 
         // 2. 查询当前用户的购物车是否已存在该SKU（基于userId）
         Cart existingCart = findByUserIdAndSkuId(userId, skuId);

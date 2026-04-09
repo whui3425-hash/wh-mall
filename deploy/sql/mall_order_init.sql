@@ -81,11 +81,11 @@ INSERT INTO order_info (id, pay_type, username, recipients, recipients_mobile, r
 
 -- Order SKU test data
 INSERT INTO order_sku (id, image, sku_id, order_id, name, price, num, money, tenant_id) VALUES
-('ORDERSKU001', 'https://example.com/iphone15.jpg', 'SKU001', 'ORDER001', 'iPhone 15 Pro Max 256GB', 999900, 1, 999900, '1001'),
-('ORDERSKU002', 'https://example.com/airpods.jpg', 'SKU002', 'ORDER001', 'AirPods Pro 2', 199900, 2, 399800, '1001'),
-('ORDERSKU003', 'https://example.com/mate60.jpg', 'SKU003', 'ORDER002', 'Huawei Mate 60 Pro 512GB', 699900, 1, 699900, '1001'),
-('ORDERSKU004', 'https://example.com/xiaomi14.jpg', 'SKU004', 'ORDER002', 'Xiaomi 14 Pro 256GB', 499900, 1, 499900, '1001'),
-('ORDERSKU005', 'https://example.com/ipad.jpg', 'SKU005', 'ORDER003', 'iPad Pro 12.9 inch', 899900, 1, 899900, '1001');
+('ORDERSKU001', '/images/goods/order-iphone15.jpg', 'SKU001', 'ORDER001', 'iPhone 15 Pro Max 256GB', 999900, 1, 999900, '1001'),
+('ORDERSKU002', '/images/goods/order-airpods.jpg', 'SKU002', 'ORDER001', 'AirPods Pro 2', 199900, 2, 399800, '1001'),
+('ORDERSKU003', '/images/goods/order-mate60.jpg', 'SKU003', 'ORDER002', 'Huawei Mate 60 Pro 512GB', 699900, 1, 699900, '1001'),
+('ORDERSKU004', '/images/goods/order-xiaomi14.jpg', 'SKU004', 'ORDER002', 'Xiaomi 14 Pro 256GB', 499900, 1, 499900, '1001'),
+('ORDERSKU005', '/images/goods/order-ipad.jpg', 'SKU005', 'ORDER003', 'iPad Pro 12.9 inch', 899900, 1, 899900, '1001');
 
 -- Order refund test data
 INSERT INTO order_refund (id, order_no, refund_type, order_sku_id, username, status, money, tenant_id) VALUES
