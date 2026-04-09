@@ -2,7 +2,7 @@
 -- 创建 order_sku 表（订单商品明细表）
 -- ==================================================
 
-USE mall_order;
+USE mall_goods;
 
 -- 如果表存在则删除（注意：生产环境慎用）
 DROP TABLE IF EXISTS order_sku;
