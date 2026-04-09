@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/spu")
+@RequestMapping(value = "/api/spu")
 @CrossOrigin
 public class SpuController {
 

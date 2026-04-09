@@ -36,7 +36,12 @@ public class Order  implements Serializable {
     private Integer orderStatus;
     private Integer payStatus;
     private Integer isDelete;
+    private String tenantId;        // 【多租户】租户ID，数据隔离
+    private String outTradeNo;      // 【支付】外部交易流水号，拉起支付时使用
 
     @TableField(exist = false)
     private List<String> cartIds;
+
+    @TableField(exist = false)
+    private List<Long> cartItemIds;  // 【提交订单】购物车商品ID列表（不持久化）
 }

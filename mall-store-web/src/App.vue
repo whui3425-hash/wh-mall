@@ -253,6 +253,71 @@
       </template>
     </el-dialog>
 
+    <!-- ================== 收银台弹窗 ================== -->
+    <el-dialog
+      v-model="showPayDialog"
+      title="收银台"
+      width="480px"
+      :close-on-click-modal="false"
+      :show-close="true"
+      center
+      class="pay-dialog"
+    >
+      <div class="pay-content">
+        <!-- 订单信息展示 -->
+        <div class="order-info">
+          <div class="order-label">订单编号</div>
+          <div class="order-value order-no">{{ orderResult.outTradeNo }}</div>
+        </div>
+
+        <div class="order-info">
+          <div class="order-label">商品数量</div>
+          <div class="order-value">{{ orderResult.totalNum }} 件</div>
+        </div>
+
+        <el-divider />
+
+        <!-- 支付金额 -->
+        <div class="pay-amount-section">
+          <div class="pay-label">应付金额</div>
+          <div class="pay-amount">${{ (orderResult.totalAmount / 100).toFixed(2) }}</div>
+        </div>
+
+        <!-- 支付方式（模拟） -->
+        <div class="pay-methods">
+          <div class="pay-method-title">选择支付方式</div>
+          <div class="pay-method-options">
+            <div class="pay-method-option active">
+              <el-icon :size="24"><Wallet /></el-icon>
+              <span>微信支付</span>
+            </div>
+            <div class="pay-method-option">
+              <el-icon :size="24"><CreditCard /></el-icon>
+              <span>支付宝</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="pay-footer">
+          <el-button @click="handleCancelPay" size="large">
+            稍后支付
+          </el-button>
+          <el-button
+            type="primary"
+            size="large"
+            :color="themeColor"
+            @click="handleConfirmPay"
+            class="confirm-pay-btn"
+          >
+            <el-icon><WalletFilled /></el-icon>
+            确认支付
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
     <!-- ================== 购物车抽屉 ================== -->
     <el-drawer
       v-model="showCartDrawer"
@@ -326,8 +391,10 @@
             :color="themeColor"
             class="checkout-btn"
             @click="handleCheckout"
+            :loading="submitting"
+            :disabled="cartItems.length === 0"
           >
-            去结算 ({{ cartItems.length }} items)
+            {{ submitting ? '提交订单中...' : `去结算 (${cartItems.length} items)` }}
           </el-button>
         </div>
       </div>
@@ -355,7 +422,7 @@ import { post, get, del, put } from '@/utils/request'
 import {
   Shop, Search, ShoppingCart, User, ShoppingBag,
   StarFilled, Picture, Cellphone, Brush, Watch, Headset,
-  ArrowDown, Lock, Delete
+  ArrowDown, Lock, Delete, Wallet, CreditCard, WalletFilled
 } from '@element-plus/icons-vue'
 
 // Theme configuration based on domain
@@ -410,6 +477,16 @@ const cartCount = ref(0)                    // 购物车商品种类数量（Bad
 const cartItems = ref([])                   // 购物车数据列表
 const showCartDrawer = ref(false)           // 控制购物车抽屉显示
 const cartLoading = ref(false)                // 购物车加载状态
+
+// ================== 订单提交相关状态 ==================
+const submitting = ref(false)               // 订单提交loading状态
+const showPayDialog = ref(false)            // 收银台弹窗显示
+const orderResult = ref({                   // 订单提交结果
+  orderId: '',
+  outTradeNo: '',
+  totalAmount: 0,
+  totalNum: 0
+})
 
 // ================== 登录相关状态 ==================
 const showLoginDialog = ref(false)          // 控制登录弹窗显示
@@ -887,18 +964,138 @@ const handleDeleteCartItem = async (item) => {
 }
 
 /**
- * 【核心】去结算
+ * 【核心】提交订单 - 调用后端 /api/order/submit
  */
-const handleCheckout = () => {
+const handleCheckout = async () => {
   if (cartItems.value.length === 0) {
     ElMessage.warning('购物车为空')
     return
   }
-  
-  ElMessage.success('正在跳转结算页面...')
-  console.log('[Cart] 结算商品:', cartItems.value)
-  console.log('[Cart] 总金额:', calculateTotal.value)
-  // 后续实现跳转到订单确认页面
+
+  // 检查登录状态
+  const buyerToken = localStorage.getItem('buyer_token')
+  if (!buyerToken) {
+    ElMessage.warning('请先登录')
+    showLoginDialog.value = true
+    return
+  }
+
+  // 防止重复提交
+  if (submitting.value) {
+    return
+  }
+
+  submitting.value = true
+
+  try {
+    // 【关键】提取购物车商品ID列表
+    // 如果将来加了勾选框，这里可以改为只提交被选中的商品
+    const cartItemIds = cartItems.value.map(item => item.id)
+
+    console.log('[Order] 提交订单，商品ID列表:', cartItemIds)
+
+    // 【核心】调用订单提交接口
+    const res = await post('/order/submit', {
+      cartItemIds: cartItemIds
+    })
+
+    console.log('[Order] 订单提交响应:', res)
+
+    if (res.code === 20000 && res.data) {
+      // ========== 订单创建成功 ==========
+      const result = res.data
+
+      // 保存订单结果
+      orderResult.value = {
+        orderId: result.orderId || '',
+        outTradeNo: result.outTradeNo || '',
+        totalAmount: result.totalAmount || 0,
+        totalNum: result.totalNum || 0
+      }
+
+      console.log('[Order] 订单创建成功:', orderResult.value)
+
+      // 1. 关闭购物车抽屉
+      showCartDrawer.value = false
+
+      // 2. 显示成功消息
+      ElMessage.success('订单创建成功，即将跳转支付...')
+
+      // 3. 弹出收银台弹窗
+      showPayDialog.value = true
+
+      // 4. 清空购物车数据（因为已购买的商品已从数据库删除）
+      cartItems.value = []
+      cartCount.value = 0
+
+    } else {
+      // 业务逻辑错误（如库存不足等）
+      console.error('[Order] 订单提交失败:', res.message)
+      ElMessage.error(res.message || '订单提交失败')
+    }
+
+  } catch (error) {
+    console.error('[Order] 订单提交异常:', error)
+
+    // 处理不同类型的错误
+    if (error.response?.status === 401) {
+      ElMessage.error('登录已过期，请重新登录')
+      localStorage.removeItem('buyer_token')
+      showLoginDialog.value = true
+    } else if (error.message?.includes('Network Error')) {
+      ElMessage.error('网络错误，请检查网关服务是否启动')
+    } else {
+      ElMessage.error(error.message || '订单提交失败，请稍后重试')
+    }
+
+  } finally {
+    submitting.value = false
+  }
+}
+
+/**
+ * 【收银台】处理确认支付
+ */
+const handleConfirmPay = () => {
+  // 这里可以接入真实的支付SDK（如微信支付、支付宝等）
+  // 目前先模拟支付成功
+  ElMessageBox.confirm(
+    `确定要支付订单 ${orderResult.value.outTradeNo} 吗？\n金额: $${(orderResult.value.totalAmount / 100).toFixed(2)}`,
+    '确认支付',
+    {
+      confirmButtonText: '确认支付',
+      cancelButtonText: '稍后支付',
+      type: 'warning'
+    }
+  ).then(() => {
+    // 模拟支付成功
+    ElMessage.success('支付成功！')
+    showPayDialog.value = false
+
+    // 清空订单结果
+    orderResult.value = {
+      orderId: '',
+      outTradeNo: '',
+      totalAmount: 0,
+      totalNum: 0
+    }
+
+    // 可以在这里跳转到订单详情页或支付成功页
+    // router.push('/order/success')
+
+  }).catch(() => {
+    // 用户选择稍后支付
+    ElMessage.info('订单已保存，请在30分钟内完成支付')
+    showPayDialog.value = false
+  })
+}
+
+/**
+ * 【收银台】取消支付
+ */
+const handleCancelPay = () => {
+  showPayDialog.value = false
+  ElMessage.info('订单已保存，请在30分钟内完成支付')
 }
 
 // Initialize
@@ -1571,5 +1768,153 @@ onMounted(() => {
 /* 下拉菜单样式调整 */
 :deep(.el-dropdown-menu__item) {
   font-size: 14px;
+}
+
+/* ================== 收银台弹窗样式 ================== */
+
+.pay-dialog :deep(.el-dialog__header) {
+  padding: 20px 24px;
+  margin-right: 0;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.pay-dialog :deep(.el-dialog__title) {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.pay-content {
+  padding: 0 8px;
+}
+
+.order-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.order-label {
+  font-size: 14px;
+  color: #909399;
+}
+
+.order-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.order-no {
+  font-family: 'Courier New', monospace;
+  background: #f5f7fa;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.pay-amount-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+  padding: 16px;
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+  border-radius: 12px;
+  border: 1px solid #ffdbdb;
+}
+
+.pay-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #606266;
+}
+
+.pay-amount {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ff4757;
+}
+
+.pay-methods {
+  margin-top: 24px;
+}
+
+.pay-method-title {
+  font-size: 14px;
+  color: #606266;
+  margin-bottom: 12px;
+}
+
+.pay-method-options {
+  display: flex;
+  gap: 12px;
+}
+
+.pay-method-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border: 2px solid #e4e7ed;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pay-method-option:hover {
+  border-color: #c0c4cc;
+}
+
+.pay-method-option.active {
+  border-color: v-bind(themeColor);
+  background: rgba(30, 58, 95, 0.05);
+}
+
+.pay-method-option span {
+  font-size: 13px;
+  color: #606266;
+}
+
+.pay-method-option.active span {
+  color: v-bind(themeColor);
+  font-weight: 600;
+}
+
+.pay-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 0 4px;
+}
+
+.confirm-pay-btn {
+  padding: 0 24px;
+}
+
+.confirm-pay-btn :deep(.el-icon) {
+  margin-right: 8px;
+}
+
+/* Responsive for pay dialog */
+@media (max-width: 768px) {
+  .pay-method-options {
+    flex-direction: column;
+  }
+
+  .pay-amount {
+    font-size: 24px;
+  }
+
+  .pay-footer {
+    flex-direction: column-reverse;
+  }
+
+  .pay-footer .el-button {
+    width: 100%;
+  }
 }
 </style>

@@ -25,10 +25,11 @@ request.interceptors.request.use(
     const path = config.url || ''
 
     // 判断是否为 C 端买家接口（购物车、订单、用户个人中心等）
-    const isBuyerApi = path.startsWith('/cart') ||
-                        path.startsWith('/order') ||
-                        path.startsWith('/user') ||
-                        (path.startsWith('/pay') && !path.includes('/admin'))
+    // 【统一】所有接口都以 /api 开头
+    const isBuyerApi = path.startsWith('/api/cart') ||
+                        path.startsWith('/api/order') ||
+                        path.startsWith('/api/user') ||
+                        (path.startsWith('/api/pay') && !path.includes('/admin'))
 
     if (isBuyerApi) {
       // 【C端】从 localStorage 读取 buyer_token
@@ -58,10 +59,11 @@ request.interceptors.response.use(
     const requestPath = response.config.url || ''
 
     // 判断是否为 C 端请求，用于区分处理 Token 过期
-    const isBuyerApi = requestPath.startsWith('/cart') ||
-                        requestPath.startsWith('/order') ||
-                        requestPath.startsWith('/user') ||
-                        (requestPath.startsWith('/pay') && !requestPath.includes('/admin'))
+    // 【统一】所有接口都以 /api 开头
+    const isBuyerApi = requestPath.startsWith('/api/cart') ||
+                        requestPath.startsWith('/api/order') ||
+                        requestPath.startsWith('/api/user') ||
+                        (requestPath.startsWith('/api/pay') && !requestPath.includes('/admin'))
 
     // 统一处理 401 未授权
     if (data.code === 40100) {
@@ -84,9 +86,10 @@ request.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       const requestPath = error.config?.url || ''
-      const isBuyerApi = requestPath.startsWith('/cart') ||
-                          requestPath.startsWith('/order') ||
-                          requestPath.startsWith('/user')
+      // 【统一】所有接口都以 /api 开头
+      const isBuyerApi = requestPath.startsWith('/api/cart') ||
+                          requestPath.startsWith('/api/order') ||
+                          requestPath.startsWith('/api/user')
 
       if (isBuyerApi) {
         ElMessage.error('买家登录已过期，请重新登录')

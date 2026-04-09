@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(value = "mall-goods")
 public interface CategoryFeign {
 
-    @GetMapping(value = "/category/{id}")
+    @GetMapping(value = "/api/category/{id}")
     RespResult<Category> one(@PathVariable(value = "id")Integer id);
 }

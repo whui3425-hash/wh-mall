@@ -59,6 +59,13 @@ public interface CartService {
      */
     void deleteBatch(List<Long> ids, String userId);
 
+    /**
+     * 【订单服务调用】根据购物车商品ID列表查询商品详情
+     * @param cartItemIds 购物车商品ID列表
+     * @return 购物车商品列表
+     */
+    List<Cart> listByIds(List<Long> cartItemIds);
+
     /***
      * Delete shopping cart list by IDs (legacy)
      */

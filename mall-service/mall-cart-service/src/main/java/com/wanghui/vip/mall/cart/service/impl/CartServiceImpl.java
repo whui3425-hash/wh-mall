@@ -183,12 +183,18 @@ public class CartServiceImpl implements CartService {
      * 【核心】批量删除购物车记录（带用户权限验证）
      * 只能删除属于自己的购物车记录
      * @param ids 购物车记录ID列表
-     * @param userId 当前登录用户ID（从JWT Header获取）
+     * @param userId 当前登录用户ID（从JWT Header获取），为null时跳过验证（订单服务调用场景）
      */
     @Override
     public void deleteBatch(List<Long> ids, String userId) {
         for (Long id : ids) {
-            deleteById(id, userId); // 复用单条删除方法（包含权限验证）
+            if (userId != null && !userId.isEmpty()) {
+                // 有userId时进行权限验证（用户直接调用）
+                deleteById(id, userId);
+            } else {
+                // 无userId时直接删除（订单服务调用场景，已在订单提交前校验过权限）
+                cartMapper.deleteById(id);
+            }
         }
         System.out.println("[Cart] Batch delete completed - IDs: " + ids + ", UserId: " + userId);
     }
@@ -203,8 +209,24 @@ public class CartServiceImpl implements CartService {
         }
     }
 
+    /**
+     * 【订单服务调用】根据购物车商品ID列表查询商品详情
+     * @param cartItemIds 购物车商品ID列表
+     * @return 购物车列表
+     */
+    @Override
+    public List<Cart> listByIds(List<Long> cartItemIds) {
+        if (cartItemIds == null || cartItemIds.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        QueryWrapper<Cart> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("id", cartItemIds);
+        // 租户过滤由MyBatis-Plus自动附加
+        return cartMapper.selectList(queryWrapper);
+    }
+
     /***
-     * Query shopping cart list by ID collection
+     * Query shopping cart list by ID collection (legacy)
      */
     @Override
     public List<Cart> list(List<String> ids) {

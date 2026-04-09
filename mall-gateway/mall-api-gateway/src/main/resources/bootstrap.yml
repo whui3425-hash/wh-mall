@@ -27,74 +27,69 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        # Cart service route
+        # ==================== 购物车服务 ====================
         - id: mall-cart-route
           uri: lb://mall-cart
           predicates:
             - Path=/api/cart/**
-          # filters:
-          #   - StripPrefix=1  # 去掉，保持 /api/cart/** 路径，与 Controller 映射一致
-        # Order service route
+          # 【统一】所有服务都使用 /api/xxx 前缀，不剥离，保持与 Controller 一致
+
+        # ==================== 订单服务 ====================
         - id: mall-order-route
           uri: lb://mall-order
           predicates:
             - Path=/api/order/**
-          filters:
-            - StripPrefix=1
-        # Goods service route - 商品核心服务（SPU/SKU/Brand/Category）
-        - id: mall-goods-route
-          uri: lb://mall-goods
-          predicates:
-            - Path=/api/goods/**
-          filters:
-            - StripPrefix=1
-        # SKU service route - SKU相关接口
-        - id: mall-sku-route
-          uri: lb://mall-goods
-          predicates:
-            - Path=/api/sku/**
-          filters:
-            - StripPrefix=1
-        # SPU service route - SPU相关接口
-        - id: mall-spu-route
-          uri: lb://mall-goods
-          predicates:
-            - Path=/api/spu/**
-          filters:
-            - StripPrefix=1
-        # Brand service route - 品牌相关接口
-        - id: mall-brand-route
-          uri: lb://mall-goods
-          predicates:
-            - Path=/api/brand/**
-          filters:
-            - StripPrefix=1
-        # Category service route - 分类相关接口
-        - id: mall-category-route
-          uri: lb://mall-goods
-          predicates:
-            - Path=/api/category/**
-          filters:
-            - StripPrefix=1
-        # User service route
+
+        # ==================== 用户服务（C端） ====================
         - id: mall-user-route
           uri: lb://mall-user
           predicates:
             - Path=/api/user/**
-          # filters:
-          #   - StripPrefix=1  # 去掉，保持 /api/user/** 路径，与 Controller 映射一致
-        # Pay service route
-        - id: mall-pay-route
-          uri: lb://mall-pay
-          predicates:
-            - Path=/api/pay/**
-          filters:
-            - StripPrefix=1
-        # Permission service route (for login)
+
+        # ==================== 权限服务（B端） ====================
         - id: mall-permission-route
           uri: lb://mall-permission
           predicates:
             - Path=/api/permission/**
+
+        # ==================== 支付服务 ====================
+        - id: mall-pay-route
+          uri: lb://mall-pay
+          predicates:
+            - Path=/api/pay/**
+
+        # ==================== 商品核心服务（mall-goods） ====================
+        # 【统一】所有商品相关接口都走 mall-goods 服务，使用 /api/xxx 前缀
+
+        # SKU 服务
+        - id: mall-sku-route
+          uri: lb://mall-goods
+          predicates:
+            - Path=/api/sku/**
+
+        # SPU 服务
+        - id: mall-spu-route
+          uri: lb://mall-goods
+          predicates:
+            - Path=/api/spu/**
+
+        # 品牌服务
+        - id: mall-brand-route
+          uri: lb://mall-goods
+          predicates:
+            - Path=/api/brand/**
+
+        # 分类服务
+        - id: mall-category-route
+          uri: lb://mall-goods
+          predicates:
+            - Path=/api/category/**
+
+        # 商品综合接口（兼容）
+        - id: mall-goods-route
+          uri: lb://mall-goods
+          predicates:
+            - Path=/api/goods/**
 
 logging:
   pattern:

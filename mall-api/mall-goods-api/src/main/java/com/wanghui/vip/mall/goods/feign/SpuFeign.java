@@ -11,6 +11,6 @@ import java.util.List;
 @FeignClient(value = "mall-goods")
 public interface SpuFeign {
 
-    @GetMapping(value = "/spu/product/{id}")
+    @GetMapping(value = "/api/spu/product/{id}")
     RespResult<Product> one(@PathVariable(value = "id")String id);
 }

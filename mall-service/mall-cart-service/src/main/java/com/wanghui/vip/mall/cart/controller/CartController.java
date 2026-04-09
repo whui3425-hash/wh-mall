@@ -210,6 +210,38 @@ public class CartController {
         }
     }
 
+    /**
+     * 【订单服务调用】根据购物车商品ID列表查询商品详情
+     * POST /api/cart/listByIds
+     * @param cartItemIds 购物车商品ID列表（Long类型）
+     * @return 购物车商品列表
+     */
+    @PostMapping(value = "/listByIds")
+    public RespResult<List<Cart>> listByIdsForOrder(@RequestBody List<Long> cartItemIds) {
+        if (cartItemIds == null || cartItemIds.isEmpty()) {
+            return RespResult.ok(java.util.Collections.emptyList());
+        }
+        System.out.println("[Cart] 订单服务查询购物车，IDs: " + cartItemIds);
+        List<Cart> carts = cartService.listByIds(cartItemIds);
+        return RespResult.ok(carts != null ? carts : java.util.Collections.emptyList());
+    }
+
+    /**
+     * 【订单服务调用】批量删除购物车商品（订单提交后清理）
+     * DELETE /api/cart/byIds
+     * @param cartItemIds 购物车商品ID列表
+     * @return 删除结果
+     */
+    @DeleteMapping(value = "/byIds")
+    public RespResult deleteByIdsForOrder(@RequestBody List<Long> cartItemIds) {
+        if (cartItemIds == null || cartItemIds.isEmpty()) {
+            return RespResult.error("购物车ID列表不能为空");
+        }
+        System.out.println("[Cart] 订单服务删除购物车，IDs: " + cartItemIds);
+        cartService.deleteBatch(cartItemIds, null);  // null 表示不校验用户权限（订单服务调用时已通过）
+        return RespResult.ok();
+    }
+
     // ================== 原有接口（保留兼容）==================
 
     /***
@@ -222,10 +254,10 @@ public class CartController {
     }
 
     /***
-     * Shopping cart data by specified ID collection
+     * Shopping cart data by specified ID collection (legacy, uses String IDs)
      */
     @PostMapping(value = "/list/ids")
-    public RespResult<List<Cart>> listByIds(@RequestBody List<String> ids){
+    public RespResult<List<Cart>> listByIdsLegacy(@RequestBody List<String> ids){
         List<Cart> carts = cartService.list(ids);
         return RespResult.ok(carts);
     }

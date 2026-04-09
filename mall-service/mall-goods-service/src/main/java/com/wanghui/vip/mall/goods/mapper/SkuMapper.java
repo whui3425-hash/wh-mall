@@ -31,4 +31,14 @@ public interface SkuMapper extends BaseMapper<Sku> {
      */
     @Select("SELECT * FROM sku WHERE spu_id = #{spuId} AND status = 1 ORDER BY id LIMIT 1")
     Sku selectFirstBySpuId(@Param("spuId") String spuId);
+
+    /**
+     * 【绝对物理防超卖】原子性库存扣减
+     * 使用 UPDATE ... WHERE num >= #{num} 实现乐观锁，防止并发超卖
+     * @param skuId SKU ID
+     * @param num 扣减数量
+     * @return 影响行数：1表示扣减成功，0表示库存不足或并发冲突
+     */
+    @Update("UPDATE sku SET num = num - #{num} WHERE id = #{skuId} AND num >= #{num}")
+    int decrStock(@Param("skuId") String skuId, @Param("num") Integer num);
 }

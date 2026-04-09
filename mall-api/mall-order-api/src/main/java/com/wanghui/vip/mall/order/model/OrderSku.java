@@ -21,4 +21,5 @@ public class OrderSku {
     private Integer price;
     private Integer num;
     private Integer money;
+    private String tenantId;  // 【多租户】租户ID，数据隔离
 }

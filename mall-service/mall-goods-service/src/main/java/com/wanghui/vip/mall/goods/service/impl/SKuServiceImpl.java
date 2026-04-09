@@ -106,4 +106,33 @@ public class SKuServiceImpl extends ServiceImpl<SkuMapper,Sku> implements SKuSer
         return null;
     }
 
+    /**
+     * 【绝对物理防超卖】库存扣减
+     * 核心机制：使用数据库乐观锁（UPDATE ... WHERE num >= #{num}）
+     * 只有当库存充足时（num >= 扣减量），更新才会成功
+     * 影响行数 = 0 表示库存不足或被并发抢光
+     *
+     * @param skuId SKU ID
+     * @param num 扣减数量
+     * @throws RuntimeException 库存不足时抛出异常
+     */
+    @Override
+    public void decrStock(String skuId, Integer num) {
+        // 1. 执行原子性库存扣减（数据库层面乐观锁）
+        int affectedRows = skuMapper.decrStock(skuId, num);
+
+        System.out.println("[DecrStock] skuId=" + skuId + ", num=" + num + ", affectedRows=" + affectedRows);
+
+        // 2. 判断扣减结果
+        if (affectedRows == 0) {
+            // 影响行数为0，说明：
+            // a) 库存不足（num < 扣减量）
+            // b) 并发冲突（其他线程先扣减了库存）
+            throw new RuntimeException("商品库存不足，skuId=" + skuId + ", 请求扣减=" + num);
+        }
+
+        // 3. 扣减成功（affectedRows >= 1）
+        System.out.println("[DecrStock] 库存扣减成功，skuId=" + skuId);
+    }
+
 }
