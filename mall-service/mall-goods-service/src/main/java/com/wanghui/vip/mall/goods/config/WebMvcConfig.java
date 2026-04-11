@@ -1,29 +1,24 @@
 package com.wanghui.vip.mall.goods.config;
 
-import com.wanghui.vip.mall.goods.config.tenant.TenantWebInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Web MVC configuration for registering interceptors
+ * Web MVC 配置
+ * 配置静态资源映射，用于提供商品图片访问
  */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    @Autowired
-    private TenantWebInterceptor tenantWebInterceptor;
-
+    /**
+     * 配置静态资源映射
+     * 将 /images/** 映射到 classpath:/static/images/
+     */
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        // Register tenant interceptor for all paths
-        registry.addInterceptor(tenantWebInterceptor)
-                .addPathPatterns("/**")
-                .excludePathPatterns(
-                        "/error",
-                        "/static/**",
-                        "/favicon.ico"
-                );
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("classpath:/static/images/")
+                .setCachePeriod(3600); // 缓存1小时
     }
 }

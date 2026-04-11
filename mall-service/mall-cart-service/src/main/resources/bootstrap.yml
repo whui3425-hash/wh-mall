@@ -7,21 +7,21 @@ spring:
     nacos:
       config:
         file-extension: yaml
-        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+        server-addr: ${NACOS_SERVER_ADDR:192.168.31.101:8848}
         username: ${NACOS_USERNAME:nacos}
         password: ${NACOS_PASSWORD:nacos}
       discovery:
         #Nacos的注册地址
-        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+        server-addr: ${NACOS_SERVER_ADDR:192.168.31.101:8848}
         username: ${NACOS_USERNAME:nacos}
         password: ${NACOS_PASSWORD:nacos}
   main:
     allow-bean-definition-overriding: true
   # MySQL数据源配置 - 所有表都在 mall_goods 库中
   datasource:
-    url: ${MYSQL_URL:jdbc:mysql://127.0.0.1:3306/mall_goods?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
+    url: ${MYSQL_URL:jdbc:mysql://192.168.31.101:3306/mall_goods?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
     username: ${MYSQL_USERNAME:root}
-    password: ${MYSQL_PASSWORD:password}
+    password: ${MYSQL_PASSWORD:your_strong_password}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 # ====================MybatisPlus====================
