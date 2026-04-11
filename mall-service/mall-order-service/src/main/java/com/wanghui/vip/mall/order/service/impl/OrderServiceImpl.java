@@ -8,7 +8,6 @@ import com.wanghui.mall.util.RespResult;
 import com.wanghui.vip.mall.cart.feign.CartFeign;
 import com.wanghui.vip.mall.cart.model.Cart;
 import com.wanghui.vip.mall.goods.feign.SkuFeign;
-import com.wanghui.vip.mall.goods.model.Sku;
 import com.wanghui.vip.mall.order.mapper.OrderMapper;
 import com.wanghui.vip.mall.order.mapper.OrderRefundMapper;
 import com.wanghui.vip.mall.order.mapper.OrderSkuMapper;
@@ -20,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -249,6 +249,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper,Order> implements 
         // ========== 【Step 5】创建订单主记录 ==========
         Order order = new Order();
         order.setId(orderId);                          // 订单ID（雪花算法）
+        order.setUserId(userId);                         // 【关键】买家用户ID，用于查询买家订单
         order.setUsername(username);                   // 用户名
         order.setTotalNum(totalNum);                   // 总数量
         order.setMoneys(totalAmount);                  // 总金额（分）
@@ -258,10 +259,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper,Order> implements 
         order.setUpdateTime(new Date());
         order.setPayType("weixin");                    // 默认微信支付（实际支付时可更改）
         order.setTenantId(tenantId);                   // 租户ID（多租户隔离）
-
-        // 【重要】将outTradeNo存入订单表，供支付时使用
-        // 注意：Order实体类可能需要添加outTradeNo字段，这里暂用现有字段存储
-        // 如果无法存储，可以通过其他方式关联（如Redis缓存）
+        order.setOutTradeNo(outTradeNo);               // 【关键】支付流水号，供支付回调时使用
 
         orderMapper.insert(order);
 
@@ -287,6 +285,69 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper,Order> implements 
 
         System.out.println("[OrderSubmit] 订单提交完成，outTradeNo=" + outTradeNo + ", totalAmount=" + totalAmount);
 
+        return result;
+    }
+
+    /**
+     * 【C端】查询买家订单列表（带订单明细）
+     * 1. 根据 userId 和 tenantId 查询订单（多租户隔离）
+     * 2. 级联查询每个订单的 OrderSku 明细
+     * 3. 按创建时间倒序排列
+     * @param userId 买家用户ID
+     * @param tenantId 租户ID（店铺ID）
+     * @return 订单列表，每个订单包含明细
+     */
+    @Override
+    public List<Map<String, Object>> listBuyerOrdersWithDetails(String userId, String tenantId) {
+        System.out.println("[OrderList] 查询买家订单列表，userId=" + userId + ", tenantId=" + tenantId);
+
+        // ========== 【Step 1】查询订单主表 ==========
+        QueryWrapper<Order> orderQuery = new QueryWrapper<>();
+        orderQuery.eq("user_id", userId);           // 买家用户ID
+        orderQuery.eq("tenant_id", tenantId);       // 租户ID（多租户隔离）
+        orderQuery.orderByDesc("create_time");    // 按创建时间倒序
+
+        List<Order> orders = orderMapper.selectList(orderQuery);
+
+        if (orders == null || orders.isEmpty()) {
+            System.out.println("[OrderList] 未找到订单，userId=" + userId);
+            return new ArrayList<>();
+        }
+
+        System.out.println("[OrderList] 查询到 " + orders.size() + " 个订单");
+
+        // ========== 【Step 2】级联查询订单明细 ==========
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (Order order : orders) {
+            // 查询该订单的 SKU 明细
+            QueryWrapper<OrderSku> skuQuery = new QueryWrapper<>();
+            skuQuery.eq("order_id", order.getId());     // 订单ID
+            skuQuery.eq("tenant_id", tenantId);       // 租户ID（多租户隔离）
+
+            List<OrderSku> orderSkus = orderSkuMapper.selectList(skuQuery);
+
+            // 组装订单 + 明细数据
+            Map<String, Object> orderMap = new HashMap<>();
+            orderMap.put("orderId", order.getId());
+            orderMap.put("outTradeNo", order.getOutTradeNo());
+            orderMap.put("totalAmount", order.getMoneys());
+            orderMap.put("totalNum", order.getTotalNum());
+            orderMap.put("payStatus", order.getPayStatus());      // 0-未支付，1-已支付
+            orderMap.put("orderStatus", order.getOrderStatus());   // 0-未支付，1-已支付待发货
+            orderMap.put("payType", order.getPayType());
+            orderMap.put("createTime", order.getCreateTime());
+            orderMap.put("username", order.getUsername());
+            orderMap.put("tenantId", order.getTenantId());
+            orderMap.put("items", orderSkus != null ? orderSkus : new ArrayList<>());  // 订单明细
+
+            result.add(orderMap);
+
+            System.out.println("[OrderList] 订单 " + order.getId() + " 包含 " + 
+                (orderSkus != null ? orderSkus.size() : 0) + " 个商品");
+        }
+
+        System.out.println("[OrderList] 订单列表组装完成，共 " + result.size() + " 个订单");
         return result;
     }
 }

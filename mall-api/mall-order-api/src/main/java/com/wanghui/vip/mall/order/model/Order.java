@@ -26,6 +26,7 @@ public class Order  implements Serializable {
     private Date payTime;
     private Date consignTime;
     private Date endTime;
+    private String userId;            // 【C端买家】用户ID，用于查询买家订单
     private String username;
     private String recipients;
     private String recipientsMobile;

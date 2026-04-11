@@ -18,10 +18,15 @@
               class="search-input"
             />
           </div>
+          <!-- 我的订单图标 -->
+          <el-icon :size="26" color="#fff" class="action-icon" @click="handleOrderClick" title="我的订单">
+            <Document />
+          </el-icon>
+
           <el-badge :value="cartCount" :hidden="cartCount === 0" class="action-badge">
             <el-icon :size="26" color="#fff" class="action-icon" @click="handleCartClick"><ShoppingCart /></el-icon>
           </el-badge>
-          
+
           <!-- 用户登录状态区域 -->
           <div v-if="isLoggedIn" class="user-info">
             <el-dropdown @command="handleUserCommand">
@@ -330,8 +335,8 @@
       <!-- 购物车列表 -->
       <div class="cart-content" v-if="cartItems.length > 0">
         <div class="cart-items">
-          <div 
-            v-for="item in cartItems" 
+          <div
+            v-for="item in cartItems"
             :key="item.id"
             class="cart-item"
           >
@@ -349,13 +354,13 @@
                 </template>
               </el-image>
             </div>
-            
+
             <!-- 商品信息 -->
             <div class="cart-item-info">
               <h4 class="cart-item-name">{{ item.name }}</h4>
               <p class="cart-item-price">${{ (item.price / 100).toFixed(2) }}</p>
             </div>
-            
+
             <!-- 数量控制 -->
             <div class="cart-item-actions">
               <el-input-number
@@ -366,8 +371,8 @@
                 controls-position="right"
                 @change="(val) => handleUpdateCartItem(item, val)"
               />
-              <el-button 
-                type="danger" 
+              <el-button
+                type="danger"
                 link
                 size="small"
                 @click="handleDeleteCartItem(item)"
@@ -378,15 +383,15 @@
             </div>
           </div>
         </div>
-        
+
         <!-- 底部结算区域 -->
         <div class="cart-footer">
           <div class="cart-total">
             <span class="total-label">Total Amount:</span>
             <span class="total-price">${{ calculateTotal.toFixed(2) }}</span>
           </div>
-          <el-button 
-            type="primary" 
+          <el-button
+            type="primary"
             size="large"
             :color="themeColor"
             class="checkout-btn"
@@ -398,17 +403,113 @@
           </el-button>
         </div>
       </div>
-      
+
       <!-- 空购物车状态 -->
       <div class="cart-empty" v-else>
         <el-icon :size="60" :color="'#dcdfe6'"><ShoppingCart /></el-icon>
         <p class="empty-text">购物车是空的</p>
-        <el-button 
-          :color="themeColor" 
+        <el-button
+          :color="themeColor"
           @click="showCartDrawer = false"
           class="continue-shopping-btn"
         >
           继续购物
+        </el-button>
+      </div>
+    </el-drawer>
+
+    <!-- ================== 订单列表抽屉 ================== -->
+    <el-drawer
+      v-model="showOrderDrawer"
+      title="我的订单历史"
+      direction="rtl"
+      size="450px"
+      :with-header="true"
+      class="order-drawer"
+    >
+      <!-- 加载状态 -->
+      <div v-if="orderLoading" class="order-loading">
+        <el-skeleton :rows="5" animated />
+      </div>
+
+      <!-- 订单列表 -->
+      <div v-else-if="orderList.length > 0" class="order-content">
+        <el-timeline>
+          <el-timeline-item
+            v-for="order in orderList"
+            :key="order.orderId"
+            :timestamp="formatDate(order.createTime)"
+            placement="top"
+          >
+            <el-card shadow="hover" class="order-card">
+              <!-- 订单头部：订单号 + 支付状态 -->
+              <div class="order-header">
+                <div class="order-no-section">
+                  <el-icon :size="14"><Document /></el-icon>
+                  <span class="order-no">{{ order.outTradeNo || order.orderId }}</span>
+                </div>
+                <el-tag
+                  :type="getPayStatusTagType(order.payStatus)"
+                  effect="dark"
+                  size="small"
+                  class="pay-status-tag"
+                >
+                  {{ getPayStatusText(order.payStatus) }}
+                </el-tag>
+              </div>
+
+              <!-- 订单商品列表 -->
+              <div class="order-items">
+                <div
+                  v-for="(item, index) in order.items"
+                  :key="index"
+                  class="order-item"
+                >
+                  <el-image
+                    :src="item.image"
+                    fit="cover"
+                    class="order-item-img"
+                  >
+                    <template #error>
+                      <div class="order-item-img-placeholder">
+                        <el-icon :size="20"><Picture /></el-icon>
+                      </div>
+                    </template>
+                  </el-image>
+                  <div class="order-item-info">
+                    <p class="order-item-name" :title="item.name">{{ item.name }}</p>
+                    <p class="order-item-spec">x{{ item.num }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 订单底部：金额 + 时间 -->
+              <div class="order-footer">
+                <div class="order-time">
+                  <el-icon :size="12"><Clock /></el-icon>
+                  <span>{{ formatDate(order.createTime) }}</span>
+                </div>
+                <div class="order-amount">
+                  <span class="amount-label">共 {{ order.totalNum }} 件</span>
+                  <span class="amount-value">${{ formatAmount(order.totalAmount) }}</span>
+                </div>
+              </div>
+            </el-card>
+          </el-timeline-item>
+        </el-timeline>
+      </div>
+
+      <!-- 空订单状态 -->
+      <div v-else class="order-empty">
+        <el-icon :size="60" :color="'#dcdfe6'"><List /></el-icon>
+        <p class="empty-text">暂无订单记录</p>
+        <p class="empty-subtext">快去选购心仪的商品吧~</p>
+        <el-button
+          :color="themeColor"
+          @click="showOrderDrawer = false"
+          class="continue-shopping-btn"
+        >
+          去购物
         </el-button>
       </div>
     </el-drawer>
@@ -422,7 +523,8 @@ import { post, get, del, put } from '@/utils/request'
 import {
   Shop, Search, ShoppingCart, User, ShoppingBag,
   StarFilled, Picture, Cellphone, Brush, Watch, Headset,
-  ArrowDown, Lock, Delete, Wallet, CreditCard, WalletFilled
+  ArrowDown, Lock, Delete, Wallet, CreditCard, WalletFilled,
+  Document, List, Check, Clock
 } from '@element-plus/icons-vue'
 
 // Theme configuration based on domain
@@ -487,6 +589,11 @@ const orderResult = ref({                   // 订单提交结果
   totalAmount: 0,
   totalNum: 0
 })
+
+// ================== 订单列表相关状态 ==================
+const showOrderDrawer = ref(false)          // 订单抽屉显示
+const orderList = ref([])                   // 订单列表数据
+const orderLoading = ref(false)             // 订单加载状态
 
 // ================== 登录相关状态 ==================
 const showLoginDialog = ref(false)          // 控制登录弹窗显示
@@ -760,6 +867,91 @@ const handleUserCommand = (command) => {
     // 退出后弹出登录框（因为购物车需要登录）
     showLoginDialog.value = true
   }
+}
+
+// ================== 订单列表相关方法 ==================
+
+/**
+ * 【核心】点击我的订单图标 - 打开订单抽屉
+ */
+const handleOrderClick = async () => {
+  const buyerToken = localStorage.getItem('buyer_token')
+  if (!buyerToken) {
+    ElMessage.info('请先登录查看订单')
+    showLoginDialog.value = true
+    return
+  }
+
+  // 打开订单抽屉
+  showOrderDrawer.value = true
+
+  // 加载订单列表
+  await loadOrderList()
+}
+
+/**
+ * 【核心】加载买家订单列表
+ * 调用 /api/order/list 接口，根据 JWT Header 自动获取用户ID和租户ID
+ */
+const loadOrderList = async () => {
+  orderLoading.value = true
+  try {
+    const res = await get('/order/list')
+    console.log('[OrderList] API响应:', res)
+
+    if (res.code === 20000 && res.data) {
+      orderList.value = res.data
+      console.log('[OrderList] 加载订单数量:', orderList.value.length)
+    } else {
+      orderList.value = []
+      console.warn('[OrderList] 获取订单列表失败:', res.message)
+    }
+  } catch (error) {
+    console.error('[OrderList] 加载订单列表失败:', error)
+    ElMessage.error('加载订单列表失败')
+    orderList.value = []
+  } finally {
+    orderLoading.value = false
+  }
+}
+
+/**
+ * 获取支付状态标签类型（用于 El-Tag）
+ * @param payStatus 0-未支付, 1-已支付
+ */
+const getPayStatusTagType = (payStatus) => {
+  return payStatus === 1 ? 'success' : 'danger'
+}
+
+/**
+ * 获取支付状态文本
+ * @param payStatus 0-未支付, 1-已支付
+ */
+const getPayStatusText = (payStatus) => {
+  return payStatus === 1 ? '已支付' : '待支付'
+}
+
+/**
+ * 格式化金额（分转元）
+ * @param amount 金额（分）
+ */
+const formatAmount = (amount) => {
+  return (amount / 100).toFixed(2)
+}
+
+/**
+ * 格式化时间
+ * @param dateStr 日期字符串
+ */
+const formatDate = (dateStr) => {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return date.toLocaleString('zh-CN', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
 // ================== 购物车相关方法 ==================
@@ -1054,23 +1246,63 @@ const handleCheckout = async () => {
 }
 
 /**
- * 【收银台】处理确认支付
+ * 【收银台】处理确认支付【压测版】
+ * 
+ * 【功能说明】模拟第三方支付网关网络抽风，瞬间并发发送 5 个相同的回调通知
+ * 用于测试后端分布式锁防重逻辑
  */
-const handleConfirmPay = () => {
-  // 这里可以接入真实的支付SDK（如微信支付、支付宝等）
-  // 目前先模拟支付成功
+const handleConfirmPay = async () => {
+  // 提取当前订单的 outTradeNo
+  const outTradeNo = orderResult.value.outTradeNo
+  if (!outTradeNo) {
+    ElMessage.error('订单号无效，无法发起支付回调')
+    return
+  }
+
+  // 构建确认弹窗信息
   ElMessageBox.confirm(
-    `确定要支付订单 ${orderResult.value.outTradeNo} 吗？\n金额: $${(orderResult.value.totalAmount / 100).toFixed(2)}`,
-    '确认支付',
+    `【压测模式】将并发发送 5 次支付回调到后端\n订单号: ${outTradeNo}\n金额: $${(orderResult.value.totalAmount / 100).toFixed(2)}`,
+    '确认支付（压测模式）',
     {
-      confirmButtonText: '确认支付',
-      cancelButtonText: '稍后支付',
+      confirmButtonText: '立即并发压测',
+      cancelButtonText: '取消',
       type: 'warning'
     }
-  ).then(() => {
-    // 模拟支付成功
-    ElMessage.success('支付成功！')
+  ).then(async () => {
+    console.log('[PayCallback] 开始并发压测，outTradeNo=' + outTradeNo)
+
+    // 【核心压测逻辑】构建 5 个相同的 Axios POST 请求
+    const callbackRequests = []
+    for (let i = 1; i <= 5; i++) {
+      callbackRequests.push(
+        post('/order/pay/callback', { outTradeNo: outTradeNo })
+          .then(res => {
+            console.log(`[PayCallback] 第${i}次请求响应:`, res)
+            return { index: i, success: true, data: res }
+          })
+          .catch(err => {
+            console.error(`[PayCallback] 第${i}次请求失败:`, err)
+            return { index: i, success: false, error: err }
+          })
+      )
+    }
+
+    // 【并发发送】使用 Promise.all() 同时触发 5 个请求
+    console.log('[PayCallback] 并发发送 5 个回调请求...')
+    const results = await Promise.all(callbackRequests)
+
+    // 统计结果
+    const successCount = results.filter(r => r.success).length
+    const failCount = results.filter(r => !r.success).length
+
+    console.log('[PayCallback] 压测完成，成功:', successCount, '失败:', failCount)
+    console.log('[PayCallback] 详细结果:', results)
+
+    // 关闭收银台弹窗
     showPayDialog.value = false
+
+    // 显示压测完成消息
+    ElMessage.success(`已模拟发送 5 次并发回调\n成功: ${successCount} 次\n失败: ${failCount} 次\n请查看后端控制台防重日志`)
 
     // 清空订单结果
     orderResult.value = {
@@ -1080,13 +1312,14 @@ const handleConfirmPay = () => {
       totalNum: 0
     }
 
-    // 可以在这里跳转到订单详情页或支付成功页
-    // router.push('/order/success')
+    // 【刷新页面】模拟支付完成后的跳转
+    setTimeout(() => {
+      window.location.reload()
+    }, 2000)
 
   }).catch(() => {
-    // 用户选择稍后支付
-    ElMessage.info('订单已保存，请在30分钟内完成支付')
-    showPayDialog.value = false
+    // 用户选择取消
+    ElMessage.info('已取消压测')
   })
 }
 
@@ -1916,5 +2149,184 @@ onMounted(() => {
   .pay-footer .el-button {
     width: 100%;
   }
+}
+
+/* ================== 订单列表抽屉样式 ================== */
+
+.order-drawer :deep(.el-drawer__header) {
+  padding: 20px;
+  margin-bottom: 0;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.order-drawer :deep(.el-drawer__body) {
+  padding: 0;
+  overflow: hidden;
+}
+
+.order-loading {
+  padding: 20px;
+}
+
+.order-content {
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.order-content :deep(.el-timeline) {
+  padding-left: 8px;
+}
+
+.order-card {
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.order-card :deep(.el-card__body) {
+  padding: 16px;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #e4e7ed;
+}
+
+.order-no-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #606266;
+}
+
+.order-no {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pay-status-tag {
+  font-weight: 600;
+}
+
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.order-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: #f5f7fa;
+  border-radius: 8px;
+}
+
+.order-item-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.order-item-img-placeholder {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e4e7ed;
+  border-radius: 6px;
+}
+
+.order-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.order-item-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0 0 4px 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.order-item-spec {
+  font-size: 12px;
+  color: #909399;
+  margin: 0;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #ebeef5;
+}
+
+.order-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #909399;
+}
+
+.order-amount {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.amount-label {
+  font-size: 12px;
+  color: #909399;
+}
+
+.amount-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ff4757;
+}
+
+.order-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+}
+
+.empty-subtext {
+  font-size: 14px;
+  color: #909399;
+  margin: 8px 0 24px 0;
+}
+
+/* 支付状态标签颜色覆盖 */
+:deep(.el-tag--danger) {
+  background-color: #fef0f0;
+  border-color: #fde2e2;
+  color: #f56c6c;
+}
+
+:deep(.el-tag--success) {
+  background-color: #f0f9eb;
+  border-color: #e1f3d8;
+  color: #67c23a;
 }
 </style>

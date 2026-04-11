@@ -36,4 +36,15 @@ public interface OrderService extends IService<Order> {
      * @return 包含outTradeNo和totalAmount的Map
      */
     Map<String, Object> submitOrder(List<Long> cartItemIds, String userId, String username, String tenantId);
+
+    /**
+     * 【C端】查询买家订单列表（带订单明细）
+     * 1. 根据 userId 和 tenantId 查询订单（多租户隔离）
+     * 2. 级联查询每个订单的 OrderSku 明细
+     * 3. 按创建时间倒序排列
+     * @param userId 买家用户ID
+     * @param tenantId 租户ID（店铺ID）
+     * @return 订单列表，每个订单包含明细
+     */
+    List<Map<String, Object>> listBuyerOrdersWithDetails(String userId, String tenantId);
 }
