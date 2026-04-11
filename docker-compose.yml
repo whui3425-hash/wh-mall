@@ -1,0 +1,146 @@
+version: '3.8'
+
+services:
+  # ==================== 前端服务 ====================
+  mall-store-web:
+    build:
+      context: ./mall-store-web
+      dockerfile: Dockerfile
+    container_name: mall-store-web
+    ports:
+      - "80:80"
+    networks:
+      - mall-net
+    depends_on:
+      - mall-api-gateway
+    restart: unless-stopped
+
+  mall-admin-web:
+    build:
+      context: ./mall-admin-web
+      dockerfile: Dockerfile
+    container_name: mall-admin-web
+    ports:
+      - "8080:80"
+    networks:
+      - mall-net
+    depends_on:
+      - mall-api-gateway
+    restart: unless-stopped
+
+  # ==================== API 网关 ====================
+  mall-api-gateway:
+    build:
+      context: ./mall-gateway/mall-api-gateway
+      dockerfile: Dockerfile
+    container_name: mall-api-gateway
+    ports:
+      - "8088:8088"
+    environment:
+      - NACOS_SERVER_ADDR=${NACOS_HOST}:8848
+    networks:
+      - mall-net
+    restart: unless-stopped
+
+  # ==================== Java 微服务（不暴露端口到宿主机）====================
+  mall-user-service:
+    build:
+      context: ./mall-service/mall-user-service
+      dockerfile: Dockerfile
+    container_name: mall-user-service
+    environment:
+      - NACOS_SERVER_ADDR=${NACOS_HOST}:8848
+      - MYSQL_URL=jdbc:mysql://${MYSQL_HOST}:3306/mall_goods?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+      - MYSQL_USERNAME=${MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    networks:
+      - mall-net
+    depends_on:
+      - mall-api-gateway
+    restart: unless-stopped
+
+  mall-goods-service:
+    build:
+      context: ./mall-service/mall-goods-service
+      dockerfile: Dockerfile
+    container_name: mall-goods-service
+    environment:
+      - NACOS_SERVER_ADDR=${NACOS_HOST}:8848
+      - MYSQL_URL=jdbc:mysql://${MYSQL_HOST}:3306/mall_goods?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      - MYSQL_USERNAME=${MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    networks:
+      - mall-net
+    depends_on:
+      - mall-api-gateway
+    restart: unless-stopped
+
+  mall-cart-service:
+    build:
+      context: ./mall-service/mall-cart-service
+      dockerfile: Dockerfile
+    container_name: mall-cart-service
+    environment:
+      - NACOS_SERVER_ADDR=${NACOS_HOST}:8848
+      - MYSQL_URL=jdbc:mysql://${MYSQL_HOST}:3306/mall_goods?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      - MYSQL_USERNAME=${MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    networks:
+      - mall-net
+    depends_on:
+      - mall-api-gateway
+    restart: unless-stopped
+
+  mall-order-service:
+    build:
+      context: ./mall-service/mall-order-service
+      dockerfile: Dockerfile
+    container_name: mall-order-service
+    environment:
+      - NACOS_SERVER_ADDR=${NACOS_HOST}:8848
+      - MYSQL_URL=jdbc:mysql://${MYSQL_HOST}:3306/mall_goods?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      - MYSQL_USERNAME=${MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    networks:
+      - mall-net
+    depends_on:
+      - mall-api-gateway
+    restart: unless-stopped
+
+  mall-pay-service:
+    build:
+      context: ./mall-service/mall-pay-service
+      dockerfile: Dockerfile
+    container_name: mall-pay-service
+    environment:
+      - NACOS_SERVER_ADDR=${NACOS_HOST}:8848
+      - MYSQL_URL=jdbc:mysql://${MYSQL_HOST}:3306/shop_pay?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+      - MYSQL_USERNAME=${MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    networks:
+      - mall-net
+    depends_on:
+      - mall-api-gateway
+    restart: unless-stopped
+
+  mall-permission-service:
+    build:
+      context: ./mall-service/mall-permission-service
+      dockerfile: Dockerfile
+    container_name: mall-permission-service
+    environment:
+      - NACOS_SERVER_ADDR=${NACOS_HOST}:8848
+      - MYSQL_URL=jdbc:mysql://${MYSQL_HOST}:3306/mall_goods?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      - MYSQL_USERNAME=${MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    networks:
+      - mall-net
+    depends_on:
+      - mall-api-gateway
+    restart: unless-stopped
+
+# ==================== 网络配置 ====================
+networks:
+  mall-net:
+    driver: bridge
+    name: mall-net

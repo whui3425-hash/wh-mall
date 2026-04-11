@@ -12,14 +12,14 @@ spring:
     nacos:
       config:
         file-extension: yaml
-        server-addr: 192.168.31.101:8848
-        username: nacos
-        password: nacos
+        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
       discovery:
         # Nacos discovery address
-        server-addr: 192.168.31.101:8848
-        username: nacos
-        password: nacos
+        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
     gateway:
       # Enable dynamic service discovery locator
       discovery:
