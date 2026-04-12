@@ -19,7 +19,7 @@
             />
           </div>
           <!-- 我的订单图标 -->
-          <el-icon :size="26" color="#fff" class="action-icon" @click="handleOrderClick" title="我的订单">
+          <el-icon :size="26" color="#fff" class="action-icon" @click="handleOrderClick" title="My orders">
             <Document />
           </el-icon>
 
@@ -36,7 +36,7 @@
               </span>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+                  <el-dropdown-item command="logout">Sign out</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -206,7 +206,7 @@
     <!-- ================== 买家登录弹窗 ================== -->
     <el-dialog
       v-model="showLoginDialog"
-      title="买家登录"
+      title="Sign in"
       width="400px"
       :close-on-click-modal="false"
       center
@@ -217,19 +217,19 @@
         ref="loginFormRef"
         label-position="top"
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="Username" prop="username">
           <el-input 
             v-model="loginForm.username" 
-            placeholder="请输入用户名"
+            placeholder="Username"
             prefix-icon="User"
             @keyup.enter="handleLogin"
           />
         </el-form-item>
-        <el-form-item label="密码" prop="password">
+        <el-form-item label="Password" prop="password">
           <el-input 
             v-model="loginForm.password" 
             type="password" 
-            placeholder="请输入密码"
+            placeholder="Password"
             prefix-icon="Lock"
             show-password
             @keyup.enter="handleLogin"
@@ -238,21 +238,21 @@
       </el-form>
       
       <div class="login-tips">
-        <p>测试账号：</p>
-        <p>租户 1001: zhangsan / 123456, lisi / 123456</p>
-        <p>租户 1002: wangwu / 123456, zhaoliu / 123456</p>
+        <p>Test accounts:</p>
+        <p>Tenant 1001: zhangsan / 123456, lisi / 123456</p>
+        <p>Tenant 1002: wangwu / 123456, zhaoliu / 123456</p>
       </div>
       
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="showLoginDialog = false">取消</el-button>
+          <el-button @click="showLoginDialog = false">Cancel</el-button>
           <el-button 
             type="primary" 
             @click="handleLogin"
             :loading="loginLoading"
             :color="themeColor"
           >
-            登录
+            Sign in
           </el-button>
         </div>
       </template>
@@ -261,7 +261,7 @@
     <!-- ================== 收银台弹窗 ================== -->
     <el-dialog
       v-model="showPayDialog"
-      title="收银台"
+      title="Checkout"
       width="480px"
       :close-on-click-modal="false"
       :show-close="true"
@@ -271,34 +271,34 @@
       <div class="pay-content">
         <!-- 订单信息展示 -->
         <div class="order-info">
-          <div class="order-label">订单编号</div>
+          <div class="order-label">Order number</div>
           <div class="order-value order-no">{{ orderResult.outTradeNo }}</div>
         </div>
 
         <div class="order-info">
-          <div class="order-label">商品数量</div>
-          <div class="order-value">{{ orderResult.totalNum }} 件</div>
+          <div class="order-label">Items</div>
+          <div class="order-value">{{ orderResult.totalNum }} item(s)</div>
         </div>
 
         <el-divider />
 
         <!-- 支付金额 -->
         <div class="pay-amount-section">
-          <div class="pay-label">应付金额</div>
+          <div class="pay-label">Amount due</div>
           <div class="pay-amount">${{ (orderResult.totalAmount / 100).toFixed(2) }}</div>
         </div>
 
         <!-- 支付方式（模拟） -->
         <div class="pay-methods">
-          <div class="pay-method-title">选择支付方式</div>
+          <div class="pay-method-title">Payment method</div>
           <div class="pay-method-options">
             <div class="pay-method-option active">
               <el-icon :size="24"><Wallet /></el-icon>
-              <span>微信支付</span>
+              <span>WeChat Pay</span>
             </div>
             <div class="pay-method-option">
               <el-icon :size="24"><CreditCard /></el-icon>
-              <span>支付宝</span>
+              <span>Alipay</span>
             </div>
           </div>
         </div>
@@ -307,7 +307,7 @@
       <template #footer>
         <div class="pay-footer">
           <el-button @click="handleCancelPay" size="large">
-            稍后支付
+            Pay later
           </el-button>
           <el-button
             type="primary"
@@ -317,7 +317,7 @@
             class="confirm-pay-btn"
           >
             <el-icon><WalletFilled /></el-icon>
-            确认支付
+            Confirm payment
           </el-button>
         </div>
       </template>
@@ -326,7 +326,7 @@
     <!-- ================== 购物车抽屉 ================== -->
     <el-drawer
       v-model="showCartDrawer"
-      title="购物车"
+      title="Shopping cart"
       direction="rtl"
       size="450px"
       :with-header="true"
@@ -399,7 +399,7 @@
             :loading="submitting"
             :disabled="cartItems.length === 0"
           >
-            {{ submitting ? '提交订单中...' : `去结算 (${cartItems.length} items)` }}
+            {{ submitting ? 'Placing order...' : `Checkout (${cartItems.length} items)` }}
           </el-button>
         </div>
       </div>
@@ -407,13 +407,13 @@
       <!-- 空购物车状态 -->
       <div class="cart-empty" v-else>
         <el-icon :size="60" :color="'#dcdfe6'"><ShoppingCart /></el-icon>
-        <p class="empty-text">购物车是空的</p>
+        <p class="empty-text">Your cart is empty</p>
         <el-button
           :color="themeColor"
           @click="showCartDrawer = false"
           class="continue-shopping-btn"
         >
-          继续购物
+          Continue shopping
         </el-button>
       </div>
     </el-drawer>
@@ -421,7 +421,7 @@
     <!-- ================== 订单列表抽屉 ================== -->
     <el-drawer
       v-model="showOrderDrawer"
-      title="我的订单历史"
+      title="My orders"
       direction="rtl"
       size="450px"
       :with-header="true"
@@ -490,7 +490,7 @@
                   <span>{{ formatDate(order.createTime) }}</span>
                 </div>
                 <div class="order-amount">
-                  <span class="amount-label">共 {{ order.totalNum }} 件</span>
+                  <span class="amount-label">{{ order.totalNum }} item(s)</span>
                   <span class="amount-value">${{ formatAmount(order.totalAmount) }}</span>
                 </div>
               </div>
@@ -502,14 +502,14 @@
       <!-- 空订单状态 -->
       <div v-else class="order-empty">
         <el-icon :size="60" :color="'#dcdfe6'"><List /></el-icon>
-        <p class="empty-text">暂无订单记录</p>
-        <p class="empty-subtext">快去选购心仪的商品吧~</p>
+        <p class="empty-text">No orders yet</p>
+        <p class="empty-subtext">Browse the store and place your first order.</p>
         <el-button
           :color="themeColor"
           @click="showOrderDrawer = false"
           class="continue-shopping-btn"
         >
-          去购物
+          Shop now
         </el-button>
       </div>
     </el-drawer>
@@ -611,10 +611,10 @@ const loginForm = ref({
 // 登录表单校验规则
 const loginRules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
+    { required: true, message: 'Username is required', trigger: 'blur' }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' }
+    { required: true, message: 'Password is required', trigger: 'blur' }
   ]
 }
 
@@ -770,7 +770,7 @@ const checkLoginStatus = () => {
   if (buyerToken && buyerToken !== 'undefined' && buyerToken !== 'null') {
     // 【核心】已登录：恢复前端状态，确保页面显示"已登录"
     isLoggedIn.value = true
-    currentUsername.value = savedUsername || '买家用户'
+    currentUsername.value = savedUsername || 'Customer'
     console.log('[Auth] 状态恢复成功 - 用户:', savedUsername)
     
     // 确保关闭登录弹窗（防止刷新后弹窗还开着）
@@ -814,7 +814,7 @@ const handleLogin = async () => {
       console.log('[Login] 获取到的token:', token ? token.substring(0, 20) + '...' : 'undefined/null')
       
       if (!token) {
-        ElMessage.error('登录失败：后端未返回token')
+        ElMessage.error('Sign-in failed: server did not return a token')
         console.error('[Login] 响应数据:', res.data)
         return
       }
@@ -830,11 +830,11 @@ const handleLogin = async () => {
       
       // 更新登录状态
       isLoggedIn.value = true
-      currentUsername.value = res.data.username || '买家用户'
+      currentUsername.value = res.data.username || 'Customer'
       
       // 关闭弹窗并提示
       showLoginDialog.value = false
-      ElMessage.success(`登录成功！欢迎 ${res.data.name || res.data.username}`)
+      ElMessage.success(`Welcome, ${res.data.name || res.data.username}`)
       
       // 清空表单
       loginForm.value = { username: '', password: '' }
@@ -848,11 +848,11 @@ const handleLogin = async () => {
       // 登录成功后刷新购物车数量
       loadCartCount()
     } else {
-      ElMessage.error(res.message || '登录失败，请检查用户名和密码')
+      ElMessage.error(res.message || 'Sign-in failed. Check your username and password.')
     }
   } catch (error) {
     console.error('[Login] 登录失败:', error)
-    ElMessage.error(error.message || '网络错误，请检查网关服务是否启动')
+    ElMessage.error(error.message || 'Network error. Is the API gateway running?')
   } finally {
     loginLoading.value = false
   }
@@ -875,7 +875,7 @@ const handleUserCommand = (command) => {
     cartCount.value = 0  // 清空购物车数量
     cartItems.value = []
     
-    ElMessage.success('已退出登录')
+    ElMessage.success('Signed out')
     
     // 退出后弹出登录框（因为购物车需要登录）
     showLoginDialog.value = true
@@ -890,7 +890,7 @@ const handleUserCommand = (command) => {
 const handleOrderClick = async () => {
   const buyerToken = localStorage.getItem('buyer_token')
   if (!buyerToken) {
-    ElMessage.info('请先登录查看订单')
+    ElMessage.info('Please sign in to view orders')
     showLoginDialog.value = true
     return
   }
@@ -921,7 +921,7 @@ const loadOrderList = async () => {
     }
   } catch (error) {
     console.error('[OrderList] 加载订单列表失败:', error)
-    ElMessage.error('加载订单列表失败')
+    ElMessage.error('Failed to load orders')
     orderList.value = []
   } finally {
     orderLoading.value = false
@@ -941,7 +941,7 @@ const getPayStatusTagType = (payStatus) => {
  * @param payStatus 0-未支付, 1-已支付
  */
 const getPayStatusText = (payStatus) => {
-  return payStatus === 1 ? '已支付' : '待支付'
+  return payStatus === 1 ? 'Paid' : 'Unpaid'
 }
 
 /**
@@ -959,7 +959,7 @@ const formatAmount = (amount) => {
 const formatDate = (dateStr) => {
   if (!dateStr) return ''
   const date = new Date(dateStr)
-  return date.toLocaleString('zh-CN', {
+  return date.toLocaleString('en-US', {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
@@ -1019,7 +1019,7 @@ const handleAddToCart = async (product) => {
   console.log('[Cart Debug] =====================')
   
   if (!buyerToken || buyerToken === 'undefined' || buyerToken === 'null' || buyerToken === '') {
-    ElMessage.warning('请先登录后再添加商品到购物车')
+    ElMessage.warning('Please sign in to add items to your cart')
     console.log('[Cart] 检测到未登录，弹出登录框')
     showLoginDialog.value = true
     return
@@ -1039,23 +1039,23 @@ const handleAddToCart = async (product) => {
     
     if (res.code === 20000) {
       // 3. 成功提示
-      ElMessage.success('已加入购物车')
+      ElMessage.success('Added to cart')
       
       // 4. 刷新购物车数量
       await loadCartCount()
     } else {
-      ElMessage.error(res.message || '添加购物车失败')
+      ElMessage.error(res.message || 'Could not add to cart')
     }
   } catch (error) {
     console.error('[Cart] 添加购物车失败:', error)
     
     // 处理 401 未授权（Token过期）
     if (error.response?.status === 401 || error.message?.includes('Unauthorized')) {
-      ElMessage.error('登录已过期，请重新登录')
+      ElMessage.error('Session expired. Please sign in again.')
       localStorage.removeItem('buyer_token')
       showLoginDialog.value = true
     } else {
-      ElMessage.error('添加购物车失败，请检查网络连接')
+      ElMessage.error('Could not add to cart. Check your network.')
     }
   } finally {
     product.addingToCart = false
@@ -1068,7 +1068,7 @@ const handleAddToCart = async (product) => {
 const handleCartClick = async () => {
   const buyerToken = localStorage.getItem('buyer_token')
   if (!buyerToken) {
-    ElMessage.info('请先登录查看购物车')
+    ElMessage.info('Please sign in to view your cart')
     showLoginDialog.value = true
     return
   }
@@ -1097,7 +1097,7 @@ const loadCartItems = async () => {
     }
   } catch (error) {
     console.error('[Cart] 加载购物车失败:', error)
-    ElMessage.error('加载购物车失败')
+    ElMessage.error('Failed to load cart')
     cartItems.value = []
     cartCount.value = 0
   } finally {
@@ -1120,16 +1120,16 @@ const handleUpdateCartItem = async (item, newNum) => {
     })
     
     if (res.code === 20000) {
-      ElMessage.success('数量已更新')
+      ElMessage.success('Quantity updated')
       item.num = newNum
     } else {
-      ElMessage.error(res.message || '更新失败')
+      ElMessage.error(res.message || 'Update failed')
       // 恢复原数量（重新加载）
       await loadCartItems()
     }
   } catch (error) {
     console.error('[Cart] 更新数量失败:', error)
-    ElMessage.error('更新数量失败')
+    ElMessage.error('Failed to update quantity')
     await loadCartItems()
   }
 }
@@ -1142,11 +1142,11 @@ const handleDeleteCartItem = async (item) => {
   try {
     // 确认删除
     await ElMessageBox.confirm(
-      `确定要删除 "${item.name}" 吗？`,
-      '删除确认',
+      `Remove "${item.name}" from your cart?`,
+      'Remove item',
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: 'Remove',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }
     )
@@ -1154,17 +1154,17 @@ const handleDeleteCartItem = async (item) => {
     const res = await del(`/cart/${item.id}`)
     
     if (res.code === 20000) {
-      ElMessage.success('已删除')
+      ElMessage.success('Removed')
       // 从列表中移除
       cartItems.value = cartItems.value.filter(i => i.id !== item.id)
       cartCount.value = cartItems.value.length
     } else {
-      ElMessage.error(res.message || '删除失败')
+      ElMessage.error(res.message || 'Remove failed')
     }
   } catch (error) {
     if (error === 'cancel') return
     console.error('[Cart] 删除失败:', error)
-    ElMessage.error('删除失败')
+    ElMessage.error('Remove failed')
   }
 }
 
@@ -1173,14 +1173,14 @@ const handleDeleteCartItem = async (item) => {
  */
 const handleCheckout = async () => {
   if (cartItems.value.length === 0) {
-    ElMessage.warning('购物车为空')
+    ElMessage.warning('Your cart is empty')
     return
   }
 
   // 检查登录状态
   const buyerToken = localStorage.getItem('buyer_token')
   if (!buyerToken) {
-    ElMessage.warning('请先登录')
+    ElMessage.warning('Please sign in')
     showLoginDialog.value = true
     return
   }
@@ -1224,7 +1224,7 @@ const handleCheckout = async () => {
       showCartDrawer.value = false
 
       // 2. 显示成功消息
-      ElMessage.success('订单创建成功，即将跳转支付...')
+      ElMessage.success('Order placed. Proceed to payment.')
 
       // 3. 弹出收银台弹窗
       showPayDialog.value = true
@@ -1236,7 +1236,7 @@ const handleCheckout = async () => {
     } else {
       // 业务逻辑错误（如库存不足等）
       console.error('[Order] 订单提交失败:', res.message)
-      ElMessage.error(res.message || '订单提交失败')
+      ElMessage.error(res.message || 'Checkout failed')
     }
 
   } catch (error) {
@@ -1244,13 +1244,13 @@ const handleCheckout = async () => {
 
     // 处理不同类型的错误
     if (error.response?.status === 401) {
-      ElMessage.error('登录已过期，请重新登录')
+      ElMessage.error('Session expired. Please sign in again.')
       localStorage.removeItem('buyer_token')
       showLoginDialog.value = true
     } else if (error.message?.includes('Network Error')) {
-      ElMessage.error('网络错误，请检查网关服务是否启动')
+      ElMessage.error('Network error. Is the API gateway running?')
     } else {
-      ElMessage.error(error.message || '订单提交失败，请稍后重试')
+      ElMessage.error(error.message || 'Checkout failed. Please try again.')
     }
 
   } finally {
@@ -1268,17 +1268,17 @@ const handleConfirmPay = async () => {
   // 提取当前订单的 outTradeNo
   const outTradeNo = orderResult.value.outTradeNo
   if (!outTradeNo) {
-    ElMessage.error('订单号无效，无法发起支付回调')
+    ElMessage.error('Invalid order number. Cannot send payment callback.')
     return
   }
 
   // 构建确认弹窗信息
   ElMessageBox.confirm(
-    `【压测模式】将并发发送 5 次支付回调到后端\n订单号: ${outTradeNo}\n金额: $${(orderResult.value.totalAmount / 100).toFixed(2)}`,
-    '确认支付（压测模式）',
+    `[Stress test] This will send 5 concurrent payment callbacks to the server.\nOrder: ${outTradeNo}\nAmount: $${(orderResult.value.totalAmount / 100).toFixed(2)}`,
+    'Confirm payment (stress test)',
     {
-      confirmButtonText: '立即并发压测',
-      cancelButtonText: '取消',
+      confirmButtonText: 'Run concurrent test',
+      cancelButtonText: 'Cancel',
       type: 'warning'
     }
   ).then(async () => {
@@ -1315,7 +1315,7 @@ const handleConfirmPay = async () => {
     showPayDialog.value = false
 
     // 显示压测完成消息
-    ElMessage.success(`已模拟发送 5 次并发回调\n成功: ${successCount} 次\n失败: ${failCount} 次\n请查看后端控制台防重日志`)
+    ElMessage.success(`Sent 5 concurrent callbacks.\nOK: ${successCount}\nFailed: ${failCount}\nCheck server logs for idempotency.`)
 
     // 清空订单结果
     orderResult.value = {
@@ -1332,7 +1332,7 @@ const handleConfirmPay = async () => {
 
   }).catch(() => {
     // 用户选择取消
-    ElMessage.info('已取消压测')
+    ElMessage.info('Stress test cancelled')
   })
 }
 
@@ -1341,7 +1341,7 @@ const handleConfirmPay = async () => {
  */
 const handleCancelPay = () => {
   showPayDialog.value = false
-  ElMessage.info('订单已保存，请在30分钟内完成支付')
+  ElMessage.info('Order saved. Please complete payment within 30 minutes.')
 }
 
 // Initialize
