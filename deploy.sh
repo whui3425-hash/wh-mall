@@ -59,6 +59,24 @@ check_command() {
     fi
 }
 
+# 等待服务健康
+wait_for_service() {
+    local service_name=$1
+    local url=$2
+    local max_attempts=${3:-30}
+    
+    log_info "等待 $service_name 就绪..."
+    for i in $(seq 1 $max_attempts); do
+        if curl -s "$url" > /dev/null 2>&1; then
+            log_success "$service_name 已就绪！"
+            return 0
+        fi
+        echo -ne "${YELLOW}  尝试 ${i}/${max_attempts}...\r${NC}"
+        sleep 2
+    done
+    error_exit "$service_name 启动超时"
+}
+
 # =============================================================================
 #  主程序开始
 # =============================================================================
@@ -73,139 +91,142 @@ log_info "部署开始时间: $(date '+%Y-%m-%d %H:%M:%S')"
 echo ""
 
 # =============================================================================
-#  【第一阶段：启动基础环境】
+#  【第一阶段：环境检查】
 # =============================================================================
-log_stage "第一阶段：启动基础环境 (MySQL + Nacos)"
+log_stage "第一阶段：环境检查"
 
 log_info "检查 Docker 环境..."
 check_command docker
 check_command docker-compose
 log_success "Docker 环境检查通过"
 
-echo ""
-log_info "清理旧数据..."
-rm -rf deploy/mysql-data 2>/dev/null || true
-docker network rm mall-net 2>/dev/null || true
-log_success "旧数据清理完成"
-
-echo ""
-log_info "启动基础环境容器 (MySQL + Nacos)..."
-if docker-compose -f deploy/docker-compose-env.yml up -d; then
-    log_success "基础环境容器启动成功"
-else
-    error_exit "基础环境容器启动失败"
-fi
-
-echo ""
-log_info "准备图片资源..."
-if [ -d "mall-store-web/public/images" ]; then
-    mkdir -p deploy/images
-    cp -r mall-store-web/public/images/* deploy/images/
-    log_success "图片资源已复制到 deploy/images/"
-else
-    log_warn "mall-store-web/public/images 目录不存在，跳过图片复制"
-fi
-
-echo ""
-log_info "MySQL 将自动执行 /docker-entrypoint-initdb.d/ 目录下的 SQL 脚本..."
-log_info "SQL 文件:"
-log_info "  - deploy/sql/nacos_init.sql (Nacos 配置中心数据库)"
-log_info "  - deploy/sql/mall_init.sql (商城业务数据库)"
-
-# 检查 SQL 文件是否存在
-if [ ! -f "deploy/sql/nacos_init.sql" ]; then
-    log_warn "nacos_init.sql 不存在，跳过"
-fi
-if [ ! -f "deploy/sql/mall_init.sql" ]; then
-    log_warn "mall_init.sql 不存在，跳过"
-fi
-
-echo ""
-log_warn "正在等待 MySQL 和 Nacos 初始化，休眠 60 秒..."
-log_warn "这是为了确保数据库有足够的时间完成建表操作"
-for i in $(seq 60 -1 1); do
-    echo -ne "${YELLOW}  剩余等待时间: ${i} 秒...\r${NC}"
-    sleep 1
-done
-echo -e "${GREEN}  等待完成，继续执行...             ${NC}"
-
-# 健康检查 - 等待 Nacos 真正可用
-echo ""
-log_info "检查 Nacos 健康状态..."
-for i in {1..30}; do
-    if curl -s http://localhost:8848/nacos/v1/ns/operator/metrics > /dev/null 2>&1; then
-        log_success "Nacos 已就绪！"
-        break
-    fi
-    echo -ne "${YELLOW}  等待 Nacos 就绪... (${i}/30)\r${NC}"
-    sleep 2
-done
-echo ""
-
-# =============================================================================
-#  【第二阶段：编译后端代码】
-# =============================================================================
-echo ""
-log_stage "第二阶段：编译后端代码"
-
 log_info "检查 Maven 环境..."
 check_command mvn
 log_success "Maven 环境检查通过"
 
-log_info "Maven 版本: $(mvn -v | head -1)"
+# 检查 .env 文件
+if [ ! -f ".env" ]; then
+    log_warn ".env 文件不存在，创建默认配置..."
+    cat > .env << 'EOF'
+NACOS_HOST=mall-nacos
+MYSQL_HOST=mall-mysql
+MYSQL_USERNAME=root
+MYSQL_PASSWORD=123456
+EOF
+    log_success ".env 文件已创建"
+fi
 
-echo ""
-log_info "开始编译后端代码 (mvn clean package -DskipTests)..."
-log_info "编译过程可能需要 3-5 分钟，请耐心等待..."
+# =============================================================================
+#  【第二阶段：清理旧环境】
+# =============================================================================
+log_stage "第二阶段：清理旧环境"
 
-if mvn clean package -DskipTests; then
-    echo ""
+log_info "停止旧容器..."
+docker-compose down 2>/dev/null || true
+docker-compose -f deploy/docker-compose-env.yml down 2>/dev/null || true
+
+log_info "清理旧数据..."
+rm -rf deploy/mysql-data 2>/dev/null || true
+
+docker network rm mall-net 2>/dev/null || true
+log_success "旧环境清理完成"
+
+# =============================================================================
+#  【第三阶段：启动基础服务】
+# =============================================================================
+log_stage "第三阶段：启动基础服务 (MySQL + Nacos)"
+
+log_info "复制图片资源..."
+if [ -d "mall-store-web/public/images" ]; then
+    mkdir -p deploy/images
+    cp -r mall-store-web/public/images/* deploy/images/ 2>/dev/null || true
+    log_success "图片资源已复制"
+else
+    log_warn "图片目录不存在，跳过"
+fi
+
+log_info "启动 MySQL 和 Nacos..."
+docker-compose -f deploy/docker-compose-env.yml up -d
+
+log_info "等待 MySQL 初始化 (60秒)..."
+for i in $(seq 60 -1 1); do
+    echo -ne "${YELLOW}  剩余 ${i} 秒...\r${NC}"
+    sleep 1
+done
+echo -e "${GREEN}  MySQL 初始化完成                     ${NC}"
+
+# 等待 Nacos 就绪
+wait_for_service "Nacos" "http://localhost:8848/nacos" 30
+
+# 创建 Nacos 默认用户
+log_info "创建 Nacos 默认用户..."
+sleep 5
+if docker exec mall-nacos curl -s -X POST 'http://localhost:8848/nacos/v1/auth/users/register' \
+    -d 'username=nacos&password=nacos' > /dev/null 2>&1; then
+    log_success "Nacos 用户创建成功"
+else
+    log_warn "Nacos 用户可能已存在或注册接口不可用，继续部署..."
+fi
+
+# =============================================================================
+#  【第四阶段：编译后端代码】
+# =============================================================================
+log_stage "第四阶段：编译后端代码"
+
+log_info "开始 Maven 编译 (可能需要 5-10 分钟)..."
+if mvn clean package -DskipTests -q; then
     log_success "后端代码编译成功！"
 else
-    echo ""
-    error_exit "后端代码编译失败！请检查 Maven 构建日志"
+    error_exit "Maven 编译失败"
 fi
 
 # =============================================================================
-#  【第三阶段：拉起业务集群】
+#  【第五阶段：启动业务集群】
 # =============================================================================
-echo ""
-log_stage "第三阶段：拉起业务集群"
+log_stage "第五阶段：启动业务集群"
 
 log_info "构建并启动所有业务服务..."
-log_info "包含: Nginx前端(C端/B端)、Gateway网关、用户/商品/订单/购物车/支付/权限服务"
+docker-compose up -d --build
 
-if docker-compose up -d --build; then
-    echo ""
-    log_success "业务集群启动成功！"
-else
-    echo ""
-    error_exit "业务集群启动失败！请检查 Docker 日志"
-fi
+log_info "等待服务注册到 Nacos (60秒)..."
+for i in $(seq 60 -1 1); do
+    echo -ne "${YELLOW}  剩余 ${i} 秒...\r${NC}"
+    sleep 1
+done
+echo -e "${GREEN}  服务注册完成                     ${NC}"
+
+# 检查关键服务是否注册
+log_info "检查服务注册状态..."
+SERVICES=("mall-gateway" "mall-user" "mall-goods" "mall-order" "mall-cart" "mall-pay" "mall-permission")
+for service in "${SERVICES[@]}"; do
+    if curl -s "http://localhost:8848/nacos/v1/ns/instance/list?serviceName=${service}" 2>/dev/null | grep -q "ip"; then
+        log_success "  ✓ ${service} 已注册"
+    else
+        log_warn "  ✗ ${service} 未注册 (可能仍在启动中)"
+    fi
+done
 
 # =============================================================================
-#  【第四阶段：完成提示】
+#  【第六阶段：完成提示】
 # =============================================================================
-echo ""
-log_stage "第四阶段：部署完成"
+log_stage "部署完成"
 
-echo ""
-echo -e "${GREEN}${BOLD}========================================${NC}"
-echo -e "${GREEN}${BOLD}      部署成功！系统已正常运行${NC}"
-echo -e "${GREEN}${BOLD}========================================${NC}"
-echo ""
-# 获取服务器 IP
 SERVER_IP=$(hostname -I | awk '{print $1}')
 
+echo ""
+echo -e "${GREEN}${BOLD}========================================${NC}"
+echo -e "${GREEN}${BOLD}      部署完成！${NC}"
+echo -e "${GREEN}${BOLD}========================================${NC}"
+echo ""
 echo -e "${CYAN}  系统访问地址:${NC}"
 echo -e "    🛒 C端买家商城: ${YELLOW}http://${SERVER_IP}:80${NC}"
 echo -e "    ⚙️  B端管理后台: ${YELLOW}http://${SERVER_IP}:8080${NC}"
 echo -e "    🔌 API网关地址: ${YELLOW}http://${SERVER_IP}:8088${NC}"
-echo -e "    📊 Nacos 控制台: ${YELLOW}http://${SERVER_IP}:8848/nacos${NC}"
+echo -e "    📊 Nacos控制台:   ${YELLOW}http://${SERVER_IP}:8848/nacos${NC} (nacos/nacos)"
 echo ""
-echo -e "${CYAN}  默认测试账号:${NC}"
-echo -e "    👤 C端买家: username=zhangsan, password=123456"
-echo -e "    👨‍💼 B端管理员: username=admin, password=admin123"
+echo -e "${CYAN}  测试账号:${NC}"
+echo -e "    👤 C端买家: zhangsan / 123456"
+echo -e "    👨‍💼 B端管理员: admin / admin123"
 echo ""
 echo -e "${CYAN}  常用命令:${NC}"
 echo -e "    查看日志: ${YELLOW}docker-compose logs -f [服务名]${NC}"
@@ -213,8 +234,6 @@ echo -e "    停止服务: ${YELLOW}docker-compose down${NC}"
 echo -e "    重启服务: ${YELLOW}docker-compose restart [服务名]${NC}"
 echo ""
 log_info "部署完成时间: $(date '+%Y-%m-%d %H:%M:%S')"
-echo ""
-echo -e "${GREEN}感谢使用 Mall SaaS 系统，祝您使用愉快！${NC}"
 echo ""
 
 exit 0
