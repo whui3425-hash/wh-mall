@@ -13,6 +13,9 @@
 
  Date: 12/04/2026 09:28:45
 */
+
+-- 创建数据库（如果不存在）
+CREATE DATABASE IF NOT EXISTS mall_goods CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE mall_goods;
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
