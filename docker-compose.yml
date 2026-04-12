@@ -42,6 +42,8 @@ services:
       - "8088:8088"
     environment:
       - NACOS_SERVER_ADDR=${NACOS_HOST}:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
     networks:
       - mall-net
     restart: unless-stopped
@@ -54,6 +56,8 @@ services:
     container_name: mall-user-service
     environment:
       - NACOS_SERVER_ADDR=${NACOS_HOST}:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
       - MYSQL_URL=jdbc:mysql://${MYSQL_HOST}:3306/mall_goods?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
       - MYSQL_USERNAME=${MYSQL_USERNAME}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
@@ -70,6 +74,8 @@ services:
     container_name: mall-goods-service
     environment:
       - NACOS_SERVER_ADDR=${NACOS_HOST}:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
       - MYSQL_URL=jdbc:mysql://${MYSQL_HOST}:3306/mall_goods?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
       - MYSQL_USERNAME=${MYSQL_USERNAME}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
@@ -86,6 +92,8 @@ services:
     container_name: mall-cart-service
     environment:
       - NACOS_SERVER_ADDR=${NACOS_HOST}:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
       - MYSQL_URL=jdbc:mysql://${MYSQL_HOST}:3306/mall_goods?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
       - MYSQL_USERNAME=${MYSQL_USERNAME}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
@@ -102,6 +110,8 @@ services:
     container_name: mall-order-service
     environment:
       - NACOS_SERVER_ADDR=${NACOS_HOST}:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
       - MYSQL_URL=jdbc:mysql://${MYSQL_HOST}:3306/mall_goods?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
       - MYSQL_USERNAME=${MYSQL_USERNAME}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
