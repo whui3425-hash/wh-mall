@@ -13,13 +13,15 @@ spring:
       config:
         file-extension: yaml
         server-addr: ${NACOS_SERVER_ADDR:192.168.31.101:8848}
-        username: ${NACOS_USERNAME:nacos}
-        password: ${NACOS_PASSWORD:nacos}
+        # 关闭认证，不需要用户名密码
+        # username: ${NACOS_USERNAME:nacos}
+        # password: ${NACOS_PASSWORD:nacos}
       discovery:
         #Nacos的注册地址
         server-addr: ${NACOS_SERVER_ADDR:192.168.31.101:8848}
-        username: ${NACOS_USERNAME:nacos}
-        password: ${NACOS_PASSWORD:nacos}
+        # 关闭认证，不需要用户名密码
+        # username: ${NACOS_USERNAME:nacos}
+        # password: ${NACOS_PASSWORD:nacos}
 # ====================MybatisPlus====================
 mybatis-plus:
   mapper-locations: mapper/*.xml

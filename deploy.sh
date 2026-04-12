@@ -123,9 +123,7 @@ services:
       - MODE=standalone
       - JVM_XMS=512m
       - JVM_XMX=512m
-      - NACOS_AUTH_ENABLE=true
-      - NACOS_CORE_AUTH_SERVER_IDENTITY_KEY=VGhpc0lzQVRlc3RLZXlGb3JOYWNvc1NlcnZlcklkZW50aXR5MTIzNDU2Nzg=
-      - NACOS_CORE_AUTH_SERVER_IDENTITY_VALUE=VGhpc0lzQVRlc3RWYWx1ZUZvck5hY29zU2VydmVySWRlbnRpdHkxMjM0NTY3OA==
+      - NACOS_AUTH_ENABLE=false
     ports:
       - "8848:8848"
       - "9848:9848"
@@ -191,35 +189,7 @@ if ! curl -s http://${SERVER_IP}:8848/nacos > /dev/null 2>&1; then
 fi
 
 # =============================================================================
-#  【第五阶段：创建 Nacos 用户】
-# =============================================================================
-log_stage "第五阶段：创建 Nacos 用户"
-
-log_info "创建 Nacos 默认用户 (nacos/nacos)..."
-sleep 5
-
-# 尝试多次创建用户
-USER_CREATED=false
-for i in {1..5}; do
-    RESPONSE=$(docker exec mall-nacos curl -s -X POST 'http://localhost:8848/nacos/v1/auth/users/register' \
-        -d 'username=nacos&password=nacos' 2>/dev/null)
-    
-    if echo "$RESPONSE" | grep -q "true\|already\|exist"; then
-        log_success "Nacos 用户创建成功 (或已存在)"
-        USER_CREATED=true
-        break
-    fi
-    
-    log_warn "  第 ${i} 次尝试失败，等待重试..."
-    sleep 3
-done
-
-if [ "$USER_CREATED" = false ]; then
-    log_warn "Nacos 用户创建可能失败，但继续部署..."
-fi
-
-# =============================================================================
-#  【第六阶段：编译后端代码】
+#  【第五阶段：编译后端代码】
 # =============================================================================
 log_stage "第六阶段：编译后端代码"
 
