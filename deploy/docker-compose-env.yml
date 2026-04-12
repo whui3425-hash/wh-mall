@@ -23,18 +23,10 @@ services:
     environment:
       - PREFER_HOST_MODE=hostname
       - MODE=standalone # 单机模式启动
-      - JVM_XMS=256m    # 限制内存
-      - JVM_XMX=256m
-      - SPRING_DATASOURCE_PLATFORM=mysql
-      - MYSQL_SERVICE_HOST=mall-mysql
-      - MYSQL_SERVICE_DB_NAME=nacos
-      - MYSQL_SERVICE_PORT=3306
-      - MYSQL_SERVICE_USER=root
-      - MYSQL_SERVICE_PASSWORD=123456
-      - NACOS_AUTH_ENABLE=false  # 关闭认证，避免登录失败
+      - JVM_XMS=512m    # 内存限制
+      - JVM_XMX=512m
+      - NACOS_AUTH_ENABLE=false  # 关闭认证
     ports:
       - "8848:8848"
       - "9848:9848"
       - "9849:9849"
-    depends_on:
-      - mysql # Nacos 会在 MySQL 启动后再启动
