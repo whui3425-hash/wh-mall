@@ -2,43 +2,28 @@
 
 # =============================================================================
 #  Mall SaaS 系统一键部署脚本
+#  使用说明: chmod +x deploy.sh && ./deploy.sh
 # =============================================================================
 
 set -e
 
-# 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
-BOLD='\033[1m'
 
-# 日志函数
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
-
-log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
-}
-
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
+log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
+log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 log_stage() {
     echo -e ""
     echo -e "${CYAN}========================================${NC}"
     echo -e "${CYAN}  $1${NC}"
     echo -e "${CYAN}========================================${NC}"
 }
-
 error_exit() {
     log_error "$1"
     echo -e "${RED}========================================${NC}"
@@ -46,19 +31,11 @@ error_exit() {
     echo -e "${RED}========================================${NC}"
     exit 1
 }
-
 check_command() {
-    if ! command -v "$1" &> /dev/null; then
-        error_exit "$1 未安装"
-    fi
+    if ! command -v "$1" &> /dev/null; then error_exit "$1 未安装"; fi
 }
 
-# 获取服务器 IP
 SERVER_IP=$(hostname -I | awk '{print $1}')
-
-# =============================================================================
-#  主程序开始
-# =============================================================================
 
 clear
 echo -e "${CYAN}========================================${NC}"
@@ -72,12 +49,10 @@ echo ""
 #  【第一阶段：环境检查】
 # =============================================================================
 log_stage "第一阶段：环境检查"
-
 log_info "检查 Docker..."
 check_command docker
 check_command docker-compose
 log_success "Docker 检查通过"
-
 log_info "检查 Maven..."
 check_command mvn
 log_success "Maven 检查通过"
@@ -87,7 +62,6 @@ log_success "Maven 检查通过"
 # =============================================================================
 log_stage "第二阶段：创建配置文件"
 
-# 创建 .env 文件（使用 IP 地址）
 cat > .env << EOF
 NACOS_HOST=${SERVER_IP}
 MYSQL_HOST=${SERVER_IP}
@@ -96,8 +70,8 @@ MYSQL_PASSWORD=123456
 EOF
 log_success ".env 文件已创建 (IP: ${SERVER_IP})"
 
-# 创建 docker-compose-env.yml（Nacos 开启认证）
-cat > deploy/docker-compose-env.yml << EOF
+# 创建 docker-compose-env.yml（Nacos 1.4.2 关闭认证）
+cat > deploy/docker-compose-env.yml << 'EOF'
 version: '3.8'
 services:
   mysql:
@@ -115,19 +89,16 @@ services:
     networks:
       - mall-net
   nacos:
-    image: nacos/nacos-server:v2.2.3
+    image: nacos/nacos-server:1.4.2
     container_name: mall-nacos
     restart: always
     environment:
-      - PREFER_HOST_MODE=hostname
       - MODE=standalone
-      - JVM_XMS=512m
-      - JVM_XMX=512m
-      - NACOS_AUTH_ENABLE=false
+      - JVM_XMS=256m
+      - JVM_XMX=256m
     ports:
       - "8848:8848"
       - "9848:9848"
-      - "9849:9849"
     networks:
       - mall-net
 networks:
@@ -136,19 +107,24 @@ networks:
 EOF
 log_success "docker-compose-env.yml 已创建"
 
+# 注释所有 Java 服务的 bootstrap.yml 中的认证配置
+log_info "注释 Java 服务的 Nacos 认证配置..."
+find mall-service mall-gateway -name "bootstrap.yml" -type f 2>/dev/null | while read file; do
+    sed -i 's/^\(\s*username:\s*\${NACOS_USERNAME\)/# \1/g' "$file" 2>/dev/null || true
+    sed -i 's/^\(\s*password:\s*\${NACOS_PASSWORD\)/# \1/g' "$file" 2>/dev/null || true
+done
+log_success "认证配置已注释"
+
 # =============================================================================
 #  【第三阶段：清理旧环境】
 # =============================================================================
 log_stage "第三阶段：清理旧环境"
-
 log_info "停止旧容器..."
 docker-compose down 2>/dev/null || true
 docker-compose -f deploy/docker-compose-env.yml down 2>/dev/null || true
-
 log_info "清理旧数据..."
 rm -rf deploy/mysql-data 2>/dev/null || true
 docker network rm mall-net 2>/dev/null || true
-
 log_success "旧环境清理完成"
 
 # =============================================================================
@@ -183,7 +159,6 @@ for i in $(seq 1 24); do
     sleep 5
 done
 
-# 检查 Nacos 是否真的启动了
 if ! curl -s http://${SERVER_IP}:8848/nacos > /dev/null 2>&1; then
     error_exit "Nacos 启动超时，请检查日志: docker logs mall-nacos"
 fi
@@ -191,8 +166,7 @@ fi
 # =============================================================================
 #  【第五阶段：编译后端代码】
 # =============================================================================
-log_stage "第六阶段：编译后端代码"
-
+log_stage "第五阶段：编译后端代码"
 log_info "开始 Maven 编译 (可能需要 5-10 分钟)..."
 if mvn clean package -DskipTests -q; then
     log_success "后端代码编译成功"
@@ -201,10 +175,9 @@ else
 fi
 
 # =============================================================================
-#  【第七阶段：启动业务集群】
+#  【第六阶段：启动业务集群】
 # =============================================================================
-log_stage "第七阶段：启动业务集群"
-
+log_stage "第六阶段：启动业务集群"
 log_info "构建并启动所有业务服务..."
 docker-compose up -d --build
 
@@ -215,21 +188,30 @@ for i in $(seq 60 -1 1); do
 done
 echo -e "${GREEN}  服务注册完成                     ${NC}"
 
+# 检查关键服务
+log_info "检查服务状态..."
+for service in mall-api-gateway mall-user-service mall-goods-service; do
+    if docker ps | grep -q $service; then
+        log_success "  ✓ $service 运行中"
+    else
+        log_warn "  ✗ $service 可能未启动"
+    fi
+done
+
 # =============================================================================
-#  【第八阶段：完成提示】
+#  【第七阶段：完成提示】
 # =============================================================================
 log_stage "部署完成"
-
 echo ""
-echo -e "${GREEN}${BOLD}========================================${NC}"
-echo -e "${GREEN}${BOLD}      部署成功！${NC}"
-echo -e "${GREEN}${BOLD}========================================${NC}"
+echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}      部署成功！${NC}"
+echo -e "${GREEN}========================================${NC}"
 echo ""
 echo -e "${CYAN}  系统访问地址:${NC}"
 echo -e "    🛒 C端买家商城: ${YELLOW}http://${SERVER_IP}:80${NC}"
 echo -e "    ⚙️  B端管理后台: ${YELLOW}http://${SERVER_IP}:8080${NC}"
 echo -e "    🔌 API网关地址: ${YELLOW}http://${SERVER_IP}:8088${NC}"
-echo -e "    📊 Nacos控制台:   ${YELLOW}http://${SERVER_IP}:8848/nacos${NC} (nacos/nacos)"
+echo -e "    📊 Nacos控制台:   ${YELLOW}http://${SERVER_IP}:8848/nacos${NC}"
 echo ""
 echo -e "${CYAN}  测试账号:${NC}"
 echo -e "    👤 C端买家: zhangsan / 123456"
@@ -241,5 +223,4 @@ echo -e "    停止服务: ${YELLOW}docker-compose down${NC}"
 echo ""
 log_info "部署完成时间: $(date '+%Y-%m-%d %H:%M:%S')"
 echo ""
-
 exit 0
