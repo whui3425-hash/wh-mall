@@ -20,9 +20,22 @@ USE mall_goods;
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
--- ----------------------------
--- Table structure for ad_items
--- ----------------------------
+/*
+ Navicat Premium Data Transfer
+
+ Source Server         : 192.168.31.102
+ Source Server Type    : MySQL
+ Source Server Version : 80045 (8.0.45)
+ Source Host           : 192.168.31.102:3306
+ Source Schema         : mall_goods
+
+ Target Server Type    : MySQL
+ Target Server Version : 80045 (8.0.45)
+ File Encoding         : 65001
+
+ Date: 12/04/2026 09:28:45
+*/
+
 DROP TABLE IF EXISTS `ad_items`;
 CREATE TABLE `ad_items`  (
                              `id` int NOT NULL AUTO_INCREMENT COMMENT 'Ad ID',
