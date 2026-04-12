@@ -662,6 +662,15 @@ const resolveTheme = () => {
   return themeConfig.shop1
 }
 
+// 商品服务 /api/sku/aditems/type 直接返回 List<Sku>（JSON 数组），无 { code, data } 封装
+const normalizeSkuList = (res) => {
+  if (!res) return null
+  if (Array.isArray(res)) return res
+  if (res.code === 20000 && Array.isArray(res.data)) return res.data
+  if (Array.isArray(res.data)) return res.data
+  return null
+}
+
 // Fetch products from backend - 调用SKU广告列表接口
 const fetchProducts = async () => {
   loading.value = true
@@ -670,13 +679,14 @@ const fetchProducts = async () => {
     // 类型1是首页轮播/推荐商品
     const res = await get('/sku/aditems/type?id=1')
     console.log('API Response:', res)
-    if (res && res.code === 20000 && res.data && res.data.length > 0) {
+    const list = normalizeSkuList(res)
+    if (list && list.length > 0) {
       // 为每个SKU添加 addingToCart 属性（用于按钮loading状态）
-      products.value = res.data.map(sku => ({
+      products.value = list.map((sku) => ({
         id: sku.id,           // SKU ID (如 SKU001)
         name: sku.name,       // SKU 名称
         price: sku.price,     // 价格（分）
-        image: sku.image,    // 图片
+        image: sku.image,     // 图片（与数据库 sku.image 一致）
         sort: sku.sort || 1,  // 排序
         addingToCart: false
       }))
