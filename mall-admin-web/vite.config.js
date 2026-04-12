@@ -24,6 +24,10 @@ export default defineConfig({
             console.log('代理请求:', req.method, req.url, '->', proxyReq.path)
           })
         }
+      },
+      '/images': {
+        target: 'http://localhost:5173',  // C端 mall-store-web 开发服务器
+        changeOrigin: true
       }
     }
   }
