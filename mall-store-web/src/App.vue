@@ -620,8 +620,11 @@ const loginRules = {
 
 // Computed
 const bannerGradient = computed(() => {
-  const accent = tenantId.value === '1001' ? '#00D4FF' : '#FFB6C1'
-  return `linear-gradient(135deg, ${themeColor.value} 0%, ${accent} 100%)`
+  if (tenantId.value === '1001') {
+    // Hero 横幅：深紫 → 亮紫（与顶栏深蓝主题区分，仅横幅区域）
+    return 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 40%, #a78bfa 100%)'
+  }
+  return `linear-gradient(135deg, ${themeColor.value} 0%, #FFB6C1 100%)`
 })
 
 /**
