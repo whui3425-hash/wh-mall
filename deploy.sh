@@ -79,7 +79,7 @@ services:
     container_name: mall-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-123456}
       TZ: Asia/Shanghai
     ports:
       - "3306:3306"
@@ -121,7 +121,7 @@ log_success "认证配置已注释"
 log_stage "第三阶段：清理旧环境"
 log_info "停止旧容器..."
 docker-compose down 2>/dev/null || true
-docker-compose -f deploy/docker-compose-env.yml down 2>/dev/null || true
+docker-compose --env-file .env -f deploy/docker-compose-env.yml down 2>/dev/null || true
 log_info "清理旧数据..."
 rm -rf deploy/mysql-data 2>/dev/null || true
 docker network rm mall-net 2>/dev/null || true
@@ -140,7 +140,7 @@ if [ -d "mall-store-web/public/images" ]; then
 fi
 
 log_info "启动 MySQL 和 Nacos..."
-docker-compose -f deploy/docker-compose-env.yml up -d
+docker-compose --env-file .env -f deploy/docker-compose-env.yml up -d
 
 log_info "等待 MySQL 初始化 (60秒)..."
 for i in $(seq 60 -1 1); do
