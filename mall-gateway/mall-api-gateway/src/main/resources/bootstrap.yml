@@ -14,14 +14,14 @@ spring:
         file-extension: yaml
         server-addr: ${NACOS_SERVER_ADDR:192.168.31.101:8848}
         # 关闭认证，不需要用户名密码
-        username: ${NACOS_USERNAME:nacos}
-        password: ${NACOS_PASSWORD:nacos}
+        # username: ${NACOS_USERNAME:nacos}
+        # password: ${NACOS_PASSWORD:nacos}
       discovery:
         # Nacos discovery address
         server-addr: ${NACOS_SERVER_ADDR:192.168.31.101:8848}
         # 关闭认证，不需要用户名密码
-        username: ${NACOS_USERNAME:nacos}
-        password: ${NACOS_PASSWORD:nacos}
+        # username: ${NACOS_USERNAME:nacos}
+        # password: ${NACOS_PASSWORD:nacos}
     gateway:
       # Enable dynamic service discovery locator
       discovery:
