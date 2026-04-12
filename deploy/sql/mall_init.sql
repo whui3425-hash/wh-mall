@@ -13,7 +13,7 @@
 
  Date: 12/04/2026 09:28:45
 */
-
+USE mall_goods;
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 

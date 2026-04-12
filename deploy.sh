@@ -83,6 +83,12 @@ check_command docker-compose
 log_success "Docker 环境检查通过"
 
 echo ""
+log_info "清理旧数据..."
+rm -rf deploy/mysql-data 2>/dev/null || true
+docker network rm mall-net 2>/dev/null || true
+log_success "旧数据清理完成"
+
+echo ""
 log_info "启动基础环境容器 (MySQL + Nacos)..."
 if docker-compose -f deploy/docker-compose-env.yml up -d; then
     log_success "基础环境容器启动成功"
@@ -106,14 +112,35 @@ log_info "SQL 文件:"
 log_info "  - deploy/sql/nacos_init.sql (Nacos 配置中心数据库)"
 log_info "  - deploy/sql/mall_init.sql (商城业务数据库)"
 
+# 检查 SQL 文件是否存在
+if [ ! -f "deploy/sql/nacos_init.sql" ]; then
+    log_warn "nacos_init.sql 不存在，跳过"
+fi
+if [ ! -f "deploy/sql/mall_init.sql" ]; then
+    log_warn "mall_init.sql 不存在，跳过"
+fi
+
 echo ""
-log_warn "正在等待 MySQL 和 Nacos 初始化，休眠 30 秒..."
+log_warn "正在等待 MySQL 和 Nacos 初始化，休眠 60 秒..."
 log_warn "这是为了确保数据库有足够的时间完成建表操作"
-for i in $(seq 30 -1 1); do
+for i in $(seq 60 -1 1); do
     echo -ne "${YELLOW}  剩余等待时间: ${i} 秒...\r${NC}"
     sleep 1
 done
 echo -e "${GREEN}  等待完成，继续执行...             ${NC}"
+
+# 健康检查 - 等待 Nacos 真正可用
+echo ""
+log_info "检查 Nacos 健康状态..."
+for i in {1..30}; do
+    if curl -s http://localhost:8848/nacos/v1/ns/operator/metrics > /dev/null 2>&1; then
+        log_success "Nacos 已就绪！"
+        break
+    fi
+    echo -ne "${YELLOW}  等待 Nacos 就绪... (${i}/30)\r${NC}"
+    sleep 2
+done
+echo ""
 
 # =============================================================================
 #  【第二阶段：编译后端代码】
@@ -167,10 +194,14 @@ echo -e "${GREEN}${BOLD}========================================${NC}"
 echo -e "${GREEN}${BOLD}      部署成功！系统已正常运行${NC}"
 echo -e "${GREEN}${BOLD}========================================${NC}"
 echo ""
+# 获取服务器 IP
+SERVER_IP=$(hostname -I | awk '{print $1}')
+
 echo -e "${CYAN}  系统访问地址:${NC}"
-echo -e "    🛒 C端买家商城: ${YELLOW}http://localhost:80${NC}"
-echo -e "    ⚙️  B端管理后台: ${YELLOW}http://localhost:8080${NC}"
-echo -e "    🔌 API网关地址: ${YELLOW}http://localhost:8088${NC}"
+echo -e "    🛒 C端买家商城: ${YELLOW}http://${SERVER_IP}:80${NC}"
+echo -e "    ⚙️  B端管理后台: ${YELLOW}http://${SERVER_IP}:8080${NC}"
+echo -e "    🔌 API网关地址: ${YELLOW}http://${SERVER_IP}:8088${NC}"
+echo -e "    📊 Nacos 控制台: ${YELLOW}http://${SERVER_IP}:8848/nacos${NC}"
 echo ""
 echo -e "${CYAN}  默认测试账号:${NC}"
 echo -e "    👤 C端买家: username=zhangsan, password=123456"
