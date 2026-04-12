@@ -37,4 +37,4 @@ services:
 
 networks:
   mall-net:
-    external: true  # 使用外部网络，由主 docker-compose.yml 创建
+    driver: bridge  # 自动创建网络
