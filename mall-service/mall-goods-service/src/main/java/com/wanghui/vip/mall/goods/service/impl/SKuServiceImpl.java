@@ -9,17 +9,12 @@ import com.wanghui.vip.mall.goods.model.AdItems;
 import com.wanghui.vip.mall.goods.model.Sku;
 import com.wanghui.vip.mall.goods.service.SKuService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@CacheConfig(cacheNames = "ad-items-skus")
 @Service
 public class SKuServiceImpl extends ServiceImpl<SkuMapper,Sku> implements SKuService {
 
@@ -48,16 +43,13 @@ public class SKuServiceImpl extends ServiceImpl<SkuMapper,Sku> implements SKuSer
 
     /***
      * Query product list by promotion category ID
-     * @param id
-     * @return
-     * ad-items-skus::1
+     * @param id promotion type
      */
-    @Cacheable(key ="#id" )
     @Override
     public List<Sku> typeSkuItems(Integer id) {
-        //1. Query all list info under current category
+        //1. Query all list info under current category（tenant_id 由 MP 租户插件注入）
         QueryWrapper<AdItems> adItemsQueryWrapper = new QueryWrapper<AdItems>();
-        adItemsQueryWrapper.eq("type",id);
+        adItemsQueryWrapper.eq("type", id);
         List<AdItems> adItems = adItemsMapper.selectList(adItemsQueryWrapper);
 
         //2. Query product list info based on promotion list
@@ -70,21 +62,18 @@ public class SKuServiceImpl extends ServiceImpl<SkuMapper,Sku> implements SKuSer
      * @param id
      * @return
      */
-    @CacheEvict(key ="#id" )
     @Override
     public void delTypeSkuItems(Integer id) {}
 
     /****
-     * Update cache
-     * @param id
-     * @return
+     * Re-query promotion SKU list after ad_items change
+     * @param id promotion type
      */
-    @CachePut(key = "#id")
     @Override
     public List<Sku> updateTypeSkuItems(Integer id) {
         //1. Query all list info under current category
         QueryWrapper<AdItems> adItemsQueryWrapper = new QueryWrapper<AdItems>();
-        adItemsQueryWrapper.eq("type",id);
+        adItemsQueryWrapper.eq("type", id);
         List<AdItems> adItems = adItemsMapper.selectList(adItemsQueryWrapper);
 
         //2. Query product list info based on promotion list

@@ -48,7 +48,7 @@ CREATE TABLE `ad_items`  (
                              INDEX `idx_tenant_id`(`tenant_id` ASC) USING BTREE,
                              INDEX `idx_sku_id`(`sku_id` ASC) USING BTREE,
                              INDEX `idx_type`(`type` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Ad items table' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 27 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Ad items table' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ad_items
@@ -59,6 +59,26 @@ INSERT INTO `ad_items` VALUES (3, 'Air Jordan 1 Retro - Trending', 2, 'SKU012', 
 INSERT INTO `ad_items` VALUES (4, 'Advanced Night Repair - Best Seller', 2, 'SKU010', 2, '1002');
 INSERT INTO `ad_items` VALUES (5, 'Huawei Mate 60 Pro - New Arrival', 1, 'SKU018', 3, '1001');
 INSERT INTO `ad_items` VALUES (6, 'MacBook Pro 16 - Professional', 1, 'SKU004', 4, '1001');
+INSERT INTO `ad_items` VALUES (7, '1001首页-Galaxy S24 Ultra', 1, 'SKU021', 5, '1001');
+INSERT INTO `ad_items` VALUES (8, '1001首页-iPad Pro M4', 1, 'SKU023', 6, '1001');
+INSERT INTO `ad_items` VALUES (9, '1001首页-MX Keys Mini', 1, 'SKU026', 7, '1001');
+INSERT INTO `ad_items` VALUES (10, '1001首页-Mate 60 釉白', 1, 'SKU028', 8, '1001');
+INSERT INTO `ad_items` VALUES (11, '1001分类-AirPods 演示', 2, 'SKU030', 3, '1001');
+INSERT INTO `ad_items` VALUES (12, '1001分类-MacBook Air M3', 2, 'SKU029', 4, '1001');
+INSERT INTO `ad_items` VALUES (13, '1002首页-小棕瓶50ml', 1, 'SKU010', 1, '1002');
+INSERT INTO `ad_items` VALUES (14, '1002首页-AJ芝加哥', 1, 'SKU012', 2, '1002');
+INSERT INTO `ad_items` VALUES (15, '1002首页-Ultraboost黑', 1, 'SKU014', 3, '1002');
+INSERT INTO `ad_items` VALUES (16, '1002首页-卫衣黑M', 1, 'SKU016', 4, '1002');
+INSERT INTO `ad_items` VALUES (17, '1002首页-限定唇膏520', 1, 'SKU035', 5, '1002');
+INSERT INTO `ad_items` VALUES (18, '1002首页-身体乳400ml', 1, 'SKU037', 6, '1002');
+INSERT INTO `ad_items` VALUES (19, '1002首页-小棕瓶75ml', 1, 'SKU031', 7, '1002');
+INSERT INTO `ad_items` VALUES (20, '1002首页-Dunk熊猫', 1, 'SKU039', 8, '1002');
+INSERT INTO `ad_items` VALUES (21, '1002分类-微精华200ml', 2, 'SKU038', 5, '1002');
+INSERT INTO `ad_items` VALUES (22, '1002分类-卫衣橄榄绿', 2, 'SKU040', 6, '1002');
+INSERT INTO `ad_items` VALUES (23, '1002分类-AJ Shadow', 2, 'SKU032', 7, '1002');
+INSERT INTO `ad_items` VALUES (24, '1002分类-Ultraboost橄榄', 2, 'SKU033', 8, '1002');
+INSERT INTO `ad_items` VALUES (25, '1002分类-唇膏330珊瑚', 2, 'SKU036', 9, '1002');
+INSERT INTO `ad_items` VALUES (26, '1001分类-Galaxy Tab', 2, 'SKU024', 5, '1001');
 
 -- ----------------------------
 -- Table structure for brand
@@ -170,6 +190,7 @@ INSERT INTO `category_brand` VALUES (161, 7);
 INSERT INTO `category_brand` VALUES (171, 8);
 INSERT INTO `category_brand` VALUES (111, 10);
 INSERT INTO `category_brand` VALUES (111, 11);
+INSERT INTO `category_brand` VALUES (111, 9);
 
 -- ----------------------------
 -- Table structure for mall_cart
@@ -444,6 +465,26 @@ INSERT INTO `sku` VALUES ('SKU017', 'Oversized Hoodie - Grey L', 69900, 100, '/i
 INSERT INTO `sku` VALUES ('SKU018', 'Huawei Mate 60 Pro - Black 512GB', 699900, 80, '/images/goods/sku-huawei-512.jpg', '[\"/images/goods/iphone-huawei-1.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU009', 111, 'Smartphone', 10, 'Huawei', '{\"color\": \"Black\", \"storage\": \"512GB\"}', 1, '1001');
 INSERT INTO `sku` VALUES ('SKU019', 'Xiaomi 14 Pro - White 256GB', 499900, 100, '/images/goods/sku-xiaomi-256.jpg', '[\"/images/goods/iphone-xiaomi-1.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU010', 111, 'Smartphone', 11, 'Xiaomi', '{\"color\": \"White\", \"storage\": \"256GB\"}', 1, '1001');
 INSERT INTO `sku` VALUES ('SKU020', 'Xiaomi 14 Pro - Black 512GB', 549900, 60, '/images/goods/pic2.jpg', '[\"/images/goods/iphone-xiaomi-2.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU010', 111, 'Smartphone', 11, 'Xiaomi', '{\"color\": \"Black\", \"storage\": \"512GB\"}', 1, '1001');
+INSERT INTO `sku` VALUES ('SKU021', 'Samsung Galaxy S24 Ultra - Titanium Black 256GB', 899900, 45, '/images/goods/pic3.jpg', '[\"/images/goods/pic3.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU011', 111, 'Smartphone', 9, 'Samsung', '{\"color\": \"Titanium Black\", \"storage\": \"256GB\"}', 1, '1001');
+INSERT INTO `sku` VALUES ('SKU022', 'Samsung Galaxy S24 Ultra - Titanium Violet 512GB', 969900, 38, '/images/goods/pic3.jpg', '[\"/images/goods/order-ipad.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU011', 111, 'Smartphone', 9, 'Samsung', '{\"color\": \"Titanium Violet\", \"storage\": \"512GB\"}', 1, '1001');
+INSERT INTO `sku` VALUES ('SKU023', 'iPad Pro 11 M4 - Space Black 256GB WiFi', 679900, 52, '/images/goods/order-ipad.jpg', '[\"/images/goods/order-ipad.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU012', 131, 'Laptop', 1, 'Apple', '{\"size\": \"11 inch\", \"storage\": \"256GB\"}', 1, '1001');
+INSERT INTO `sku` VALUES ('SKU024', 'iPad Pro 13 M4 - Silver 512GB WiFi', 929900, 28, '/images/goods/order-ipad.jpg', '[\"/images/goods/spu002-1.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU012', 131, 'Laptop', 1, 'Apple', '{\"size\": \"13 inch\", \"storage\": \"512GB\"}', 1, '1001');
+INSERT INTO `sku` VALUES ('SKU025', 'Sony WH-1000XM5 - Midnight Blue', 359900, 88, '/images/goods/spu003-1.jpg', '[\"/images/goods/spu003-2.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU003', 121, 'Headphones', 2, 'Sony', '{\"color\": \"Midnight Blue\"}', 1, '1001');
+INSERT INTO `sku` VALUES ('SKU026', 'Logitech MX Keys Mini - Rose Wireless', 99900, 95, '/images/goods/spu004-2.jpg', '[\"/images/goods/spu004-2.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU004', 141, 'Keyboard', 3, 'Logitech', '{\"layout\": \"Mini\", \"color\": \"Rose\"}', 1, '1001');
+INSERT INTO `sku` VALUES ('SKU027', 'iPhone 15 Pro - Desert Titanium 128GB', 799900, 42, '/images/goods/spu001-1.jpg', '[\"/images/goods/spu001-1.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU001', 111, 'Smartphone', 1, 'Apple', '{\"color\": \"Desert Titanium\", \"storage\": \"128GB\"}', 1, '1001');
+INSERT INTO `sku` VALUES ('SKU028', 'Huawei Mate 60 Pro - White 256GB', 659900, 55, '/images/goods/iphone-huawei-2.jpg', '[\"/images/goods/iphone-huawei-2.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU009', 111, 'Smartphone', 10, 'Huawei', '{\"color\": \"White\", \"storage\": \"256GB\"}', 1, '1001');
+INSERT INTO `sku` VALUES ('SKU029', 'MacBook Air 15 M3 - Starlight 16GB 512GB', 1099900, 33, '/images/goods/spu002-2.jpg', '[\"/images/goods/spu002-1.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU002', 131, 'Laptop', 1, 'Apple', '{\"color\": \"Starlight\", \"memory\": \"16GB\"}', 1, '1001');
+INSERT INTO `sku` VALUES ('SKU030', 'Sony LinkBuds S - Noise Canceling White', 129900, 120, '/images/goods/order-airpods.jpg', '[\"/images/goods/order-airpods.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU003', 121, 'Headphones', 2, 'Sony', '{\"color\": \"White\", \"feature\": \"ANC\"}', 1, '1001');
+INSERT INTO `sku` VALUES ('SKU031', 'Advanced Night Repair 75ml', 158000, 90, '/images/goods/spu005-1.jpg', '[\"/images/goods/spu005-1.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU005', 151, 'Skincare', 5, 'Estée Lauder', '{\"size\": \"75ml\"}', 1, '1002');
+INSERT INTO `sku` VALUES ('SKU032', 'Air Jordan 1 High - Shadow US 11', 154900, 42, '/images/goods/spu006-2.jpg', '[\"/images/goods/spu006-1.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU006', 161, 'Shoes', 6, 'Nike', '{\"colorway\": \"Shadow\", \"size\": \"US 11\"}', 1, '1002');
+INSERT INTO `sku` VALUES ('SKU033', 'Ultraboost 23 - Olive US 10', 139900, 72, '/images/goods/spu007-1.jpg', '[\"/images/goods/spu007-2.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU007', 161, 'Shoes', 7, 'Adidas', '{\"color\": \"Olive\", \"size\": \"US 10\"}', 1, '1002');
+INSERT INTO `sku` VALUES ('SKU034', 'Oversized Hoodie - Cream XL', 75900, 85, '/images/goods/spu008-1.jpg', '[\"/images/goods/spu008-2.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU008', 171, 'Clothing', 8, 'Zara', '{\"color\": \"Cream\", \"size\": \"XL\"}', 1, '1002');
+INSERT INTO `sku` VALUES ('SKU035', 'Pure Color Envy Lipstick - 520 Ruby', 32000, 200, '/images/goods/spu005-2.jpg', '[\"/images/goods/spu005-2.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU013', 151, 'Skincare', 5, 'Estée Lauder', '{\"shade\": \"520 Ruby\"}', 1, '1002');
+INSERT INTO `sku` VALUES ('SKU036', 'Pure Color Envy Lipstick - 330 Coral', 32000, 180, '/images/goods/spu005-1.jpg', '[\"/images/goods/spu005-1.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU013', 151, 'Skincare', 5, 'Estée Lauder', '{\"shade\": \"330 Coral\"}', 1, '1002');
+INSERT INTO `sku` VALUES ('SKU037', 'Revitalizing Supreme Body Lotion 400ml', 48000, 130, '/images/goods/spu008-2.jpg', '[\"/images/goods/spu008-2.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU014', 151, 'Skincare', 5, 'Estée Lauder', '{\"volume\": \"400ml\"}', 1, '1002');
+INSERT INTO `sku` VALUES ('SKU038', 'Micro Essence Treatment Lotion 200ml', 92000, 100, '/images/goods/spu005-2.jpg', '[\"/images/goods/spu005-1.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU005', 151, 'Skincare', 5, 'Estée Lauder', '{\"size\": \"200ml\"}', 1, '1002');
+INSERT INTO `sku` VALUES ('SKU039', 'Nike Dunk Low - Panda US 9', 89900, 65, '/images/goods/spu006-1.jpg', '[\"/images/goods/spu006-2.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU006', 161, 'Shoes', 6, 'Nike', '{\"colorway\": \"Panda\", \"size\": \"US 9\"}', 1, '1002');
+INSERT INTO `sku` VALUES ('SKU040', 'Oversized Hoodie - Olive Green S', 72900, 95, '/images/goods/spu008-1.jpg', '[\"/images/goods/spu008-1.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU008', 171, 'Clothing', 8, 'Zara', '{\"color\": \"Olive\", \"size\": \"S\"}', 1, '1002');
 
 -- ----------------------------
 -- Table structure for spu
@@ -485,6 +526,10 @@ INSERT INTO `spu` VALUES ('SPU007', 'Adidas Ultraboost 23', 'Premium running sho
 INSERT INTO `spu` VALUES ('SPU008', 'Zara Oversized Hoodie', 'Trendy streetwear hoodie for everyday style', 8, 3, 17, 171, '[\"/images/goods/spu008-1.jpg\", \"/images/goods/spu008-2.jpg\"]', '30-day return, easy size exchange', '<h2>Oversized Hoodie</h2><p>Comfortable cotton blend with trendy oversized fit.</p>', '[{\"color\": \"Black\", \"size\": \"M\"}]', 1, 0, 1, '1002');
 INSERT INTO `spu` VALUES ('SPU009', 'Huawei Mate 60 Pro', 'Huawei flagship with Kirin 9000S chip', 10, 1, 11, 111, '[\"/images/goods/iphone-huawei-1.jpg\", \"/images/goods/iphone-huawei-2.jpg\"]', '7-day no-reason return, 2-year warranty', '<h1>Huawei Mate 60 Pro</h1><p>Satellite communication capability.</p>', '[{\"color\": \"Black\", \"storage\": \"512GB\"}]', 1, 0, 1, '1001');
 INSERT INTO `spu` VALUES ('SPU010', 'Xiaomi 14 Pro', 'Xiaomi flagship with Snapdragon 8 Gen 3', 11, 1, 11, 111, '[\"/images/goods/iphone-xiaomi-1.jpg\", \"/images/goods/iphone-xiaomi-2.jpg\"]', '7-day no-reason return, 1-year warranty', '<h1>Xiaomi 14 Pro</h1><p>Leica optics system.</p>', '[{\"color\": \"White\", \"storage\": \"256GB\"}]', 1, 0, 1, '1001');
+INSERT INTO `spu` VALUES ('SPU011', 'Samsung Galaxy S24 Ultra', 'Samsung flagship with S Pen and AI', 9, 1, 11, 111, '[\"/images/goods/pic3.jpg\", \"/images/goods/brand-samsung.jpg\"]', '7-day no-reason return, 1-year warranty', '<h1>Galaxy S24 Ultra</h1><p>AI-powered photography.</p>', '[{\"color\": \"Titanium Black\", \"storage\": \"256GB\"}]', 1, 0, 1, '1001');
+INSERT INTO `spu` VALUES ('SPU012', 'iPad Pro M4', 'Apple tablet with M4 chip', 1, 2, 13, 131, '[\"/images/goods/order-ipad.jpg\", \"/images/goods/spu002-1.jpg\"]', '1 year warranty', '<h2>iPad Pro M4</h2><p>OLED Ultra Retina display.</p>', '[{\"size\": \"11 inch\"}]', 1, 0, 1, '1001');
+INSERT INTO `spu` VALUES ('SPU013', 'Pure Color Envy Lipstick', 'High pigment lipstick line', 5, 3, 15, 151, '[\"/images/goods/spu005-1.jpg\", \"/images/goods/spu005-2.jpg\"]', 'Authentic guarantee', '<h2>Pure Color Envy</h2><p>Rich color, comfortable wear.</p>', '[{\"finish\": \"Satin\"}]', 1, 0, 1, '1002');
+INSERT INTO `spu` VALUES ('SPU014', 'Revitalizing Supreme Body', 'Body care collection', 5, 3, 15, 151, '[\"/images/goods/spu008-2.jpg\"]', '30-day return', '<h2>Body care</h2><p>Hydrating body lotion.</p>', '[{\"type\": \"Lotion\"}]', 1, 0, 1, '1002');
 
 -- ----------------------------
 -- Table structure for sys_admin
