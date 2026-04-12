@@ -16,15 +16,15 @@
       >
         <el-menu-item index="/dashboard">
           <el-icon><Odometer /></el-icon>
-          <span>控制台大盘</span>
+          <span>Dashboard</span>
         </el-menu-item>
         <el-menu-item index="/goods">
           <el-icon><Goods /></el-icon>
-          <span>商品管理</span>
+          <span>Products</span>
         </el-menu-item>
         <el-menu-item index="/orders">
           <el-icon><Document /></el-icon>
-          <span>订单管理</span>
+          <span>Orders</span>
         </el-menu-item>
       </el-menu>
     </el-aside>
@@ -47,16 +47,16 @@
           <el-dropdown @command="handleCommand">
             <span class="user-info">
               <el-avatar :size="32" :icon="UserFilled" />
-              <span class="username">店长设置</span>
+              <span class="username">Administrator</span>
               <el-icon class="dropdown-icon"><ArrowDown /></el-icon>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="profile">个人中心</el-dropdown-item>
-                <el-dropdown-item command="settings">系统设置</el-dropdown-item>
+                <el-dropdown-item command="profile">Profile</el-dropdown-item>
+                <el-dropdown-item command="settings">Settings</el-dropdown-item>
                 <el-dropdown-item divided command="logout">
                   <el-icon><SwitchButton /></el-icon>
-                  退出登录
+                  Sign out
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -118,17 +118,17 @@ const handleCommand = (command) => {
 
 const handleLogout = () => {
   ElMessageBox.confirm(
-    '确定要退出登录吗？',
-    '提示',
+    'Are you sure you want to sign out?',
+    'Confirm',
     {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
       type: 'warning',
     }
   )
     .then(() => {
       localStorage.removeItem('admin_token')
-      ElMessage.success('已安全退出')
+      ElMessage.success('Signed out successfully')
       router.push('/login')
     })
     .catch(() => {

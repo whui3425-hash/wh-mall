@@ -162,10 +162,10 @@
               <h4 class="product-name" :title="product.name">{{ product.name }}</h4>
               <div class="product-tags">
                 <el-tag size="small" :type="tenantId === '1001' ? 'primary' : 'danger'" effect="light">
-                  {{ tenantId === '1001' ? '数码' : '美妆' }}
+                  {{ tenantId === '1001' ? 'Tech' : 'Beauty' }}
                 </el-tag>
                 <el-tag size="small" type="warning" effect="plain" v-if="product.sort <= 3">
-                  热销
+                  Bestseller
                 </el-tag>
               </div>
               <div class="product-price-row">
@@ -531,12 +531,12 @@ import {
 const themeConfig = {
   shop1: {
     tenantId: '1001',
-    storeName: '极客数码专营店',
-    storeSlogan: 'Shop1 · 科技改变生活',
+    storeName: 'Geek Tech Store',
+    storeSlogan: 'Shop1 · Technology that changes life',
     themeColor: '#1E3A5F', // Deep tech blue
     accentColor: '#00D4FF', // Cyan accent
-    heroTitle: '探索科技新境界',
-    heroSubtitle: '精选全球顶尖数码装备，让科技更有温度',
+    heroTitle: 'Explore New Tech Horizons',
+    heroSubtitle: 'Curated world-class digital gear—technology with a human touch',
     categories: [
       { id: 1, name: 'All', icon: 'StarFilled' },
       { id: 2, name: 'Phones', icon: 'Cellphone' },
@@ -546,12 +546,12 @@ const themeConfig = {
   },
   shop2: {
     tenantId: '1002',
-    storeName: '星颜美妆甄选',
-    storeSlogan: 'Shop2 · 美丽由此绽放',
+    storeName: 'StarGlow Beauty',
+    storeSlogan: 'Shop2 · Where beauty blooms',
     themeColor: '#D4237A', // Rose pink
     accentColor: '#FFB6C1', // Light pink
-    heroTitle: '发现最美的自己',
-    heroSubtitle: '甄选全球美妆好物，绽放独特魅力',
+    heroTitle: 'Discover Your Best Self',
+    heroSubtitle: 'Curated global beauty favorites—unleash your unique glow',
     categories: [
       { id: 1, name: 'All', icon: 'StarFilled' },
       { id: 2, name: 'Skincare', icon: 'Brush' },
@@ -565,10 +565,10 @@ const themeConfig = {
 const currentDomain = ref('')
 const tenantId = ref('1001')
 const themeColor = ref('#1E3A5F')
-const storeName = ref('极客数码专营店')
-const storeSlogan = ref('Shop1 · 科技改变生活')
-const heroTitle = ref('探索科技新境界')
-const heroSubtitle = ref('精选全球顶尖数码装备，让科技更有温度')
+const storeName = ref('Geek Tech Store')
+const storeSlogan = ref('Shop1 · Technology that changes life')
+const heroTitle = ref('Explore New Tech Horizons')
+const heroSubtitle = ref('Curated world-class digital gear—technology with a human touch')
 const categories = ref(themeConfig.shop1.categories)
 const activeCategory = ref(1)
 const products = ref([])

@@ -6,8 +6,8 @@
           <div class="logo">
             <el-icon size="48" color="#409EFF"><Shop /></el-icon>
           </div>
-          <h1 class="title">SaaS 商户控制台</h1>
-          <p class="subtitle">专业电商管理平台</p>
+          <h1 class="title">SaaS Merchant Console</h1>
+          <p class="subtitle">E-commerce management platform</p>
         </div>
 
         <el-form
@@ -20,7 +20,7 @@
           <el-form-item prop="tenantId">
             <el-input
               v-model="form.tenantId"
-              placeholder="请输入店铺ID，如 1001"
+              placeholder="Store ID, e.g. 1001"
               :prefix-icon="OfficeBuilding"
               size="large"
               clearable
@@ -30,7 +30,7 @@
           <el-form-item prop="username">
             <el-input
               v-model="form.username"
-              placeholder="请输入用户名"
+              placeholder="Username"
               :prefix-icon="User"
               size="large"
               clearable
@@ -41,7 +41,7 @@
             <el-input
               v-model="form.password"
               type="password"
-              placeholder="请输入密码"
+              placeholder="Password"
               :prefix-icon="Lock"
               size="large"
               show-password
@@ -57,13 +57,13 @@
               :loading="loading"
               @click="handleLogin"
             >
-              {{ loading ? '登录中...' : '登 录' }}
+              {{ loading ? 'Signing in...' : 'Sign in' }}
             </el-button>
           </el-form-item>
         </el-form>
 
         <div class="login-footer">
-          <p>忘记密码？请联系系统管理员</p>
+          <p>Forgot your password? Contact your administrator.</p>
         </div>
       </el-card>
     </div>
@@ -96,15 +96,15 @@ const form = reactive({
 
 const rules = {
   tenantId: [
-    { required: true, message: '请输入店铺编号', trigger: 'blur' }
+    { required: true, message: 'Store ID is required', trigger: 'blur' }
   ],
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+    { required: true, message: 'Username is required', trigger: 'blur' },
+    { min: 3, max: 20, message: '3–20 characters', trigger: 'blur' }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
+    { required: true, message: 'Password is required', trigger: 'blur' },
+    { min: 6, max: 20, message: '6–20 characters', trigger: 'blur' }
   ]
 }
 
@@ -149,13 +149,13 @@ const handleLogin = async () => {
 
     if (!token || typeof token === 'object') {
       console.error('[登录] token格式异常:', token)
-      throw new Error('登录响应格式错误')
+      throw new Error('Invalid login response')
     }
 
     localStorage.setItem('admin_token', token)
 
     // 登录成功提示
-    ElMessage.success('欢迎回来，店长')
+    ElMessage.success('Welcome back')
 
     // 强制跳转到首页
     console.log('准备跳转到首页...')
@@ -168,7 +168,7 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.error('登录过程出错:', error)
-    ElMessage.error(error.message || '登录失败，请检查用户名和密码')
+    ElMessage.error(error.message || 'Sign-in failed. Check your credentials.')
   } finally {
     loading.value = false
   }

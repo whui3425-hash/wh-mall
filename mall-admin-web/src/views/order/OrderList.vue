@@ -4,9 +4,9 @@
       <div class="card-header">
         <div class="title-section">
           <el-icon size="20" color="#409EFF"><Document /></el-icon>
-          <span class="title">本店铺订单流水</span>
+          <span class="title">Orders</span>
           <el-tag type="info" effect="plain" class="count-tag">
-            共 {{ tableData.length }} 笔订单
+            {{ tableData.length }} orders
           </el-tag>
         </div>
         <el-button
@@ -15,7 +15,7 @@
           :loading="loading"
           @click="fetchOrderList"
         >
-          刷新数据
+          Refresh
         </el-button>
       </div>
     </template>
@@ -34,7 +34,7 @@
     >
       <el-table-column
         prop="outTradeNo"
-        label="订单流水号"
+        label="Order no."
         min-width="180"
         show-overflow-tooltip
       >
@@ -45,7 +45,7 @@
 
       <el-table-column
         prop="amount"
-        label="订单金额"
+        label="Amount"
         width="120"
         align="right"
       >
@@ -56,7 +56,7 @@
 
       <el-table-column
         prop="createTime"
-        label="创建时间"
+        label="Created"
         width="160"
       >
         <template #default="{ row }">
@@ -67,7 +67,7 @@
 
       <el-table-column
         prop="payStatus"
-        label="支付状态"
+        label="Payment"
         width="100"
         align="center"
       >
@@ -77,13 +77,13 @@
             effect="light"
             size="small"
           >
-            {{ row.payStatus === 1 ? '已支付' : '待支付' }}
+            {{ row.payStatus === 1 ? 'Paid' : 'Unpaid' }}
           </el-tag>
         </template>
       </el-table-column>
 
       <el-table-column
-        label="操作"
+        label="Actions"
         width="100"
         align="center"
         fixed="right"
@@ -95,7 +95,7 @@
             size="small"
             @click="viewDetail(row)"
           >
-            查看详情
+            Details
           </el-button>
         </template>
       </el-table-column>
@@ -104,11 +104,11 @@
     <!-- 空状态 -->
     <el-empty
       v-if="!loading && tableData.length === 0"
-      description="暂无订单数据"
+      description="No orders yet"
       :image-size="120"
     >
       <el-button type="primary" @click="fetchOrderList">
-        重新加载
+        Reload
       </el-button>
     </el-empty>
   </el-card>
@@ -129,9 +129,9 @@ const fetchOrderList = async () => {
   try {
     const res = await request.get('/order/admin/list')
     tableData.value = res || []
-    ElMessage.success('订单数据已更新')
+    ElMessage.success('Orders refreshed')
   } catch (error) {
-    ElMessage.error(error.message || '获取订单列表失败')
+    ElMessage.error(error.message || 'Failed to load orders')
     tableData.value = []
   } finally {
     loading.value = false
@@ -158,7 +158,7 @@ const formatTime = (time) => {
 
 // 查看订单详情
 const viewDetail = (row) => {
-  ElMessage.info(`查看订单: ${row.outTradeNo || row.id}`)
+  ElMessage.info(`Order: ${row.outTradeNo || row.id}`)
   // 实际项目中可以跳转到详情页
   // router.push(`/orders/detail/${row.id}`)
 }

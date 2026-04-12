@@ -5,9 +5,9 @@
       <div class="card-header">
         <div class="title-section">
           <el-icon size="20" color="#409EFF"><Goods /></el-icon>
-          <span class="title">商品列表</span>
+          <span class="title">Products</span>
           <el-tag type="info" effect="plain" class="count-tag">
-            共 {{ tableData.length }} 件商品
+            {{ tableData.length }} products
           </el-tag>
         </div>
         <el-button
@@ -16,7 +16,7 @@
           :loading="loading"
           @click="fetchProductList"
         >
-          刷新数据
+          Refresh
         </el-button>
       </div>
     </template>
@@ -34,7 +34,7 @@
       }"
     >
       <el-table-column
-        label="商品图片"
+        label="Image"
         width="80"
         align="center"
       >
@@ -56,7 +56,7 @@
 
       <el-table-column
         prop="id"
-        label="商品ID"
+        label="Product ID"
         width="100"
         show-overflow-tooltip
       >
@@ -67,7 +67,7 @@
 
       <el-table-column
         prop="name"
-        label="商品名称"
+        label="Name"
         min-width="180"
         show-overflow-tooltip
       >
@@ -78,18 +78,18 @@
 
       <el-table-column
         prop="price"
-        label="价格"
+        label="Price"
         width="120"
         align="right"
       >
         <template #default="{ row }">
-          <span class="price">¥ {{ formatPrice(row.price) }}</span>
+          <span class="price">${{ formatPrice(row.price) }}</span>
         </template>
       </el-table-column>
 
       <el-table-column
         prop="num"
-        label="库存"
+        label="Stock"
         width="100"
         align="center"
       >
@@ -102,7 +102,7 @@
 
       <el-table-column
         prop="isMarketable"
-        label="上架状态"
+        label="Listing status"
         width="100"
         align="center"
       >
@@ -112,7 +112,7 @@
             effect="light"
             size="small"
           >
-            {{ row.isMarketable === 1 ? '上架' : '下架' }}
+            {{ row.isMarketable === 1 ? 'Listed' : 'Delisted' }}
           </el-tag>
         </template>
       </el-table-column>
@@ -129,7 +129,7 @@
       </el-table-column>
 
       <el-table-column
-        label="操作"
+        label="Actions"
         width="240"
         align="center"
         fixed="right"
@@ -141,7 +141,7 @@
             size="small"
             @click="goToDetail(row)"
           >
-            查看详情
+            Details
           </el-button>
           <el-button
             link
@@ -149,7 +149,7 @@
             size="small"
             @click="handleEdit(row)"
           >
-            编辑
+            Edit
           </el-button>
           <el-button
             link
@@ -158,7 +158,7 @@
             :loading="row.statusLoading"
             @click="handleToggleStatus(row)"
           >
-            {{ row.isMarketable === 1 ? '下架' : '上架' }}
+            {{ row.isMarketable === 1 ? 'Delist' : 'List' }}
           </el-button>
         </template>
       </el-table-column>
@@ -167,11 +167,11 @@
     <!-- 空状态 -->
     <el-empty
       v-if="!loading && tableData.length === 0"
-      description="暂无商品数据"
+      description="No products yet"
       :image-size="120"
     >
       <el-button type="primary" @click="fetchProductList">
-        重新加载
+        Reload
       </el-button>
     </el-empty>
   </el-card>
@@ -185,34 +185,34 @@
   >
     <el-form
       :model="editForm"
-      label-width="80px"
+      label-width="110px"
       label-position="right"
     >
-      <el-form-item label="商品ID">
+      <el-form-item label="Product ID">
         <el-input v-model="editForm.id" disabled />
       </el-form-item>
 
-      <el-form-item label="商品名称">
+      <el-form-item label="Name">
         <el-input
           v-model="editForm.name"
-          placeholder="请输入商品名称"
+          placeholder="Product name"
           maxlength="100"
           show-word-limit
         />
       </el-form-item>
 
-      <el-form-item label="商品简介">
+      <el-form-item label="Introduction">
         <el-input
           v-model="editForm.intro"
           type="textarea"
           :rows="3"
-          placeholder="请输入商品简介"
+          placeholder="Short description"
           maxlength="500"
           show-word-limit
         />
       </el-form-item>
 
-      <el-form-item label="价格">
+      <el-form-item label="Price (USD)">
         <el-input-number
           v-model="editForm.price"
           :min="0"
@@ -220,13 +220,12 @@
           :step="0.1"
           style="width: 180px"
         />
-        <span class="price-unit">元</span>
       </el-form-item>
 
-      <el-form-item label="商品图片">
+      <el-form-item label="Image URL">
         <el-input
           v-model="editForm.image"
-          placeholder="请输入图片URL"
+          placeholder="Image URL"
         />
         <div v-if="editForm.image" class="image-preview">
           <el-image
@@ -239,13 +238,13 @@
     </el-form>
 
     <template #footer>
-      <el-button @click="dialogVisible = false">取消</el-button>
+      <el-button @click="dialogVisible = false">Cancel</el-button>
       <el-button
         type="primary"
         :loading="editLoading"
         @click="handleSave"
       >
-        保存
+        Save
       </el-button>
     </template>
   </el-dialog>
@@ -253,7 +252,7 @@
   <!-- 图片预览 -->
   <el-dialog
     v-model="previewVisible"
-    title="图片预览"
+    title="Image preview"
     width="600px"
     align-center
   >
@@ -283,7 +282,7 @@ const tableData = ref([])
 
 // 编辑弹窗相关
 const dialogVisible = ref(false)
-const dialogTitle = ref('编辑商品')
+const dialogTitle = ref('Edit product')
 const editForm = ref({
   id: '',
   name: '',
@@ -301,7 +300,7 @@ const fetchProductList = async () => {
     // 为每行添加状态加载标记
     tableData.value = (res || []).map(item => ({ ...item, statusLoading: false }))
   } catch (error) {
-    ElMessage.error(error.message || '获取商品列表失败')
+    ElMessage.error(error.message || 'Failed to load products')
     tableData.value = []
   } finally {
     loading.value = false
@@ -333,7 +332,7 @@ const formatTime = (time) => {
 
 // 编辑商品
 const handleEdit = (row) => {
-  dialogTitle.value = '编辑商品'
+  dialogTitle.value = 'Edit product'
   editForm.value = {
     id: row.id,
     name: row.name || '',
@@ -347,7 +346,7 @@ const handleEdit = (row) => {
 // 保存编辑
 const handleSave = async () => {
   if (!editForm.value.name.trim()) {
-    ElMessage.warning('商品名称不能为空')
+    ElMessage.warning('Product name is required')
     return
   }
 
@@ -361,11 +360,11 @@ const handleSave = async () => {
       image: editForm.value.image
     }
     await request.put('/spu/admin/update', data)
-    ElMessage.success('商品更新成功')
+    ElMessage.success('Product updated')
     dialogVisible.value = false
     fetchProductList()
   } catch (error) {
-    ElMessage.error(error.message || '更新失败')
+    ElMessage.error(error.message || 'Update failed')
   } finally {
     editLoading.value = false
   }
@@ -387,26 +386,26 @@ const showImagePreview = (image) => {
 // 切换上下架状态
 const handleToggleStatus = async (row) => {
   const newStatus = row.isMarketable === 1 ? 0 : 1
-  const actionText = newStatus === 1 ? '上架' : '下架'
+  const actionText = newStatus === 1 ? 'list' : 'delist'
 
   try {
     await ElMessageBox.confirm(
-      `确定要${actionText}商品 "${row.name}" 吗？`,
-      '确认操作',
+      `Are you sure you want to ${actionText} "${row.name}"?`,
+      'Confirm',
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }
     )
 
     row.statusLoading = true
     await request.put(`/spu/admin/status/${row.id}/${newStatus}`)
-    ElMessage.success(`${actionText}成功`)
+    ElMessage.success(newStatus === 1 ? 'Product listed' : 'Product delisted')
     fetchProductList()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || '操作失败')
+      ElMessage.error(error.message || 'Action failed')
     }
   } finally {
     row.statusLoading = false

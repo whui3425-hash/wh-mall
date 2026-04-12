@@ -7,11 +7,11 @@
         :icon="ArrowLeft"
         @click="goBack"
       >
-        返回列表
+        Back to list
       </el-button>
-      <span class="page-title">商品详情</span>
-      <el-tag v-if="product.isMarketable === 1" type="success">上架中</el-tag>
-      <el-tag v-else type="info">已下架</el-tag>
+      <span class="page-title">Product details</span>
+      <el-tag v-if="product.isMarketable === 1" type="success">On sale</el-tag>
+      <el-tag v-else type="info">Delisted</el-tag>
     </div>
 
     <el-row :gutter="24">
@@ -28,7 +28,7 @@
             />
             <div v-else class="no-main-image">
               <el-icon size="64" color="#c0c4cc"><Picture /></el-icon>
-              <p>暂无商品图片</p>
+              <p>No product image</p>
             </div>
           </div>
 
@@ -63,13 +63,13 @@
                   :icon="Edit"
                   @click="handleEdit"
                 >
-                  编辑
+                  Edit
                 </el-button>
                 <el-button
                   :type="product.isMarketable === 1 ? 'danger' : 'success'"
                   @click="handleToggleStatus"
                 >
-                  {{ product.isMarketable === 1 ? '下架' : '上架' }}
+                  {{ product.isMarketable === 1 ? 'Delist' : 'List' }}
                 </el-button>
               </div>
             </div>
@@ -78,7 +78,7 @@
           <div class="info-content">
             <!-- 商品ID -->
             <div class="info-row">
-              <span class="info-label">商品ID：</span>
+              <span class="info-label">Product ID:</span>
               <span class="info-value id-value">{{ product.id }}</span>
               <el-button
                 link
@@ -86,7 +86,7 @@
                 size="small"
                 @click="copyId(product.id)"
               >
-                复制
+                Copy
               </el-button>
             </div>
 
@@ -98,26 +98,26 @@
 
             <!-- 价格 -->
             <div class="info-row price-row">
-              <span class="info-label">价格：</span>
-              <span class="price-value">¥ {{ formatPrice(product.price) }}</span>
+              <span class="info-label">Price:</span>
+              <span class="price-value">${{ formatPrice(product.price) }}</span>
             </div>
 
             <!-- 库存 -->
             <div class="info-row">
-              <span class="info-label">库存：</span>
+              <span class="info-label">Stock:</span>
               <el-tag :type="product.num > 0 ? 'success' : 'danger'" size="large">
-                {{ product.num || 0 }} 件
+                {{ product.num || 0 }} units
               </el-tag>
             </div>
 
             <!-- 上下架状态 -->
             <div class="info-row">
-              <span class="info-label">状态：</span>
+              <span class="info-label">Status:</span>
               <el-tag
                 :type="product.isMarketable === 1 ? 'success' : 'info'"
                 size="large"
               >
-                {{ product.isMarketable === 1 ? '上架中' : '已下架' }}
+                {{ product.isMarketable === 1 ? 'On sale' : 'Delisted' }}
               </el-tag>
             </div>
 
@@ -125,8 +125,8 @@
 
             <!-- 商品简介 -->
             <div class="intro-section">
-              <h4 class="section-title">商品简介</h4>
-              <p class="intro-text">{{ product.intro || '暂无简介' }}</p>
+              <h4 class="section-title">Description</h4>
+              <p class="intro-text">{{ product.intro || 'No description' }}</p>
             </div>
           </div>
         </el-card>
@@ -139,32 +139,32 @@
     <!-- 编辑弹窗 -->
     <el-dialog
       v-model="dialogVisible"
-      title="编辑商品"
+      title="Edit product"
       width="500px"
       destroy-on-close
     >
-      <el-form :model="editForm" label-width="80px" label-position="right">
-        <el-form-item label="商品名称">
+      <el-form :model="editForm" label-width="110px" label-position="right">
+        <el-form-item label="Name">
           <el-input
             v-model="editForm.name"
-            placeholder="请输入商品名称"
+            placeholder="Product name"
             maxlength="100"
             show-word-limit
           />
         </el-form-item>
 
-        <el-form-item label="商品简介">
+        <el-form-item label="Introduction">
           <el-input
             v-model="editForm.intro"
             type="textarea"
             :rows="3"
-            placeholder="请输入商品简介"
+            placeholder="Short description"
             maxlength="500"
             show-word-limit
           />
         </el-form-item>
 
-        <el-form-item label="价格">
+        <el-form-item label="Price (USD)">
           <el-input-number
             v-model="editForm.price"
             :min="0"
@@ -172,11 +172,10 @@
             :step="0.1"
             style="width: 180px"
           />
-          <span class="price-unit">元</span>
         </el-form-item>
 
-        <el-form-item label="商品图片">
-          <el-input v-model="editForm.image" placeholder="请输入图片URL" />
+        <el-form-item label="Image URL">
+          <el-input v-model="editForm.image" placeholder="Image URL" />
           <div v-if="editForm.image" class="image-preview">
             <el-image
               :src="editForm.image"
@@ -188,9 +187,9 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button @click="dialogVisible = false">Cancel</el-button>
         <el-button type="primary" :loading="editLoading" @click="handleSave">
-          保存
+          Save
         </el-button>
       </template>
     </el-dialog>
@@ -241,7 +240,7 @@ const fetchProductDetail = async () => {
       imageList.value = []
     }
   } catch (error) {
-    ElMessage.error(error.message || '获取商品详情失败')
+    ElMessage.error(error.message || 'Failed to load product')
   } finally {
     loading.value = false
   }
@@ -266,9 +265,9 @@ const goBack = () => {
 // 复制ID
 const copyId = (id) => {
   navigator.clipboard.writeText(id).then(() => {
-    ElMessage.success('已复制到剪贴板')
+    ElMessage.success('Copied to clipboard')
   }).catch(() => {
-    ElMessage.error('复制失败')
+    ElMessage.error('Copy failed')
   })
 }
 
@@ -287,7 +286,7 @@ const handleEdit = () => {
 // 保存编辑
 const handleSave = async () => {
   if (!editForm.value.name.trim()) {
-    ElMessage.warning('商品名称不能为空')
+    ElMessage.warning('Product name is required')
     return
   }
 
@@ -301,11 +300,11 @@ const handleSave = async () => {
       image: editForm.value.image
     }
     await request.put('/spu/admin/update', data)
-    ElMessage.success('商品更新成功')
+    ElMessage.success('Product updated')
     dialogVisible.value = false
     fetchProductDetail()
   } catch (error) {
-    ElMessage.error(error.message || '更新失败')
+    ElMessage.error(error.message || 'Update failed')
   } finally {
     editLoading.value = false
   }
@@ -314,25 +313,25 @@ const handleSave = async () => {
 // 切换上下架状态
 const handleToggleStatus = async () => {
   const newStatus = product.value.isMarketable === 1 ? 0 : 1
-  const actionText = newStatus === 1 ? '上架' : '下架'
+  const actionText = newStatus === 1 ? 'list' : 'delist'
 
   try {
     await ElMessageBox.confirm(
-      `确定要${actionText}商品 "${product.value.name}" 吗？`,
-      '确认操作',
+      `Are you sure you want to ${actionText} "${product.value.name}"?`,
+      'Confirm',
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }
     )
 
     await request.put(`/spu/admin/status/${product.value.id}/${newStatus}`)
-    ElMessage.success(`${actionText}成功`)
+    ElMessage.success(newStatus === 1 ? 'Product listed' : 'Product delisted')
     fetchProductDetail()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error(error.message || '操作失败')
+      ElMessage.error(error.message || 'Action failed')
     }
   }
 }

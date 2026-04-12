@@ -42,7 +42,7 @@ request.interceptors.response.use(
     const successCodes = [200, 0, 10000, 20000, '200', '0', '10000', '20000']
     if (!successCodes.includes(res.code)) {
       console.log('[响应拦截器] 业务错误 code:', res.code, 'message:', res.message)
-      return Promise.reject(new Error(res.message || '请求失败'))
+      return Promise.reject(new Error(res.message || 'Request failed'))
     }
     return res.data
   },
@@ -55,7 +55,7 @@ request.interceptors.response.use(
         localStorage.removeItem('admin_token')
         window.location.href = '/login'
       }
-      return Promise.reject(new Error(response.data?.message || '请求失败'))
+      return Promise.reject(new Error(response.data?.message || 'Request failed'))
     }
     return Promise.reject(error)
   }

@@ -1,17 +1,17 @@
 <template>
   <div class="dashboard">
-    <h1>欢迎使用商户后台管理系统</h1>
+    <h1>Welcome to the merchant admin</h1>
     <div class="stats-cards">
       <div class="card">
-        <h3>今日订单</h3>
+        <h3>Today's orders</h3>
         <p class="number">128</p>
       </div>
       <div class="card">
-        <h3>待处理</h3>
+        <h3>Pending</h3>
         <p class="number">12</p>
       </div>
       <div class="card">
-        <h3>今日销售额</h3>
+        <h3>Today's sales</h3>
         <p class="number">¥ 8,520</p>
       </div>
     </div>
