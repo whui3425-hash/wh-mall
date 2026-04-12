@@ -102,7 +102,9 @@ fi
 
 echo ""
 log_info "MySQL 将自动执行 /docker-entrypoint-initdb.d/ 目录下的 SQL 脚本..."
-log_info "SQL 文件: deploy/sql/mall_init.sql"
+log_info "SQL 文件:"
+log_info "  - deploy/sql/nacos_init.sql (Nacos 配置中心数据库)"
+log_info "  - deploy/sql/mall_init.sql (商城业务数据库)"
 
 echo ""
 log_warn "正在等待 MySQL 和 Nacos 初始化，休眠 30 秒..."

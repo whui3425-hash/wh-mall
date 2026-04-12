@@ -25,6 +25,13 @@ services:
       - MODE=standalone # 单机模式启动
       - JVM_XMS=256m    # 限制内存
       - JVM_XMX=256m
+      - SPRING_DATASOURCE_PLATFORM=mysql
+      - MYSQL_SERVICE_HOST=mall-mysql
+      - MYSQL_SERVICE_DB_NAME=nacos
+      - MYSQL_SERVICE_PORT=3306
+      - MYSQL_SERVICE_USER=root
+      - MYSQL_SERVICE_PASSWORD=123456
+      - NACOS_AUTH_ENABLE=false  # 关闭认证，避免登录失败
     ports:
       - "8848:8848"
       - "9848:9848"
