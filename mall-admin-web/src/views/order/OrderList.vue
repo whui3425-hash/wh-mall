@@ -141,7 +141,9 @@ const fetchOrderList = async () => {
 // 格式化金额
 const formatAmount = (amount) => {
   if (!amount && amount !== 0) return '0.00'
-  return Number(amount).toFixed(2)
+  const amountInCent = Number(amount)
+  if (Number.isNaN(amountInCent)) return '0.00'
+  return (amountInCent / 100).toFixed(2)
 }
 
 // 格式化时间

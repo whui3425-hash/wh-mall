@@ -36,6 +36,9 @@ SET FOREIGN_KEY_CHECKS = 0;
  Date: 12/04/2026 09:28:45
 */
 
+-- ----------------------------
+-- Table structure for ad_items
+-- ----------------------------
 DROP TABLE IF EXISTS `ad_items`;
 CREATE TABLE `ad_items`  (
                              `id` int NOT NULL AUTO_INCREMENT COMMENT 'Ad ID',
@@ -48,7 +51,7 @@ CREATE TABLE `ad_items`  (
                              INDEX `idx_tenant_id`(`tenant_id` ASC) USING BTREE,
                              INDEX `idx_sku_id`(`sku_id` ASC) USING BTREE,
                              INDEX `idx_type`(`type` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 27 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Ad items table' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 27 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Ad items table' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ad_items
@@ -62,7 +65,7 @@ INSERT INTO `ad_items` VALUES (6, 'MacBook Pro 16 - Professional', 1, 'SKU004', 
 INSERT INTO `ad_items` VALUES (7, '1001首页-Galaxy S24 Ultra', 1, 'SKU021', 5, '1001');
 INSERT INTO `ad_items` VALUES (8, '1001首页-iPad Pro M4', 1, 'SKU023', 6, '1001');
 INSERT INTO `ad_items` VALUES (9, '1001首页-MX Keys Mini', 1, 'SKU026', 7, '1001');
-INSERT INTO `ad_items` VALUES (10, '1001首页-Mate 60 釉白', 1, 'SKU028', 8, '1001');
+INSERT INTO `ad_items` VALUES (10, '1001首页-Xiaomi 14 Pro', 1, 'SKU019', 8, '1001');
 INSERT INTO `ad_items` VALUES (11, '1001分类-AirPods 演示', 2, 'SKU030', 3, '1001');
 INSERT INTO `ad_items` VALUES (12, '1001分类-MacBook Air M3', 2, 'SKU029', 4, '1001');
 INSERT INTO `ad_items` VALUES (13, '1002首页-小棕瓶50ml', 1, 'SKU010', 1, '1002');
@@ -71,8 +74,8 @@ INSERT INTO `ad_items` VALUES (15, '1002首页-Ultraboost黑', 1, 'SKU014', 3, '
 INSERT INTO `ad_items` VALUES (16, '1002首页-卫衣黑M', 1, 'SKU016', 4, '1002');
 INSERT INTO `ad_items` VALUES (17, '1002首页-限定唇膏520', 1, 'SKU035', 5, '1002');
 INSERT INTO `ad_items` VALUES (18, '1002首页-身体乳400ml', 1, 'SKU037', 6, '1002');
-INSERT INTO `ad_items` VALUES (19, '1002首页-小棕瓶75ml', 1, 'SKU031', 7, '1002');
-INSERT INTO `ad_items` VALUES (20, '1002首页-Dunk熊猫', 1, 'SKU039', 8, '1002');
+INSERT INTO `ad_items` VALUES (19, '1002分类-小棕瓶75ml', 2, 'SKU031', 10, '1002');
+INSERT INTO `ad_items` VALUES (20, '1002分类-Dunk熊猫', 2, 'SKU039', 11, '1002');
 INSERT INTO `ad_items` VALUES (21, '1002分类-微精华200ml', 2, 'SKU038', 5, '1002');
 INSERT INTO `ad_items` VALUES (22, '1002分类-卫衣橄榄绿', 2, 'SKU040', 6, '1002');
 INSERT INTO `ad_items` VALUES (23, '1002分类-AJ Shadow', 2, 'SKU032', 7, '1002');
@@ -93,7 +96,7 @@ CREATE TABLE `brand`  (
                           `tenant_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '1001' COMMENT 'Tenant ID',
                           PRIMARY KEY (`id`) USING BTREE,
                           INDEX `idx_tenant_id`(`tenant_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Brand table' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Brand table' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of brand
@@ -123,7 +126,7 @@ CREATE TABLE `category`  (
                              PRIMARY KEY (`id`) USING BTREE,
                              INDEX `idx_tenant_id`(`tenant_id` ASC) USING BTREE,
                              INDEX `idx_parent_id`(`parent_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 172 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Product category table' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 172 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Product category table' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of category
@@ -156,7 +159,7 @@ CREATE TABLE `category_attr`  (
                                   `attr_id` int NOT NULL COMMENT 'Attribute ID',
                                   PRIMARY KEY (`category_id`, `attr_id`) USING BTREE,
                                   INDEX `idx_attr_id`(`attr_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Category-Attribute relationship' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Category-Attribute relationship' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of category_attr
@@ -174,7 +177,7 @@ CREATE TABLE `category_brand`  (
                                    `brand_id` int NOT NULL COMMENT 'Brand ID',
                                    PRIMARY KEY (`category_id`, `brand_id`) USING BTREE,
                                    INDEX `idx_brand_id`(`brand_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Category-Brand relationship' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Category-Brand relationship' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of category_brand
@@ -188,9 +191,9 @@ INSERT INTO `category_brand` VALUES (151, 5);
 INSERT INTO `category_brand` VALUES (161, 6);
 INSERT INTO `category_brand` VALUES (161, 7);
 INSERT INTO `category_brand` VALUES (171, 8);
+INSERT INTO `category_brand` VALUES (111, 9);
 INSERT INTO `category_brand` VALUES (111, 10);
 INSERT INTO `category_brand` VALUES (111, 11);
-INSERT INTO `category_brand` VALUES (111, 9);
 
 -- ----------------------------
 -- Table structure for mall_cart
@@ -213,7 +216,7 @@ CREATE TABLE `mall_cart`  (
                               INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
                               INDEX `idx_sku_id`(`sku_id` ASC) USING BTREE,
                               INDEX `idx_tenant_id`(`tenant_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '购物车表（支持多租户、用户隔离）' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '购物车表（支持多租户、用户隔离）' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of mall_cart
@@ -250,7 +253,7 @@ CREATE TABLE `order_info`  (
                                INDEX `idx_out_trade_no`(`out_trade_no` ASC) USING BTREE,
                                INDEX `idx_order_status`(`order_status` ASC) USING BTREE,
                                INDEX `idx_user_tenant`(`user_id` ASC, `tenant_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单主表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单主表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of order_info
@@ -260,6 +263,7 @@ INSERT INTO `order_info` VALUES ('2042378804600512513', NULL, 'weixin', '2026-04
 INSERT INTO `order_info` VALUES ('2042380399371366402', NULL, 'weixin', '2026-04-10 07:13:28', '2026-04-09 23:13:32', NULL, NULL, NULL, 'zhangsan', NULL, NULL, NULL, NULL, 1, 1199900, 1, 1, 0, '1001', 'ORDC9F9FA9E302A4B10');
 INSERT INTO `order_info` VALUES ('2042382769576841218', '1', 'weixin', '2026-04-10 07:22:53', '2026-04-09 23:22:53', NULL, NULL, NULL, 'zhangsan', NULL, NULL, NULL, NULL, 1, 1399900, 1, 1, 0, '1001', 'ORD5BFEB59228414F25');
 INSERT INTO `order_info` VALUES ('2042384730581651457', '1', 'weixin', '2026-04-10 07:30:40', '2026-04-09 23:30:41', NULL, NULL, NULL, 'zhangsan', NULL, NULL, NULL, NULL, 1, 129900, 1, 1, 0, '1001', 'ORD396A22CE5D704D8B');
+INSERT INTO `order_info` VALUES ('2043479837991026690', '1', 'weixin', '2026-04-13 08:02:14', '2026-04-13 08:03:31', NULL, NULL, NULL, 'zhangsan', NULL, NULL, NULL, NULL, 1, 499900, 1, 1, 0, '1001', 'ORDE71E04ADB93B4C3A');
 
 -- ----------------------------
 -- Table structure for order_refund
@@ -280,7 +284,7 @@ CREATE TABLE `order_refund`  (
                                  INDEX `idx_order_no`(`order_no` ASC) USING BTREE,
                                  INDEX `idx_username`(`username` ASC) USING BTREE,
                                  INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Order refund table' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Order refund table' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of order_refund
@@ -307,7 +311,7 @@ CREATE TABLE `order_sku`  (
                               INDEX `idx_order_id`(`order_id` ASC) USING BTREE,
                               INDEX `idx_sku_id`(`sku_id` ASC) USING BTREE,
                               INDEX `idx_tenant_id`(`tenant_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单SKU明细表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单SKU明细表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of order_sku
@@ -318,6 +322,7 @@ INSERT INTO `order_sku` VALUES ('2042378804600512514', '2042378804600512513', 'S
 INSERT INTO `order_sku` VALUES ('2042380399371366403', '2042380399371366402', 'SKU002', 'iPhone 15 Pro Max - Blue Titanium 512GB', 1199900, 1, 1199900, '/images/goods/sku-iphone-512.jpg', '1001');
 INSERT INTO `order_sku` VALUES ('2042382769576841219', '2042382769576841218', 'SKU003', 'iPhone 15 Pro Max - Black Titanium 1TB', 1399900, 1, 1399900, '/images/goods/pic1.jpg', '1001');
 INSERT INTO `order_sku` VALUES ('2042384730581651458', '2042384730581651457', 'SKU008', 'MX Mechanical - Tactile Full Size', 129900, 1, 129900, '/images/goods/spu004-1.jpg', '1001');
+INSERT INTO `order_sku` VALUES ('2043479837991026691', '2043479837991026690', 'SKU019', 'Xiaomi 14 Pro - White 256GB', 499900, 1, 499900, '/images/goods/brand-qian.jpg', '1001');
 
 -- ----------------------------
 -- Table structure for permission
@@ -331,7 +336,7 @@ CREATE TABLE `permission`  (
                                `service_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'Service name',
                                `method` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'HTTP method',
                                PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 53 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API permission table' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 53 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API permission table' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of permission
@@ -367,7 +372,7 @@ CREATE TABLE `role_info`  (
                               `role_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'Role name',
                               `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'Role description',
                               PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Role information table' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Role information table' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_info
@@ -386,7 +391,7 @@ CREATE TABLE `role_permission`  (
                                     `pid` int NOT NULL COMMENT 'Permission ID',
                                     PRIMARY KEY (`rid`, `pid`) USING BTREE,
                                     INDEX `idx_pid`(`pid` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Role-Permission mapping table' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Role-Permission mapping table' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_permission
@@ -440,7 +445,7 @@ CREATE TABLE `sku`  (
                         INDEX `idx_category_id`(`category_id` ASC) USING BTREE,
                         INDEX `idx_brand_id`(`brand_id` ASC) USING BTREE,
                         INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'SKU table (Stock Keeping Unit)' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'SKU table (Stock Keeping Unit)' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sku
@@ -463,7 +468,7 @@ INSERT INTO `sku` VALUES ('SKU015', 'Ultraboost 23 - White US 9', 139900, 90, '/
 INSERT INTO `sku` VALUES ('SKU016', 'Oversized Hoodie - Black M', 69900, 120, '/images/goods/spu008-1.jpg', '[\"/images/goods/spu008-1.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU008', 171, 'Clothing', 8, 'Zara', '{\"color\": \"Black\", \"size\": \"M\"}', 1, '1002');
 INSERT INTO `sku` VALUES ('SKU017', 'Oversized Hoodie - Grey L', 69900, 100, '/images/goods/spu008-2.jpg', '[\"/images/goods/spu008-2.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU008', 171, 'Clothing', 8, 'Zara', '{\"color\": \"Grey\", \"size\": \"L\"}', 1, '1002');
 INSERT INTO `sku` VALUES ('SKU018', 'Huawei Mate 60 Pro - Black 512GB', 699900, 80, '/images/goods/sku-huawei-512.jpg', '[\"/images/goods/iphone-huawei-1.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU009', 111, 'Smartphone', 10, 'Huawei', '{\"color\": \"Black\", \"storage\": \"512GB\"}', 1, '1001');
-INSERT INTO `sku` VALUES ('SKU019', 'Xiaomi 14 Pro - White 256GB', 499900, 100, '/images/goods/sku-xiaomi-256.jpg', '[\"/images/goods/iphone-xiaomi-1.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU010', 111, 'Smartphone', 11, 'Xiaomi', '{\"color\": \"White\", \"storage\": \"256GB\"}', 1, '1001');
+INSERT INTO `sku` VALUES ('SKU019', 'Xiaomi 14 Pro - White 256GB', 499900, 99, '/images/goods/brand-qian.jpg', '[\"/images/goods/brand-qian.jpg\"]', '2026-04-09 13:54:01', '2026-04-13 08:02:14', 'SPU010', 111, 'Smartphone', 11, 'Xiaomi', '{\"color\": \"White\", \"storage\": \"256GB\"}', 1, '1001');
 INSERT INTO `sku` VALUES ('SKU020', 'Xiaomi 14 Pro - Black 512GB', 549900, 60, '/images/goods/pic2.jpg', '[\"/images/goods/iphone-xiaomi-2.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU010', 111, 'Smartphone', 11, 'Xiaomi', '{\"color\": \"Black\", \"storage\": \"512GB\"}', 1, '1001');
 INSERT INTO `sku` VALUES ('SKU021', 'Samsung Galaxy S24 Ultra - Titanium Black 256GB', 899900, 45, '/images/goods/pic3.jpg', '[\"/images/goods/pic3.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU011', 111, 'Smartphone', 9, 'Samsung', '{\"color\": \"Titanium Black\", \"storage\": \"256GB\"}', 1, '1001');
 INSERT INTO `sku` VALUES ('SKU022', 'Samsung Galaxy S24 Ultra - Titanium Violet 512GB', 969900, 38, '/images/goods/pic3.jpg', '[\"/images/goods/order-ipad.jpg\"]', '2026-04-09 13:54:01', '2026-04-09 13:54:01', 'SPU011', 111, 'Smartphone', 9, 'Samsung', '{\"color\": \"Titanium Violet\", \"storage\": \"512GB\"}', 1, '1001');
@@ -511,7 +516,7 @@ CREATE TABLE `spu`  (
                         INDEX `idx_brand_id`(`brand_id` ASC) USING BTREE,
                         INDEX `idx_category_three_id`(`category_three_id` ASC) USING BTREE,
                         INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'SPU table (Standard Product Unit)' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'SPU table (Standard Product Unit)' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of spu
@@ -542,7 +547,7 @@ CREATE TABLE `sys_admin`  (
                               `tenant_id` bigint NOT NULL COMMENT '所属租户ID',
                               PRIMARY KEY (`id`) USING BTREE,
                               UNIQUE INDEX `uk_tenant_username`(`tenant_id` ASC, `username` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'B端租户管理员表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'B端租户管理员表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_admin
@@ -569,7 +574,7 @@ CREATE TABLE `user_info`  (
                               PRIMARY KEY (`id`) USING BTREE,
                               UNIQUE INDEX `uk_tenant_username`(`tenant_id` ASC, `username` ASC) USING BTREE,
                               INDEX `idx_tenant_id`(`tenant_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'C端买家用户信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'C端买家用户信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_info
