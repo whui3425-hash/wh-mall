@@ -1,64 +1,65 @@
-# 企业级 SaaS 多租户电商基础设施底座 (防超卖/极速开店版)
+# Enterprise-Grade SaaS E-Commerce Infrastructure (Multi-Tenant & Zero-Overselling)
 
-### 🚀 商业价值：“让您的连锁业务在几天内上线，而不是几个月”
-本项目提供了一个**生产级可用、基于微服务架构的 SaaS 底座**。它专为需要通过单一中心化后台管理多个门店、子品牌或加盟商的企业设计，在保障数据绝对安全和交易完整性的前提下，实现业务的极致扩张。
-
----
-
-### 🎯 解决的核心商业痛点
-
-#### 1. “大促/秒杀”带来的超卖噩梦 (不超卖承诺)
-* **解决方案**：底层集成了**分布式锁机制**与**异步支付回调状态机**。即使在高并发环境下，系统也能保证库存扣减的 100% 精准，彻底杜绝超卖。
-
-#### 2. 业务扩张成本高、速度慢 (极速开店)
-* **解决方案**：**真正的多租户架构**。通过“配置即开店”逻辑，一套后端支撑无限门店，让新店最快只需 **72 小时** 即可上线。
-
-#### 3. 加盟商的数据安全焦虑
-* **解决方案**：**物理级数据隔离**。确保租户 A 绝对无法越权访问租户 B 的数据，保障商业机密。
+### 🚀 Business Value: "Launch Your Franchise Network in Days, Not Months"
+Building a scalable e-commerce platform from scratch is expensive and time-consuming. This repository provides a **production-ready, microservices-based SaaS foundation**. It is specifically designed for businesses that need to manage multiple storefronts, brands, or franchises from a single, centralized backend—without sacrificing data security or transaction integrity.
 
 ---
 
-### 📸 系统演示与操作预览
+### 🎯 Business Pain Points Solved
 
-#### 1. 中心化管理后台 (控制中心)
-通过统一的门户管理所有租户、商品分类及系统全局配置。
-| ![后台1](mall-store-web/public/img_admin_1.png) | ![后台2](mall-store-web/public/img_admin_2.png) |
-|:---:|:---:|
-| *商品与分类管理* | *租户系统配置* |
+#### 1. The "Flash Sale" Nightmare (Zero-Overselling Guarantee)
+* **The Solution**: Engineered with a **Distributed Lock Mechanism** and **Asynchronous Payment Callback State Machine**. This system guarantees 100% inventory accuracy under high concurrency. I ensure your business never sells a product you don't physically have.
 
-#### 2. 数字化门店 (用户端体验)
-简洁、现代且适配移动端的界面设计，旨在将访问者转化为购买者。
-| ![门店1](mall-store-web/public/img_store_1.png) | ![门店2](mall-store-web/public/img_store_2.png) |
-|:---:|:---:|
-| *门店首页展示* | *商品详情页* |
+#### 2. Stagnant Business Expansion (Rapid Storefront Deployment)
+* **The Solution**: **True Multi-Tenant Architecture**. Launch a new store instance via simple configuration. The parametric frontend architecture allows new storefronts to be live within **72 hours**.
 
-#### 3. 订单与库存全生命周期
-对每一笔交易进行全链路追踪，并实现实时的库存同步。
-| ![订单1](mall-store-web/public/img_order_1.png) | ![订单2](mall-store-web/public/img_order_2.png) |
+#### 3. Data Privacy & Security Anxiety
+* **The Solution**: **Physical-Level Data Isolation**. Implemented at the database layer, ensuring Store A can never access Store B’s data.
+
+---
+
+### 📸 System Walkthrough (Product Preview)
+
+#### 1. Centralized Admin Dashboard (The Control Center)
+Manage all your tenants, categories, and global configurations from a unified portal.
+| ![Admin 1](mall-store-web/public/img_admin_1.png) | ![Admin 2](mall-store-web/public/img_admin_2.png) |
 |:---:|:---:|
-| *订单列表概览* | *履约状态追踪* |
+| *Product & Category Management* | *System Configuration* |
+
+#### 2. Digital Storefront (User Experience)
+Clean, modern, and mobile-responsive interface designed to convert visitors into customers.
+| ![Store 1](mall-store-web/public/img_store_1.png) | ![Store 2](mall-store-web/public/img_store_2.png) |
+|:---:|:---:|
+| *Storefront Homepage* | *Product Details* |
+
+#### 3. Order & Inventory Lifecycle
+End-to-end tracking of every transaction with real-time inventory synchronization.
+| ![Order 1](mall-store-web/public/img_order_1.png) | ![Order 2](mall-store-web/public/img_order_2.png) |
 | ![订单7](mall-store-web/public/img_order_7.png) | ![门店8](mall-store-web/public/img_order_8.png) |
----
-
-### 💻 核心技术架构亮点
-* **微服务生态**：基于 **Spring Cloud Alibaba**（Nacos, Gateway, Sentinel）构建。
-* **性能巅峰**：利用 **Redis** 支撑高频缓存，**RocketMQ** 实现系统解耦与削峰填谷。
-* **云原生支持**：全套 **Docker** 容器化方案，完美适配 **Kubernetes (K8s)** 集群。
+|:---:|:---:|
+| *Order List View* | *Fulfillment Tracking* |
 
 ---
 
-### 🛠 技术栈
-* **后端**：Java 17, Spring Boot 3, Spring Cloud Alibaba
-* **数据库**：MySQL (MyBatis Plus)
-* **中间件**：Redis, RocketMQ, Nacos
-* **运维**：Docker, Docker-Compose, Nginx
+### 💻 Core Technical Highlights
+* **Microservices Ecosystem**: Powered by **Spring Cloud Alibaba** (Nacos, Gateway, Sentinel).
+* **Performance Optimized**: Utilizes **Redis** for caching and **RocketMQ** for system decoupling.
+* **Cloud-Native Ready**: Fully containerized with **Docker**, ready for **Kubernetes (K8s)**.
 
 ---
 
-### 📩 联系与合作
-我长期承接全球范围内的后端架构外包与技术咨询。
+### 🛠 Tech Stack
+* **Backend**: Java 17, Spring Boot 3, Spring Cloud Alibaba
+* **Database**: MySQL (MyBatis Plus)
+* **Middleware**: Redis, RocketMQ, Nacos
+* **DevOps**: Docker, Docker-Compose, Nginx
 
-* **邮箱**: [whui3425@gmail.com](mailto:whui3425@gmail.com)
-* **Upwork**: [您的个人主页链接]
+---
 
-**让我们将您的技术挑战转化为市场竞争优势。**
+### 📩 Contact & Collaboration
+I am available for freelance projects and technical consulting. Let's connect:
+
+* **Email**: [whui3425@gmail.com](mailto:whui3425@gmail.com)
+* **Upwork**: [Your Upwork Profile Link]
+
+**Let’s transform your technical challenges into a competitive advantage.**
