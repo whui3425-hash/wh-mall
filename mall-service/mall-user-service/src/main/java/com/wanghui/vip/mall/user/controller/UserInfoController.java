@@ -17,20 +17,35 @@ import java.util.Map;
 @RequestMapping(value = "/api/user")
 public class UserInfoController {
 
+    /**
+     * 压测专用永久验证码（用于固定验证码压测场景）
+     */
+    private static final String STRESS_TEST_CAPTCHA = "PERF-TEST";
+
     @Autowired
     private UserInfoService userInfoService;
 
     /**
      * C端买家登录接口（JSON格式）
      * 与 B 端管理员登录完全独立
-     * @param loginRequest 登录请求（username + password）
+     * @param loginRequest 登录请求（username + password + captcha）
      * @return RespResult 包含 Token、userId、tenantId
      */
     @PostMapping("/login")
     public RespResult<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
         // 参数校验
-        if (loginRequest == null || loginRequest.getUsername() == null || loginRequest.getPassword() == null) {
-            return RespResult.error("用户名或密码不能为空");
+        if (loginRequest == null || loginRequest.getUsername() == null || loginRequest.getPassword() == null
+                || loginRequest.getCaptcha() == null) {
+            return RespResult.error("用户名、密码或验证码不能为空");
+        }
+
+        String captcha = loginRequest.getCaptcha().trim();
+        if (captcha.isEmpty()) {
+            return RespResult.error("验证码不能为空");
+        }
+        // 当前版本启用固定验证码：PERF-TEST（永久有效，便于压测）
+        if (!STRESS_TEST_CAPTCHA.equalsIgnoreCase(captcha)) {
+            return RespResult.error("验证码错误");
         }
 
         // 查询用户（根据用户名查询）
@@ -69,6 +84,7 @@ public class UserInfoController {
     public static class LoginRequest {
         private String username;
         private String password;
+        private String captcha;
 
         public String getUsername() {
             return username;
@@ -84,6 +100,14 @@ public class UserInfoController {
 
         public void setPassword(String password) {
             this.password = password;
+        }
+
+        public String getCaptcha() {
+            return captcha;
+        }
+
+        public void setCaptcha(String captcha) {
+            this.captcha = captcha;
         }
     }
 

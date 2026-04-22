@@ -235,12 +235,20 @@
             @keyup.enter="handleLogin"
           />
         </el-form-item>
+        <el-form-item label="Captcha" prop="captcha">
+          <el-input
+            v-model="loginForm.captcha"
+            placeholder="请输入验证码（压测可用 PERF-TEST）"
+            @keyup.enter="handleLogin"
+          />
+        </el-form-item>
       </el-form>
       
       <div class="login-tips">
         <p>Test accounts:</p>
         <p>Tenant 1001: zhangsan / 123456, lisi / 123456</p>
         <p>Tenant 1002: wangwu / 123456, zhaoliu / 123456</p>
+        <p>Captcha: PERF-TEST (permanent, stress-test purpose)</p>
       </div>
       
       <template #footer>
@@ -605,7 +613,8 @@ const loginFormRef = ref(null)              // 表单引用
 // 登录表单数据
 const loginForm = ref({
   username: '',
-  password: ''
+  password: '',
+  captcha: ''
 })
 
 // 登录表单校验规则
@@ -615,6 +624,9 @@ const loginRules = {
   ],
   password: [
     { required: true, message: 'Password is required', trigger: 'blur' }
+  ],
+  captcha: [
+    { required: true, message: 'Captcha is required', trigger: 'blur' }
   ]
 }
 
@@ -803,7 +815,8 @@ const handleLogin = async () => {
     // 调用 C 端登录接口
     const res = await post('/user/login', {
       username: loginForm.value.username,
-      password: loginForm.value.password
+      password: loginForm.value.password,
+      captcha: loginForm.value.captcha
     })
     
     console.log('[Login] 登录响应:', res)
@@ -837,7 +850,7 @@ const handleLogin = async () => {
       ElMessage.success(`Welcome, ${res.data.name || res.data.username}`)
       
       // 清空表单
-      loginForm.value = { username: '', password: '' }
+      loginForm.value = { username: '', password: '', captcha: '' }
       
       console.log('[Login] 登录成功，状态:', {
         userId: res.data.userId,
