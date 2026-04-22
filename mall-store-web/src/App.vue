@@ -46,7 +46,7 @@
             :size="26" 
             color="#fff" 
             class="action-icon"
-            @click="showLoginDialog = true"
+            @click="openBuyerAuth('login')"
           >
             <User />
           </el-icon>
@@ -203,64 +203,169 @@
       </div>
     </footer>
 
-    <!-- ================== 买家登录弹窗 ================== -->
+    <!-- ================== 买家登录 / 注册弹窗 ================== -->
     <el-dialog
       v-model="showLoginDialog"
-      title="Sign in"
+      :title="buyerAuthTab === 'login' ? 'Sign in' : 'Create account'"
       width="400px"
       :close-on-click-modal="false"
       center
+      class="buyer-auth-dialog"
+      @closed="onBuyerAuthDialogClosed"
     >
-      <el-form 
-        :model="loginForm" 
-        :rules="loginRules"
-        ref="loginFormRef"
-        label-position="top"
-      >
-        <el-form-item label="Username" prop="username">
-          <el-input 
-            v-model="loginForm.username" 
-            placeholder="Username"
-            prefix-icon="User"
-            @keyup.enter="handleLogin"
-          />
-        </el-form-item>
-        <el-form-item label="Password" prop="password">
-          <el-input 
-            v-model="loginForm.password" 
-            type="password" 
-            placeholder="Password"
-            prefix-icon="Lock"
-            show-password
-            @keyup.enter="handleLogin"
-          />
-        </el-form-item>
-        <el-form-item label="Captcha" prop="captcha">
-          <el-input
-            v-model="loginForm.captcha"
-            placeholder="请输入验证码（压测可用 PERF-TEST）"
-            @keyup.enter="handleLogin"
-          />
-        </el-form-item>
-      </el-form>
-      
-      <div class="login-tips">
-        <p>Test accounts:</p>
-        <p>Tenant 1001: zhangsan / 123456, lisi / 123456</p>
-        <p>Tenant 1002: wangwu / 123456, zhaoliu / 123456</p>
-        <p>Captcha: PERF-TEST (permanent, stress-test purpose)</p>
-      </div>
+      <template v-if="buyerAuthTab === 'login'">
+        <el-form 
+          :model="loginForm" 
+          :rules="loginRules"
+          ref="loginFormRef"
+          label-position="top"
+        >
+          <el-form-item label="Username" prop="username">
+            <el-input 
+              v-model="loginForm.username" 
+              placeholder="Username"
+              prefix-icon="User"
+              @keyup.enter="handleLogin"
+            />
+          </el-form-item>
+          <el-form-item label="Password" prop="password">
+            <el-input 
+              v-model="loginForm.password" 
+              type="password" 
+              placeholder="Password"
+              prefix-icon="Lock"
+              show-password
+              @keyup.enter="handleLogin"
+            />
+          </el-form-item>
+          <el-form-item label="Captcha" prop="captcha">
+            <el-input
+              v-model="loginForm.captcha"
+              placeholder="请输入验证码（与注册相同，固定 PERF-TEST）"
+              @keyup.enter="handleLogin"
+            />
+          </el-form-item>
+        </el-form>
+        
+        <div class="login-tips">
+          <p>Test accounts:</p>
+          <p>Tenant 1001: zhangsan / 123456, lisi / 123456</p>
+          <p>Tenant 1002: wangwu / 123456, zhaoliu / 123456</p>
+          <p>Captcha: PERF-TEST (fixed on server for demo / stress test)</p>
+        </div>
+
+        <div class="auth-dialog-switch">
+          <span class="auth-dialog-switch-text">No account yet?</span>
+          <button
+            type="button"
+            class="auth-dialog-switch-cta"
+            :style="{ '--auth-cta-color': themeColor }"
+            @click="buyerAuthTab = 'register'"
+          >
+            Create an account
+          </button>
+        </div>
+      </template>
+
+      <template v-else>
+        <el-form
+          :model="registerForm"
+          :rules="registerRules"
+          ref="registerFormRef"
+          label-position="top"
+        >
+          <el-form-item label="Username" prop="username">
+            <el-input
+              v-model="registerForm.username"
+              placeholder="3–50 characters"
+              prefix-icon="User"
+              @keyup.enter="handleRegister"
+            />
+          </el-form-item>
+          <el-form-item label="Display name" prop="name">
+            <el-input
+              v-model="registerForm.name"
+              placeholder="Optional, defaults to username"
+              prefix-icon="User"
+              @keyup.enter="handleRegister"
+            />
+          </el-form-item>
+          <el-form-item label="Phone" prop="phone">
+            <el-input
+              v-model="registerForm.phone"
+              placeholder="11-digit China mobile, e.g. 13800138000"
+              prefix-icon="Cellphone"
+              maxlength="11"
+              @keyup.enter="handleRegister"
+            />
+          </el-form-item>
+          <el-form-item label="Password" prop="password">
+            <el-input
+              v-model="registerForm.password"
+              type="password"
+              placeholder="At least 6 characters"
+              prefix-icon="Lock"
+              show-password
+              @keyup.enter="handleRegister"
+            />
+          </el-form-item>
+          <el-form-item label="Confirm password" prop="confirmPassword">
+            <el-input
+              v-model="registerForm.confirmPassword"
+              type="password"
+              placeholder="Re-enter password"
+              prefix-icon="Lock"
+              show-password
+              @keyup.enter="handleRegister"
+            />
+          </el-form-item>
+          <el-form-item label="Captcha" prop="captcha">
+            <el-input
+              v-model="registerForm.captcha"
+              placeholder="固定验证码：PERF-TEST（与登录一致）"
+              @keyup.enter="handleRegister"
+            />
+          </el-form-item>
+        </el-form>
+
+        <div class="login-tips">
+          <p>注册归属当前店铺租户（Header: X-Tenant-Id）。</p>
+          <p>验证码与登录相同，后台写死为 PERF-TEST（不区分大小写）。</p>
+        </div>
+
+        <div class="auth-dialog-switch">
+          <span class="auth-dialog-switch-text">Already have an account?</span>
+          <button
+            type="button"
+            class="auth-dialog-switch-cta"
+            :style="{ '--auth-cta-color': themeColor }"
+            @click="switchBuyerAuthToLogin"
+          >
+            Sign in
+          </button>
+        </div>
+      </template>
       
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="showLoginDialog = false">Cancel</el-button>
-          <el-button 
+          <el-button
+            v-if="buyerAuthTab === 'login'"
             type="primary" 
             @click="handleLogin"
             :loading="loginLoading"
             :color="themeColor"
           >
             Sign in
+          </el-button>
+          <el-button
+            v-else
+            type="primary"
+            @click="handleRegister"
+            :loading="registerLoading"
+            :color="themeColor"
+          >
+            Register
           </el-button>
         </div>
       </template>
@@ -525,9 +630,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { post, get, del, put } from '@/utils/request'
+import { resolveTenantIdFromHostname } from '@/utils/tenant'
 import {
   Shop, Search, ShoppingCart, User, ShoppingBag,
   StarFilled, Picture, Cellphone, Brush, Watch, Headset,
@@ -603,17 +709,30 @@ const showOrderDrawer = ref(false)          // 订单抽屉显示
 const orderList = ref([])                   // 订单列表数据
 const orderLoading = ref(false)             // 订单加载状态
 
-// ================== 登录相关状态 ==================
-const showLoginDialog = ref(false)          // 控制登录弹窗显示
+// ================== 登录 / 注册相关状态 ==================
+const showLoginDialog = ref(false)          // 控制买家认证弹窗（登录+注册）
+const buyerAuthTab = ref('login')           // 'login' | 'register'
 const loginLoading = ref(false)             // 登录按钮加载状态
+const registerLoading = ref(false)          // 注册按钮加载状态
 const isLoggedIn = ref(false)               // 是否已登录
 const currentUsername = ref('')             // 当前登录用户名
-const loginFormRef = ref(null)              // 表单引用
+const loginFormRef = ref(null)              // 登录表单引用
+const registerFormRef = ref(null)           // 注册表单引用
 
 // 登录表单数据
 const loginForm = ref({
   username: '',
   password: '',
+  captcha: ''
+})
+
+// 注册表单数据
+const registerForm = ref({
+  username: '',
+  name: '',
+  phone: '',
+  password: '',
+  confirmPassword: '',
   captcha: ''
 })
 
@@ -628,6 +747,76 @@ const loginRules = {
   captcha: [
     { required: true, message: 'Captcha is required', trigger: 'blur' }
   ]
+}
+
+const registerRules = {
+  username: [
+    { required: true, message: 'Username is required', trigger: 'blur' },
+    { min: 3, max: 50, message: 'Username must be 3–50 characters', trigger: 'blur' }
+  ],
+  phone: [
+    { required: true, message: 'Phone is required', trigger: 'blur' },
+    {
+      pattern: /^1[3-9]\d{9}$/,
+      message: 'Enter a valid 11-digit China mobile number',
+      trigger: 'blur'
+    }
+  ],
+  password: [
+    { required: true, message: 'Password is required', trigger: 'blur' },
+    { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, message: 'Please confirm your password', trigger: 'blur' },
+    {
+      validator: (_rule, value, callback) => {
+        if (value !== registerForm.value.password) {
+          callback(new Error('Passwords do not match'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ],
+  captcha: [
+    { required: true, message: 'Captcha is required', trigger: 'blur' }
+  ]
+}
+
+/** 打开买家登录或注册弹窗 */
+const openBuyerAuth = (tab = 'login') => {
+  buyerAuthTab.value = tab === 'register' ? 'register' : 'login'
+  showLoginDialog.value = true
+}
+
+const onBuyerAuthDialogClosed = () => {
+  buyerAuthTab.value = 'login'
+  registerForm.value = {
+    username: '',
+    name: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    captcha: ''
+  }
+  nextTick(() => {
+    loginFormRef.value?.resetFields?.()
+    registerFormRef.value?.resetFields?.()
+  })
+}
+
+const switchBuyerAuthToLogin = () => {
+  buyerAuthTab.value = 'login'
+  registerForm.value = {
+    username: '',
+    name: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    captcha: ''
+  }
+  nextTick(() => registerFormRef.value?.clearValidate?.())
 }
 
 // Computed
@@ -668,13 +857,8 @@ const getDefaultImage = (id) => {
 const resolveTheme = () => {
   const hostname = window.location.hostname.toLowerCase()
   currentDomain.value = hostname
-  
-  if (hostname.includes('shop1')) {
-    return themeConfig.shop1
-  } else if (hostname.includes('shop2')) {
-    return themeConfig.shop2
-  }
-  return themeConfig.shop1
+  const tid = resolveTenantIdFromHostname(hostname)
+  return tid === '1002' ? themeConfig.shop2 : themeConfig.shop1
 }
 
 // 商品服务 /api/sku/aditems/type 直接返回 List<Sku>（JSON 数组），无 { code, data } 封装
@@ -793,8 +977,58 @@ const checkLoginStatus = () => {
     console.log('[Auth] 未检测到有效 Token，需要登录')
     isLoggedIn.value = false
     currentUsername.value = ''
-    showLoginDialog.value = true
+    openBuyerAuth('login')
     return false
+  }
+}
+
+/**
+ * 买家注册：验证码与后台写死的 PERF-TEST 一致（与登录相同）
+ */
+const handleRegister = async () => {
+  if (!registerFormRef.value) return
+  try {
+    await registerFormRef.value.validate()
+  } catch {
+    return
+  }
+
+  registerLoading.value = true
+  try {
+    const res = await post('/user/register', {
+      username: registerForm.value.username.trim(),
+      password: registerForm.value.password,
+      name: registerForm.value.name.trim() || undefined,
+      phone: registerForm.value.phone.trim().replace(/\s+/g, ''),
+      captcha: registerForm.value.captcha.trim()
+    })
+
+    if (res.code === 20000 && res.data) {
+      ElMessage.success('Account created. You can sign in now.')
+      loginForm.value.username = registerForm.value.username.trim()
+      loginForm.value.password = ''
+      loginForm.value.captcha = ''
+      buyerAuthTab.value = 'login'
+      registerForm.value = {
+        username: '',
+        name: '',
+        phone: '',
+        password: '',
+        confirmPassword: '',
+        captcha: ''
+      }
+      nextTick(() => {
+        registerFormRef.value?.clearValidate?.()
+        loginFormRef.value?.clearValidate?.()
+      })
+    } else {
+      ElMessage.error(res.message || 'Registration failed')
+    }
+  } catch (error) {
+    console.error('[Register] 注册失败:', error)
+    ElMessage.error(error.message || 'Network error. Is the API gateway running?')
+  } finally {
+    registerLoading.value = false
   }
 }
 
@@ -891,7 +1125,7 @@ const handleUserCommand = (command) => {
     ElMessage.success('Signed out')
     
     // 退出后弹出登录框（因为购物车需要登录）
-    showLoginDialog.value = true
+    openBuyerAuth('login')
   }
 }
 
@@ -904,7 +1138,7 @@ const handleOrderClick = async () => {
   const buyerToken = localStorage.getItem('buyer_token')
   if (!buyerToken) {
     ElMessage.info('Please sign in to view orders')
-    showLoginDialog.value = true
+    openBuyerAuth('login')
     return
   }
 
@@ -1034,7 +1268,7 @@ const handleAddToCart = async (product) => {
   if (!buyerToken || buyerToken === 'undefined' || buyerToken === 'null' || buyerToken === '') {
     ElMessage.warning('Please sign in to add items to your cart')
     console.log('[Cart] 检测到未登录，弹出登录框')
-    showLoginDialog.value = true
+    openBuyerAuth('login')
     return
   }
   
@@ -1066,7 +1300,7 @@ const handleAddToCart = async (product) => {
     if (error.response?.status === 401 || error.message?.includes('Unauthorized')) {
       ElMessage.error('Session expired. Please sign in again.')
       localStorage.removeItem('buyer_token')
-      showLoginDialog.value = true
+      openBuyerAuth('login')
     } else {
       ElMessage.error('Could not add to cart. Check your network.')
     }
@@ -1082,7 +1316,7 @@ const handleCartClick = async () => {
   const buyerToken = localStorage.getItem('buyer_token')
   if (!buyerToken) {
     ElMessage.info('Please sign in to view your cart')
-    showLoginDialog.value = true
+    openBuyerAuth('login')
     return
   }
   
@@ -1194,7 +1428,7 @@ const handleCheckout = async () => {
   const buyerToken = localStorage.getItem('buyer_token')
   if (!buyerToken) {
     ElMessage.warning('Please sign in')
-    showLoginDialog.value = true
+    openBuyerAuth('login')
     return
   }
 
@@ -1259,7 +1493,7 @@ const handleCheckout = async () => {
     if (error.response?.status === 401) {
       ElMessage.error('Session expired. Please sign in again.')
       localStorage.removeItem('buyer_token')
-      showLoginDialog.value = true
+      openBuyerAuth('login')
     } else if (error.message?.includes('Network Error')) {
       ElMessage.error('Network error. Is the API gateway running?')
     } else {
@@ -2016,6 +2250,57 @@ onMounted(() => {
 
 .login-tips p {
   margin: 4px 0;
+}
+
+.auth-dialog-switch {
+  margin-top: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 10px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #606266;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.auth-dialog-switch-text {
+  color: #475569;
+  font-size: 14px;
+}
+
+/* 登录/注册切换：比默认 link 更醒目，仍保持一行内 CTA 气质 */
+.auth-dialog-switch-cta {
+  margin: 0;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  color: #fff;
+  background: var(--auth-cta-color, #1e3a5f);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.auth-dialog-switch-cta:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.16), 0 4px 14px rgba(15, 23, 42, 0.12);
+  transform: translateY(-1px);
+}
+
+.auth-dialog-switch-cta:active {
+  transform: translateY(0);
+  filter: brightness(0.96);
 }
 
 .dialog-footer {

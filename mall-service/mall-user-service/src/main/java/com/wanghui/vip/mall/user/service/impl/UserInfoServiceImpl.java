@@ -16,4 +16,11 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         queryWrapper.eq("username", username);
         return baseMapper.selectOne(queryWrapper);
     }
+
+    @Override
+    public UserInfo findByPhone(String phone) {
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("phone", phone);
+        return baseMapper.selectOne(queryWrapper);
+    }
 }

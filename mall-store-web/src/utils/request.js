@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { resolveTenantIdFromHostname } from '@/utils/tenant'
 
 // Create axios instance with base URL
 const request = axios.create({
@@ -10,21 +11,10 @@ const request = axios.create({
   }
 })
 
-// Get tenant ID based on current domain
-const getTenantIdByDomain = () => {
-  const hostname = window.location.hostname.toLowerCase()
-  if (hostname.includes('shop1')) {
-    return '1001'
-  } else if (hostname.includes('shop2')) {
-    return '1002'
-  }
-  return '1001'
-}
-
 // Request interceptor - inject X-Tenant-Id header and Buyer Token
 request.interceptors.request.use(
   (config) => {
-    const tenantId = getTenantIdByDomain()
+    const tenantId = resolveTenantIdFromHostname(window.location.hostname)
     config.headers['X-Tenant-Id'] = tenantId
     
     // ==========================================

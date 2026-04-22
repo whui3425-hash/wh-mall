@@ -11,4 +11,9 @@ public interface UserInfoService extends IService<UserInfo> {
      * @return UserInfo 用户信息
      */
     UserInfo findByUsername(String username);
+
+    /**
+     * 按手机号查询（当前租户下，由多租户插件自动追加 tenant_id）
+     */
+    UserInfo findByPhone(String phone);
 }

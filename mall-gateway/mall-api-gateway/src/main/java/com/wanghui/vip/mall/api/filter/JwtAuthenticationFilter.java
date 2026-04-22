@@ -38,7 +38,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
      */
     private static final List<String> WHITE_LIST = Arrays.asList(
             "/api/permission/admin/login",  // B端管理员登录
-            "/api/user/login",              // C端用户登录（预留）
+            "/api/user/login",              // C端用户登录
+            "/api/user/register",           // C端用户注册（验证码写死，与登录一致）
             "/api/brand/**",                // 品牌查询
             "/api/category/**",             // 分类查询
             "/api/spu/**",                  // SPU商品查询
