@@ -1506,80 +1506,49 @@ const handleCheckout = async () => {
 }
 
 /**
- * 【收银台】处理确认支付【压测版】
- * 
- * 【功能说明】模拟第三方支付网关网络抽风，瞬间并发发送 5 个相同的回调通知
- * 用于测试后端分布式锁防重逻辑
+ * 【收银台】确认支付：模拟支付网关向服务端发送单次支付回调
  */
 const handleConfirmPay = async () => {
-  // 提取当前订单的 outTradeNo
   const outTradeNo = orderResult.value.outTradeNo
   if (!outTradeNo) {
     ElMessage.error('Invalid order number. Cannot send payment callback.')
     return
   }
 
-  // 构建确认弹窗信息
   ElMessageBox.confirm(
-    `[Stress test] This will send 5 concurrent payment callbacks to the server.\nOrder: ${outTradeNo}\nAmount: $${(orderResult.value.totalAmount / 100).toFixed(2)}`,
-    'Confirm payment (stress test)',
+    `Confirm payment for order ${outTradeNo}?\nAmount: $${(orderResult.value.totalAmount / 100).toFixed(2)}`,
+    'Confirm payment',
     {
-      confirmButtonText: 'Run concurrent test',
+      confirmButtonText: 'Pay now',
       cancelButtonText: 'Cancel',
       type: 'warning'
     }
   ).then(async () => {
-    console.log('[PayCallback] 开始并发压测，outTradeNo=' + outTradeNo)
+    try {
+      console.log('[PayCallback] 单次回调 outTradeNo=' + outTradeNo)
+      const res = await post('/order/pay/callback', { outTradeNo })
+      console.log('[PayCallback] 响应:', res)
 
-    // 【核心压测逻辑】构建 5 个相同的 Axios POST 请求
-    const callbackRequests = []
-    for (let i = 1; i <= 5; i++) {
-      callbackRequests.push(
-        post('/order/pay/callback', { outTradeNo: outTradeNo })
-          .then(res => {
-            console.log(`[PayCallback] 第${i}次请求响应:`, res)
-            return { index: i, success: true, data: res }
-          })
-          .catch(err => {
-            console.error(`[PayCallback] 第${i}次请求失败:`, err)
-            return { index: i, success: false, error: err }
-          })
-      )
+      if (res.code === 20000) {
+        showPayDialog.value = false
+        ElMessage.success(res.message || 'Payment successful')
+        orderResult.value = {
+          orderId: '',
+          outTradeNo: '',
+          totalAmount: 0,
+          totalNum: 0
+        }
+        setTimeout(() => {
+          window.location.reload()
+        }, 2000)
+      } else {
+        ElMessage.error(res.message || 'Payment callback failed')
+      }
+    } catch (err) {
+      console.error('[PayCallback] 请求失败:', err)
     }
-
-    // 【并发发送】使用 Promise.all() 同时触发 5 个请求
-    console.log('[PayCallback] 并发发送 5 个回调请求...')
-    const results = await Promise.all(callbackRequests)
-
-    // 统计结果
-    const successCount = results.filter(r => r.success).length
-    const failCount = results.filter(r => !r.success).length
-
-    console.log('[PayCallback] 压测完成，成功:', successCount, '失败:', failCount)
-    console.log('[PayCallback] 详细结果:', results)
-
-    // 关闭收银台弹窗
-    showPayDialog.value = false
-
-    // 显示压测完成消息
-    ElMessage.success(`Sent 5 concurrent callbacks.\nOK: ${successCount}\nFailed: ${failCount}\nCheck server logs for idempotency.`)
-
-    // 清空订单结果
-    orderResult.value = {
-      orderId: '',
-      outTradeNo: '',
-      totalAmount: 0,
-      totalNum: 0
-    }
-
-    // 【刷新页面】模拟支付完成后的跳转
-    setTimeout(() => {
-      window.location.reload()
-    }, 2000)
-
   }).catch(() => {
-    // 用户选择取消
-    ElMessage.info('Stress test cancelled')
+    ElMessage.info('Payment cancelled')
   })
 }
 
