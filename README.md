@@ -59,7 +59,7 @@ End-to-end tracking of every transaction with real-time inventory synchronizatio
 ### 📩 Contact & Collaboration
 I am available for freelance projects and technical consulting.
 
-* **Upwork**: [Your Upwork Profile Link]
+* **Upwork**: [https://www.upwork.com/freelancers/~01777ff0bdd20cccd6]
 * **Contact policy**: Please contact me through Upwork messages only.
 
 **Let’s transform your technical challenges into a competitive advantage.**
